@@ -349,7 +349,7 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .items-table tbody tr:hover {
-          background: #e3f2fd;
+          background: #F3E8FF;
         }
         
         .description-cell {
