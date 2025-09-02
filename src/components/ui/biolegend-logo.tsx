@@ -4,9 +4,10 @@ interface BiolegendLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
   showText?: boolean;
+  pixelSize?: number;
 }
 
-export function BiolegendLogo({ className, size = "md", showText = true }: BiolegendLogoProps) {
+export function BiolegendLogo({ className, size = "md", showText = true, pixelSize }: BiolegendLogoProps) {
   const sizeClasses = {
     sm: "h-10 w-10",
     md: "h-16 w-16",
