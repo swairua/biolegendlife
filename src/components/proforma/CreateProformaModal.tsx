@@ -468,7 +468,7 @@ export const CreateProformaModal = ({
                       <TableHead>Description</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
-                      <TableHead>Tax %</TableHead>
+                      <TableHead>VAT %</TableHead>
                       <TableHead>Tax Incl.</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead></TableHead>
