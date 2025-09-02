@@ -974,33 +974,15 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
     notes: invoice.notes,
     terms_and_conditions: documentType === 'INVOICE' ? `Terms
 1. PAYMENT.
-Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees.
-Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
+Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees. Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
 2. PAYMENT, PRICE, TRANSPORTATION
-Seller shall have the continuing right to approve Buyer’s credit. Seller may at any time demand advance payment, additional security or guarantee of prompt payment. If Buyer refuses to give the payment,
-security or guarantee demanded, Seller may terminate the Agreement, refuse to deliver any undelivered
-goods and Buyer shall immediately become liable to Seller for the unpaid price of all goods delivered & for
-damages. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s
-fees incurred by Seller in collecting said sums.
+Seller shall have the continuing right to approve Buyer’s credit. Seller may at any time demand advance payment, additional security or guarantee of prompt payment. If Buyer refuses to give the payment, security or guarantee demanded, Seller may terminate the Agreement, refuse to deliver any undelivered goods and Buyer shall immediately become liable to Seller for the unpaid price of all goods delivered & for damages. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees incurred by Seller in collecting said sums.
 3. SERVICE CHARGE AND INTEREST
-A service charge of 3% of the total invoice cost per month will be made on past due accounts unless
-otherwise agreed in writing by both parties.
+A service charge of 3% of the total invoice cost per month will be made on past due accounts unless otherwise agreed in writing by both parties.
 4. FORCE MAJEURE
-Seller shall not be liable for any damages resulting from: any delay or failure of performance arising from
-any cause not reasonably within Seller’s control; accidents to, breakdowns or mechanical failure of
-machinery or equipment, however caused; strikes or other labor troubles, shortage of labor,
-transportation, raw materials, energy sources, or failure of usual means of supply; fire; flood; war, declared
-or undeclared; insurrection; riots; acts of God or the public enemy; or priorities, allocations or limitations or
-other acts required or requested by Federal, State or local governments or any of their sub-divisions,
-bureaus or agencies. Seller may, at its option, cancel this Agreement or delay performance hereunder for
-any period reasonably necessary due to any of the foregoing, during which time this Agreement shall
-remain in full force and effect. Seller shall have the further right to then allocate its available goods
-between its own uses and its customers in such manner as Seller may consider equitable.
+Seller shall not be liable for any damages resulting from: any delay or failure of performance arising from any cause not reasonably within Seller’s control; accidents to, breakdowns or mechanical failure of machinery or equipment, however caused; strikes or other labor troubles, shortage of labor, transportation, raw materials, energy sources, or failure of usual means of supply; fire; flood; war, declared or undeclared; insurrection; riots; acts of God or the public enemy; or priorities, allocations or limitations or other acts required or requested by Federal, State or local governments or any of their sub-divisions, bureaus or agencies. Seller may, at its option, cancel this Agreement or delay performance hereunder for any period reasonably necessary due to any of the foregoing, during which time this Agreement shall remain in full force and effect. Seller shall have the further right to then allocate its available goods between its own uses and its customers in such manner as Seller may consider equitable.
 5. INDEMINITY
-Buyer shall indemnify and hold Seller harmless from and against any and all claims, demands, lawsuits,
-damages, liabilities, costs and expenses (including attorney’s fees), incurred by reason of any injury to or
-death of any person, or damage to any property, resulting from or arising out of any act, error, omission,
-negligence, or misconduct by Buyer in connection with the goods sold hereunder.
+Buyer shall indemnify and hold Seller harmless from and against any and all claims, demands, lawsuits, damages, liabilities, costs and expenses (including attorney’s fees), incurred by reason of any injury to or death of any person, or damage to any property, resulting from or arising out of any act, error, omission, negligence, or misconduct by Buyer in connection with the goods sold hereunder.
 6. ANY OTHER TERMS AND CONDITIONS....` : invoice.terms_and_conditions,
   };
 
