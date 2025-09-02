@@ -891,19 +891,6 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Footer -->
-        <div class="footer">
-          ${data.type === 'quotation'
-            ? '<strong>We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!</strong><br>'
-            : '<strong>Thank you for your business!</strong><br>'}
-          <strong>${company.name}</strong><br>
-          This document was generated on ${new Date().toLocaleString()}
-          ${data.type === 'proforma' ? '<br><em>This is a proforma invoice and not a request for payment</em>' : ''}
-          ${data.type === 'delivery' ? '<br><em>This delivery note confirms the items delivered</em>' : ''}
-          ${data.type === 'receipt' ? '<br><em>This receipt serves as proof of payment received</em>' : ''}
-          ${data.type === 'remittance' ? '<br><em>This remittance advice details payments made to your account</em>' : ''}
-          ${data.type === 'lpo' ? '<br><em>This Local Purchase Order serves as an official request for goods/services</em>' : ''}
-        </div>
       </div>
     </body>
     </html>
