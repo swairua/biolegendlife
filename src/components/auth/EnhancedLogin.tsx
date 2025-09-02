@@ -80,7 +80,7 @@ export function EnhancedLogin() {
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto">
-            <BiolegendLogo size="xl" showText={false} />
+            <BiolegendLogo size="xl" pixelSize={336} showText={false} />
           </div>
           <div className="space-y-2">
             <CardTitle className="text-2xl font-bold biolegend-brand">Biolegend Scientific Ltd</CardTitle>
