@@ -21,10 +21,13 @@ export function BiolegendLogo({ className, size = "md", showText = true }: Biole
     xl: "text-3xl",
   } as const;
 
+  const boxClass = pixelSize ? undefined : sizeClasses[size];
+  const boxStyle = pixelSize ? { width: `${pixelSize}px`, height: `${pixelSize}px` } : undefined;
+
   return (
     <div className={cn("flex items-center space-x-3", className)}>
       {/* Biolegend Logo Image */}
-      <div className={cn("relative", sizeClasses[size])}>
+      <div className={cn("relative", boxClass)} style={boxStyle}>
         <img
           src="https://cdn.builder.io/api/v1/image/assets%2F0dc223c975394fb180f961daff51284e%2Fc6326902fe5c42489708ae2804c1b10b?format=webp&width=800"
           alt="Biolegend Scientific Ltd Logo"
