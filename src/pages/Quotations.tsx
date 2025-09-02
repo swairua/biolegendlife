@@ -29,7 +29,7 @@ import { toast } from 'sonner';
 import { CreateQuotationModal } from '@/components/quotations/CreateQuotationModal';
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
-import { downloadQuotationJsPDF } from '@/utils/jsPdfGenerator';
+import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 
 interface Quotation {
   id: string;
@@ -132,7 +132,7 @@ export default function Quotations() {
         logo_url: currentCompany.logo_url
       } : undefined;
 
-      downloadQuotationJsPDF(quotation, companyDetails);
+      downloadQuotationPDF(quotation, companyDetails);
       toast.success(`PDF download started for ${quotation.quotation_number}`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
