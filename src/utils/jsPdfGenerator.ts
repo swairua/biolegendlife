@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 interface DocumentData {
@@ -315,35 +316,49 @@ export const generateJsPDF = (data: DocumentData) => {
     yPosition += 10;
   }
 
-  // Bank Details for Invoices and Proformas
-  if ((data.type === 'invoice' || data.type === 'proforma')) {
-    // Check if we need a new page
-    if (yPosition > 250) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
+  // Footer renderer (Bank Details) for invoices and proformas at the very bottom, full width
+  const renderBankFooter = () => {
     const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
-    
-    const bankLines = doc.splitTextToSize(bankDetails, contentWidth);
-    doc.text(bankLines, margin, yPosition);
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const lineHeight = 4;
+    const paddingV = 4;
+    const textWidth = contentWidth - 4;
+    const lines = doc.splitTextToSize(bankDetails, textWidth);
+    const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
+    const yTop = pageHeight - rectHeight - 15; // keep bottom margin
+
+    doc.setDrawColor(221, 221, 221);
+    doc.setFillColor(240, 240, 240);
+    doc.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
+
+    doc.setFontSize(9);
+    doc.setTextColor(17, 24, 39);
+    doc.text(lines, margin + 2, yTop + paddingV + lineHeight);
+  };
+
+  // Apply footer to all pages for invoices and proformas
+  if (data.type === 'invoice' || data.type === 'proforma') {
+    const pages = doc.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      renderBankFooter();
+    }
   }
 
-  // Quotation Footer
+  // Quotation Footer (kept for quotations only)
   if (data.type === 'quotation') {
-    const footerY = doc.internal.pageSize.getHeight() - 30;
+    const footerY = doc.internal.pageSize.getHeight() - 15;
     doc.setFontSize(12);
     doc.setTextColor(75, 33, 182);
-    doc.text('We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!', 
-             pageWidth / 2, footerY, { align: 'center' });
+    const text = 'We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!';
+    const qLines = doc.splitTextToSize(text, contentWidth);
+    doc.text(qLines, margin, footerY - (qLines.length - 1) * 4);
   }
 
-  // Save the PDF
+  // Save the PDF (auto-download)
   const fileName = `${documentTitle.replace(' ', '_')}_${data.number}.pdf`;
   doc.save(fileName);
-  
+
   return doc;
 };
 
