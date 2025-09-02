@@ -448,8 +448,8 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .notes-content, .terms-content {
-          font-size: 9px;
-          line-height: 1.5;
+          font-size: 10px;
+          line-height: 1.6;
           color: #666;
           white-space: pre-wrap;
           text-align: justify;
@@ -457,13 +457,6 @@ export const generatePDF = (data: DocumentData) => {
           max-width: 100%;
           word-spacing: 0.1em;
           hyphens: auto;
-        }
-
-        .invoice-terms .terms-content {
-          column-count: 2;
-          column-gap: 25px;
-          column-fill: balance;
-          column-rule: 1px solid #e9ecef;
         }
         
         .footer { display: none; }
