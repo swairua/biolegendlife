@@ -190,13 +190,16 @@ export const generatePDF = (data: DocumentData) => {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          gap: 24px;
           margin-bottom: 30px;
           padding-bottom: 20px;
           border-bottom: 2px solid #7C3AED;
+          flex-wrap: nowrap;
         }
         
         .company-info {
-          flex: 1;
+          flex: 1 1 auto;
+          min-width: 0;
         }
         
         .logo {
@@ -229,8 +232,8 @@ export const generatePDF = (data: DocumentData) => {
         
         .document-info {
           text-align: right;
-          flex: 1;
-          max-width: 300px;
+          flex: 0 0 400px;
+          max-width: 400px;
         }
         
         .document-title {
@@ -589,7 +592,7 @@ export const generatePDF = (data: DocumentData) => {
                 `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
               }
             </div>
-            <div class="document-title">${documentTitle}</div>
+            <div class="document-title" style="margin-top:8px;">${documentTitle}</div>
             <div class="document-details">
               <table>
                 <tr>
