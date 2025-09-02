@@ -172,7 +172,7 @@ export const EditProformaModal = ({
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
     const baseAmount = item.quantity * item.unit_price;
 
-    const taxAmount = (item.tax_inclusive && item.tax_percentage > 0)
+    const taxAmount = (item.tax_percentage > 0)
       ? baseAmount * (item.tax_percentage / 100)
       : 0;
 
