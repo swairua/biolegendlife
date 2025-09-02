@@ -211,8 +211,9 @@ export const generatePDF = (data: DocumentData) => {
         .company-info { flex: 1 1 auto; min-width: 0; }
         
         .logo {
-          width: 360px;
-          height: 180px;
+          width: 75%;
+          height: auto;
+          max-height: 220px;
           margin-bottom: 15px;
           border-radius: 8px;
           overflow: hidden;
@@ -220,7 +221,7 @@ export const generatePDF = (data: DocumentData) => {
         
         .logo img {
           width: 100%;
-          height: 100%;
+          height: auto;
           object-fit: contain;
         }
         
@@ -232,9 +233,9 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .company-details {
-          font-size: 11px;
-          line-height: 1.6;
-          color: #666;
+          font-size: 12px;
+          line-height: 1.7;
+          color: #444;
           margin-bottom: 0;
         }
         
@@ -250,10 +251,10 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .document-details {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
+          background: transparent;
+          padding: 0;
+          border-radius: 0;
+          border: none;
         }
         
         .document-details table {
@@ -262,19 +263,22 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .document-details td {
-          padding: 5px 0;
+          padding: 4px 0;
           border: none;
         }
         
         .document-details .label {
-          font-weight: bold;
-          color: #495057;
-          width: 40%;
+          font-weight: 600;
+          color: #4B5563;
+          width: 50%;
+          font-size: 12px;
         }
         
         .document-details .value {
           text-align: right;
-          color: #212529;
+          color: #111827;
+          font-size: 13px;
+          font-weight: 700;
         }
         
         
