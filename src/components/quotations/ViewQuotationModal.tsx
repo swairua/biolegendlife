@@ -304,7 +304,7 @@ export function ViewQuotationModal({
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span>Tax:</span>
+                      <span>VAT:</span>
                       <span className="font-semibold">{formatCurrency(quotation.tax_amount || 0)}</span>
                     </div>
                     <div className="flex justify-between text-lg border-t pt-2">

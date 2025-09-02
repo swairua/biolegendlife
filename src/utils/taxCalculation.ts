@@ -37,7 +37,7 @@ export interface DocumentTotals {
  */
 export function calculateItemTax(item: TaxableItem): CalculatedItem {
   const baseAmount = item.quantity * item.unit_price;
-  
+
   // Calculate discount
   let discountTotal = 0;
   if (item.discount_percentage && item.discount_percentage > 0) {
@@ -45,22 +45,22 @@ export function calculateItemTax(item: TaxableItem): CalculatedItem {
   } else if (item.discount_amount && item.discount_amount > 0) {
     discountTotal = Math.min(item.discount_amount, baseAmount); // Don't allow discount to exceed base amount
   }
-  
+
   const taxableAmount = baseAmount - discountTotal;
-  
+
   let taxAmount = 0;
   let lineTotal = 0;
-  
-  if (item.tax_inclusive) {
-    // Treat checkbox as "apply tax" on top (prices are tax-exclusive by default)
-    taxAmount = taxableAmount * (item.tax_percentage / 100);
+  const rate = Math.max(0, item.tax_percentage || 0);
+
+  // Treat unit prices as tax-exclusive. Apply tax ONLY when checkbox is checked.
+  if (rate > 0 && item.tax_inclusive) {
+    taxAmount = taxableAmount * (rate / 100);
     lineTotal = taxableAmount + taxAmount;
   } else {
-    // No tax applied (exclusive price without tax)
     taxAmount = 0;
     lineTotal = taxableAmount;
   }
-  
+
   return {
     ...item,
     base_amount: parseFloat(baseAmount.toFixed(2)),

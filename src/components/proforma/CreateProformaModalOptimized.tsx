@@ -436,8 +436,8 @@ export const CreateProformaModalOptimized = ({
                         <TableHead>Description</TableHead>
                         <TableHead>Qty</TableHead>
                         <TableHead>Unit Price</TableHead>
-                        <TableHead>Tax %</TableHead>
-                        <TableHead>Tax Incl.</TableHead>
+                        <TableHead>VAT %</TableHead>
+                        <TableHead>Apply Tax</TableHead>
                         <TableHead>Total</TableHead>
                         <TableHead></TableHead>
                       </TableRow>
@@ -516,7 +516,7 @@ export const CreateProformaModalOptimized = ({
                       <span>{formatCurrency(totals.subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Tax:</span>
+                      <span>VAT:</span>
                       <span>{formatCurrency(totals.tax_total)}</span>
                     </div>
                     <div className="flex justify-between font-semibold text-lg border-t pt-2">

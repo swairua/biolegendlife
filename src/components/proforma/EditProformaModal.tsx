@@ -172,8 +172,9 @@ export const EditProformaModal = ({
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
     const baseAmount = item.quantity * item.unit_price;
 
-    // Both inclusive and exclusive now add VAT on top
-    const taxAmount = baseAmount * (item.tax_percentage / 100);
+    const taxAmount = (item.tax_inclusive && item.tax_percentage > 0)
+      ? baseAmount * (item.tax_percentage / 100)
+      : 0;
 
     return {
       ...item,
@@ -416,8 +417,8 @@ export const EditProformaModal = ({
                       <TableHead>Description</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
-                      <TableHead>Tax %</TableHead>
-                      <TableHead>Tax Incl.</TableHead>
+                      <TableHead>VAT %</TableHead>
+                      <TableHead>Apply Tax</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
@@ -497,7 +498,7 @@ export const EditProformaModal = ({
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax:</span>
+                    <span>VAT:</span>
                     <span>${totalTax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg border-t pt-2">

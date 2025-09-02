@@ -468,7 +468,7 @@ export const CreateProformaModal = ({
                       <TableHead>Description</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
-                      <TableHead>Tax %</TableHead>
+                      <TableHead>VAT %</TableHead>
                       <TableHead>Tax Incl.</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead></TableHead>
@@ -549,7 +549,7 @@ export const CreateProformaModal = ({
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax:</span>
+                    <span>VAT:</span>
                     <span>${totalTax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg border-t pt-2">

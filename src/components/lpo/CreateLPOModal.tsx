@@ -835,7 +835,7 @@ export const CreateLPOModal = ({
                         <TableHead>Description</TableHead>
                         <TableHead>Qty</TableHead>
                         <TableHead>Unit Price</TableHead>
-                        <TableHead>Tax %</TableHead>
+                        <TableHead>VAT %</TableHead>
                         <TableHead>Total</TableHead>
                         <TableHead></TableHead>
                       </TableRow>
@@ -913,7 +913,7 @@ export const CreateLPOModal = ({
                         <span>KES {subtotal.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Tax:</span>
+                        <span>VAT:</span>
                         <span>KES {totalTax.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t pt-2">
