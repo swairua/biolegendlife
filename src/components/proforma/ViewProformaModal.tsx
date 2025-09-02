@@ -229,7 +229,7 @@ export const ViewProformaModal = ({
                     <span className="text-sm">${proforma.subtotal?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Tax:</span>
+                    <span className="text-sm">VAT:</span>
                     <span className="text-sm">${proforma.tax_amount?.toFixed(2)}</span>
                   </div>
                   <Separator />

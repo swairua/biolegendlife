@@ -278,7 +278,7 @@ export const ViewLPOModal = ({
                       <span>{formatCurrency(lpo.subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Tax:</span>
+                      <span>VAT:</span>
                       <span>{formatCurrency(lpo.tax_amount)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t pt-2">

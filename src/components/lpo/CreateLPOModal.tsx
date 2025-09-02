@@ -913,7 +913,7 @@ export const CreateLPOModal = ({
                         <span>KES {subtotal.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Tax:</span>
+                        <span>VAT:</span>
                         <span>KES {totalTax.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between font-bold text-lg border-t pt-2">

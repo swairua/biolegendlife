@@ -549,7 +549,7 @@ export const CreateProformaModal = ({
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax:</span>
+                    <span>VAT:</span>
                     <span>${totalTax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg border-t pt-2">
