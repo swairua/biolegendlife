@@ -573,7 +573,7 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n      </style>
+        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -855,39 +855,31 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes / Terms Section -->
-        ${data.notes || data.terms_and_conditions ? `
-        ${data.type === 'invoice' ? `
-          <div class="notes-section">
-            ${data.terms_and_conditions ? `
-            <div class="terms" style="width:100%">
-              <div class="section-subtitle">Terms & Conditions</div>
-              <div class="terms-content">${data.terms_and_conditions}</div>
-            </div>
-            ` : ''}
-            ${data.notes ? `
-            <div class="notes" style="width:100%">
-              <div class="section-subtitle">Notes</div>
-              <div class="notes-content">${data.notes}</div>
-            </div>
-            ` : ''}
+        <!-- Notes Section (only for non-quotation documents) -->
+        ${data.notes && data.type !== 'quotation' ? `
+        <div class="notes-section">
+          <div class="notes">
+            <div class="section-subtitle">Notes</div>
+            <div class="notes-content">${data.notes}</div>
           </div>
-        ` : `
-          <div class="notes-section">
-            ${data.notes ? `
-            <div class="notes">
-              <div class="section-subtitle">Notes</div>
-              <div class="notes-content">${data.notes}</div>
-            </div>
-            ` : ''}
-            ${data.terms_and_conditions ? `
-            <div class="terms">
-              <div class="section-subtitle">Terms & Conditions</div>
-              <div class="terms-content">${data.terms_and_conditions}</div>
-            </div>
-            ` : ''}
+        </div>
+        ` : ''}
+
+        <!-- Terms Section (for invoices only) -->
+        ${data.terms_and_conditions && data.type === 'invoice' ? `
+        <div class="notes-section">
+          <div class="terms" style="width:100%">
+            <div class="section-subtitle">Terms & Conditions</div>
+            <div class="terms-content">${data.terms_and_conditions}</div>
           </div>
-        `}
+        </div>
+        ` : ''}
+
+        <!-- Quotation Footer (centered at bottom) -->
+        ${data.type === 'quotation' ? `
+        <div class="quotation-footer">
+          We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!
+        </div>
         ` : ''}
         
         <!-- Bank Details (only invoices and proformas) -->
