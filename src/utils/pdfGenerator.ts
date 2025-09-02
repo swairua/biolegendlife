@@ -865,23 +865,39 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section -->
+        <!-- Notes / Terms Section -->
         ${data.notes || data.terms_and_conditions ? `
-        <div class="notes-section">
-          ${data.notes ? `
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
+        ${data.type === 'invoice' ? `
+          <div class="notes-section">
+            ${data.terms_and_conditions ? `
+            <div class="terms" style="width:100%">
+              <div class="section-subtitle">Terms & Conditions</div>
+              <div class="terms-content">${data.terms_and_conditions}</div>
+            </div>
+            ` : ''}
+            ${data.notes ? `
+            <div class="notes" style="width:100%">
+              <div class="section-subtitle">Notes</div>
+              <div class="notes-content">${data.notes}</div>
+            </div>
+            ` : ''}
           </div>
-          ` : ''}
-          
-          ${data.terms_and_conditions ? `
-          <div class="terms">
-            <div class="section-subtitle">Terms & Conditions</div>
-            <div class="terms-content">${data.terms_and_conditions}</div>
+        ` : `
+          <div class="notes-section">
+            ${data.notes ? `
+            <div class="notes">
+              <div class="section-subtitle">Notes</div>
+              <div class="notes-content">${data.notes}</div>
+            </div>
+            ` : ''}
+            ${data.terms_and_conditions ? `
+            <div class="terms">
+              <div class="section-subtitle">Terms & Conditions</div>
+              <div class="terms-content">${data.terms_and_conditions}</div>
+            </div>
+            ` : ''}
           </div>
-          ` : ''}
-        </div>
+        `}
         ` : ''}
         
         <!-- Bank Details (only invoices and proformas) -->
