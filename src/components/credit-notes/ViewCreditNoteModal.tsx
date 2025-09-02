@@ -200,7 +200,7 @@ export function ViewCreditNoteModal({ open, onOpenChange, creditNote }: ViewCred
                   <span className="font-semibold">{formatCurrency(creditNote.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax Amount:</span>
+                  <span>VAT Amount:</span>
                   <span className="font-semibold">{formatCurrency(creditNote.tax_amount)}</span>
                 </div>
                 <Separator />
