@@ -33,7 +33,7 @@ import { CreateProformaModalOptimized } from '@/components/proforma/CreateProfor
 import { EditProformaModal } from '@/components/proforma/EditProformaModal';
 import { ViewProformaModal } from '@/components/proforma/ViewProformaModal';
 import { ProformaSetupBanner } from '@/components/proforma/ProformaSetupBanner';
-import { downloadInvoiceJsPDF, downloadQuotationJsPDF } from '@/utils/jsPdfGenerator';
+import { downloadInvoicePDF, downloadQuotationPDF } from '@/utils/pdfGenerator';
 import { formatCurrency } from '@/utils/taxCalculation';
 import { ensureProformaSchema } from '@/utils/proformaDatabaseSetup';
 
@@ -118,7 +118,7 @@ export default function Proforma() {
         logo_url: currentCompany.logo_url
       } : undefined;
 
-      await downloadInvoiceJsPDF(invoiceData, 'PROFORMA', companyDetails);
+      await downloadInvoicePDF(invoiceData, 'PROFORMA', companyDetails);
       toast.success('Proforma PDF downloaded successfully!');
     } catch (error) {
       console.error('Error downloading PDF:', error);
