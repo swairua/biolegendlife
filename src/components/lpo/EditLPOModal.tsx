@@ -440,7 +440,7 @@ export const EditLPOModal = ({
                         <TableHead>Description</TableHead>
                         <TableHead>Qty</TableHead>
                         <TableHead>Unit Price</TableHead>
-                        <TableHead>Tax %</TableHead>
+                        <TableHead>VAT %</TableHead>
                         <TableHead>Total</TableHead>
                         <TableHead></TableHead>
                       </TableRow>
