@@ -454,17 +454,7 @@ export const generatePDF = (data: DocumentData) => {
           white-space: pre-wrap;
         }
         
-        .footer {
-          position: absolute;
-          bottom: 20mm;
-          left: 20mm;
-          right: 20mm;
-          text-align: center;
-          font-size: 10px;
-          color: #666;
-          border-top: 1px solid #e9ecef;
-          padding-top: 15px;
-        }
+        .footer { display: none; }
         
         .delivery-info-section {
           margin: 25px 0;
