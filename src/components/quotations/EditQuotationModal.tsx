@@ -481,7 +481,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                       <span className="font-semibold">{formatCurrency(subtotal)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Tax:</span>
+                      <span>VAT:</span>
                       <span className="font-semibold">{formatCurrency(taxAmount)}</span>
                     </div>
                     <div className="flex justify-between text-lg border-t pt-2">
