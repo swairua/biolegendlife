@@ -189,7 +189,7 @@ export const generatePDF = (data: DocumentData) => {
         .header {
           margin-bottom: 30px;
           padding-bottom: 20px;
-          border-bottom: 2px solid #7C3AED;
+          border-bottom: 1px solid #D1D5DB;
         }
 
         .header-rows { width: 100%; }
@@ -229,7 +229,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 24px;
           font-weight: bold;
           margin-bottom: 5px;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .company-details {
@@ -245,7 +245,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 28px;
           font-weight: bold;
           margin: 0 0 15px 0;
-          color: #5B21B6;
+          color: #111827;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -285,7 +285,7 @@ export const generatePDF = (data: DocumentData) => {
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -312,14 +312,14 @@ export const generatePDF = (data: DocumentData) => {
           border-collapse: collapse;
           margin: 20px 0;
           font-size: 11px;
-          border: 2px solid #7C3AED;
+          border: 1px solid #E5E7EB;
           border-radius: 8px;
           overflow: hidden;
         }
         
         .items-table thead {
-          background: #7C3AED;
-          color: white;
+          background: #F3F4F6;
+          color: #111827;
         }
         
         .items-table th {
@@ -357,7 +357,7 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .items-table tbody tr:hover {
-          background: #F3E8FF;
+          background: #F9FAFB;
         }
         
         .description-cell {
@@ -409,20 +409,20 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .totals-table .total-row {
-          border-top: 2px solid #7C3AED;
+          border-top: 1px solid #111827;
           background: #f8f9fa;
         }
         
         .totals-table .total-row .label {
           font-size: 14px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .totals-table .total-row .amount {
           font-size: 16px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .notes-section {
@@ -442,7 +442,7 @@ export const generatePDF = (data: DocumentData) => {
         .section-subtitle {
           font-size: 12px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin: 0 0 10px 0;
           text-transform: uppercase;
         }
@@ -496,7 +496,7 @@ export const generatePDF = (data: DocumentData) => {
         .field-label {
           font-size: 10px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin-bottom: 4px;
           text-transform: uppercase;
         }
@@ -527,7 +527,7 @@ export const generatePDF = (data: DocumentData) => {
         .signature-label {
           font-size: 11px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin-bottom: 20px;
           text-transform: uppercase;
         }
@@ -553,7 +553,7 @@ export const generatePDF = (data: DocumentData) => {
           left: 50%;
           transform: translate(-50%, -50%) rotate(-45deg);
           font-size: 72px;
-          color: rgba(124, 58, 237, 0.08);
+          color: rgba(0, 0, 0, 0.06);
           font-weight: bold;
           z-index: -1;
           pointer-events: none;
@@ -583,7 +583,7 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid #7C3AED;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid #7C3AED;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
+        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 3px solid #D1D5DB;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 3px solid #D1D5DB;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -648,7 +648,7 @@ export const generatePDF = (data: DocumentData) => {
                     ` : ''}
                     <tr>
                       <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
-                      <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? '#10B981' : '#7C3AED'};">${formatCurrency(data.total_amount)}</td>
+                      <td class="value" style="font-weight: bold; color: #111827;">${formatCurrency(data.total_amount)}</td>
                     </tr>
                   </table>
                 </div>
@@ -791,8 +791,8 @@ export const generatePDF = (data: DocumentData) => {
                   <td>${(item as any).unit_of_measure || 'pcs'}</td>
                   <td style="font-size: 10px;">
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ?
-                      '<span style="color: #10B981; font-weight: bold;">✓ Complete</span>' :
-                      '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
+                      '<span style="color: #111827; font-weight: bold;">✓ Complete</span>' :
+                      '<span style="color: #111827; font-weight: bold;">⚠ Partial</span>'
                     }
                   </td>
                   ` : `
@@ -836,11 +836,11 @@ export const generatePDF = (data: DocumentData) => {
             ${(data.type === 'invoice' || data.type === 'proforma') && data.paid_amount !== undefined ? `
             <tr class="payment-info">
               <td class="label">Paid Amount:</td>
-              <td class="amount" style="color: #10B981;">${formatCurrency(data.paid_amount || 0)}</td>
+              <td class="amount" style="color: #111827;">${formatCurrency(data.paid_amount || 0)}</td>
             </tr>
             <tr class="balance-info">
               <td class="label" style="font-weight: bold;">Balance Due:</td>
-              <td class="amount" style="font-weight: bold; color: ${(data.balance_due || 0) > 0 ? '#DC2626' : '#10B981'};">${formatCurrency(data.balance_due || 0)}</td>
+              <td class="amount" style="font-weight: bold; color: #111827;">${formatCurrency(data.balance_due || 0)}</td>
             </tr>
             ` : ''}
           </table>
