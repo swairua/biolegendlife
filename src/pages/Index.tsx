@@ -4,7 +4,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { AuthPerformanceTest } from '@/components/auth/AuthPerformanceTest';
 import { Button } from '@/components/ui/button';
 import { FileText, BarChart3 } from 'lucide-react';
-import { downloadQuotationJsPDF } from '@/utils/jsPdfGenerator';
+import { downloadQuotationPDF } from '@/utils/pdfGenerator';
 import { useQuotations, useCompanies } from '@/hooks/useDatabase';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -21,7 +21,7 @@ const Index = () => {
       const realQuotation = quotations?.[0];
 
       if (realQuotation) {
-        downloadQuotationJsPDF(realQuotation);
+        downloadQuotationPDF(realQuotation);
         toast.success('PDF generated using real quotation data!');
         return;
       }
@@ -74,7 +74,7 @@ const Index = () => {
         ]
       };
 
-      downloadQuotationJsPDF(testQuotation);
+      downloadQuotationPDF(testQuotation);
       toast.success('Test PDF generated using sample data (no real quotations found)');
     } catch (error) {
       console.error('Error generating PDF:', error);
