@@ -237,8 +237,8 @@ export const ViewLPOModal = ({
                       <TableHead>Description</TableHead>
                       <TableHead>Quantity</TableHead>
                       <TableHead>Unit Price</TableHead>
-                      <TableHead>Tax Rate</TableHead>
-                      <TableHead>Tax Amount</TableHead>
+                      <TableHead>VAT Rate</TableHead>
+                      <TableHead>VAT Amount</TableHead>
                       <TableHead>Total</TableHead>
                     </TableRow>
                   </TableHeader>
