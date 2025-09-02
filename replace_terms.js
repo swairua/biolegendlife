@@ -1,4 +1,10 @@
-TERMS & CONDITIONS
+const fs = require('fs');
+
+// Read the file
+let content = fs.readFileSync('src/utils/pdfGenerator.ts', 'utf8');
+
+// Define the new terms
+const newTerms = `TERMS & CONDITIONS
 
 1. Payment
 
@@ -60,4 +66,29 @@ caused by any act, error, omission, negligence, or misconduct of the Buyer in co
 
 6. Other Terms and Conditions
 
-Any additional terms and conditions not covered above shall be subject to further written agreement between the Buyer and Seller.
+Any additional terms and conditions not covered above shall be subject to further written agreement between the Buyer and Seller.`;
+
+// Find the start and end of the old terms
+const startPattern = /terms_and_conditions: documentType === 'INVOICE' \? `Terms\n1\. PAYMENT\./;
+const endPattern = /6\. ANY OTHER TERMS AND CONDITIONS\.\.\.\.` : invoice\.terms_and_conditions,/;
+
+const startMatch = content.match(startPattern);
+const endMatch = content.match(endPattern);
+
+if (startMatch && endMatch) {
+    const startIndex = content.indexOf(startMatch[0]);
+    const endIndex = content.indexOf(endMatch[0]) + endMatch[0].length;
+    
+    // Replace the content
+    const before = content.substring(0, startIndex);
+    const after = content.substring(endIndex);
+    
+    const newContent = before + `terms_and_conditions: documentType === 'INVOICE' ? \`${newTerms}\` : invoice.terms_and_conditions,` + after;
+    
+    // Write the file back
+    fs.writeFileSync('src/utils/pdfGenerator.ts', newContent, 'utf8');
+    
+    console.log('Successfully updated terms and conditions!');
+} else {
+    console.log('Could not find the terms section to replace');
+}
