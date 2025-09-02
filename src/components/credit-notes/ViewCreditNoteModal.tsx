@@ -259,10 +259,6 @@ export function ViewCreditNoteModal({ open, onOpenChange, creditNote }: ViewCred
                 <Download className="h-4 w-4 mr-2" />
                 {downloadPDF.isPending ? 'Generating...' : 'Download PDF'}
               </Button>
-              <Button variant="outline" size="sm">
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </Button>
               {creditNote.status === 'draft' && (
                 <Button variant="outline" size="sm">
                   <Send className="h-4 w-4 mr-2" />

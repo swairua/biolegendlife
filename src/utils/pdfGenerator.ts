@@ -187,21 +187,33 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
           margin-bottom: 30px;
           padding-bottom: 20px;
-          border-bottom: 2px solid #7C3AED;
+          border-bottom: 1px solid #D1D5DB;
         }
+
+        .header-rows { width: 100%; }
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+        .logo-row { justify-content: flex-end; }
+        .party-row { margin-top: 6px; }
+        .meta-row { margin-top: 6px; }
+        .number-row { margin-top: 10px; }
+        .party-left, .party-right { flex: 1 1 0; min-width: 0; }
+        .party-right { text-align: right; }
+        .document-info { text-align: right; flex: 0 0 380px; max-width: 380px; margin-left: auto; }
+        .document-title { font-size: 28px; font-weight: bold; margin: 0 0 15px 0; color: #5B21B6; text-transform: uppercase; letter-spacing: 1px; }
+        .document-number { font-size: 24px; font-weight: 700; color: #5B21B6; }
+        .company-details { font-size: 11px; line-height: 1.6; color: #666; margin-bottom: 0; }
+        .client-label { font-size: 12px; font-weight: bold; color: #5B21B6; text-transform: uppercase; margin-bottom: 4px; }
+        .customer-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529; }
+        .customer-details { font-size: 10px; color: #666; line-height: 1.4; }
         
-        .company-info {
-          flex: 1;
-        }
+        .company-info { flex: 1 1 auto; min-width: 0; }
         
         .logo {
-          width: 320px;
-          height: 160px;
+          width: 75%;
+          height: auto;
+          max-height: 220px;
           margin-bottom: 15px;
           border-radius: 8px;
           overflow: hidden;
@@ -209,7 +221,7 @@ export const generatePDF = (data: DocumentData) => {
         
         .logo img {
           width: 100%;
-          height: 100%;
+          height: auto;
           object-fit: contain;
         }
         
@@ -217,36 +229,32 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 24px;
           font-weight: bold;
           margin-bottom: 5px;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .company-details {
-          font-size: 11px;
-          line-height: 1.6;
-          color: #666;
+          font-size: 12px;
+          line-height: 1.7;
+          color: #444;
           margin-bottom: 0;
         }
         
-        .document-info {
-          text-align: right;
-          flex: 1;
-          max-width: 300px;
-        }
+        .document-info { text-align: right; flex: 0 0 380px; max-width: 380px; }
         
         .document-title {
           font-size: 28px;
           font-weight: bold;
           margin: 0 0 15px 0;
-          color: #5B21B6;
+          color: #111827;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
         
         .document-details {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
+          background: transparent;
+          padding: 0;
+          border-radius: 0;
+          border: none;
         }
         
         .document-details table {
@@ -255,26 +263,29 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .document-details td {
-          padding: 5px 0;
+          padding: 4px 0;
           border: none;
         }
         
         .document-details .label {
-          font-weight: bold;
-          color: #495057;
-          width: 40%;
+          font-weight: 600;
+          color: #4B5563;
+          width: 50%;
+          font-size: 12px;
         }
         
         .document-details .value {
           text-align: right;
-          color: #212529;
+          color: #111827;
+          font-size: 13px;
+          font-weight: 700;
         }
         
         
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -301,14 +312,14 @@ export const generatePDF = (data: DocumentData) => {
           border-collapse: collapse;
           margin: 20px 0;
           font-size: 11px;
-          border: 2px solid #7C3AED;
+          border: 1px solid #E5E7EB;
           border-radius: 8px;
           overflow: hidden;
         }
         
         .items-table thead {
-          background: #7C3AED;
-          color: white;
+          background: #F3F4F6;
+          color: #111827;
         }
         
         .items-table th {
@@ -346,7 +357,7 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .items-table tbody tr:hover {
-          background: #e3f2fd;
+          background: #F9FAFB;
         }
         
         .description-cell {
@@ -398,20 +409,20 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .totals-table .total-row {
-          border-top: 2px solid #7C3AED;
+          border-top: 1px solid #111827;
           background: #f8f9fa;
         }
         
         .totals-table .total-row .label {
           font-size: 14px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .totals-table .total-row .amount {
           font-size: 16px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .notes-section {
@@ -431,7 +442,7 @@ export const generatePDF = (data: DocumentData) => {
         .section-subtitle {
           font-size: 12px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin: 0 0 10px 0;
           text-transform: uppercase;
         }
@@ -443,17 +454,7 @@ export const generatePDF = (data: DocumentData) => {
           white-space: pre-wrap;
         }
         
-        .footer {
-          position: absolute;
-          bottom: 20mm;
-          left: 20mm;
-          right: 20mm;
-          text-align: center;
-          font-size: 10px;
-          color: #666;
-          border-top: 1px solid #e9ecef;
-          padding-top: 15px;
-        }
+        .footer { display: none; }
         
         .delivery-info-section {
           margin: 25px 0;
@@ -485,7 +486,7 @@ export const generatePDF = (data: DocumentData) => {
         .field-label {
           font-size: 10px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin-bottom: 4px;
           text-transform: uppercase;
         }
@@ -516,7 +517,7 @@ export const generatePDF = (data: DocumentData) => {
         .signature-label {
           font-size: 11px;
           font-weight: bold;
-          color: #5B21B6;
+          color: #111827;
           margin-bottom: 20px;
           text-transform: uppercase;
         }
@@ -542,7 +543,7 @@ export const generatePDF = (data: DocumentData) => {
           left: 50%;
           transform: translate(-50%, -50%) rotate(-45deg);
           font-size: 72px;
-          color: rgba(124, 58, 237, 0.08);
+          color: rgba(0, 0, 0, 0.06);
           font-weight: bold;
           z-index: -1;
           pointer-events: none;
@@ -572,7 +573,7 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: #f8f9fa;\n          padding: 8px 15px;\n          margin-bottom: 20px;\n          border-left: 4px solid #7C3AED;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          background: #f8f9fa;\n          padding: 10px;\n          margin: 15px 0;\n          border-left: 4px solid #7C3AED;\n          font-size: 10px;\n          color: #333;\n          text-align: center;\n          border-radius: 4px;\n          font-weight: 600;\n        }\n      </style>
+        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -581,72 +582,72 @@ export const generatePDF = (data: DocumentData) => {
         
         <!-- Header Section -->
         <div class="header">
-          <div class="company-info">
-            <div class="logo">
-              ${company.logo_url ?
-                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-              }
-            </div>
-            <div class="company-name">${company.name}</div>
-            <div class="company-details">
-              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-              ${company.address ? `${company.address}<br>` : ''}
-              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `Email: ${company.email}` : ''}
-            </div>
-
-            <!-- Client Details Section -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #5B21B6; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                ${data.customer.city ? `${data.customer.city}` : ''}
-                ${data.customer.country ? `, ${data.customer.country}` : ''}
+          <div class="header-rows">
+            <!-- Row 1: Logo right -->
+            <div class="header-row logo-row">
+              <div class="logo">
+                ${company.logo_url ? `<img src="${company.logo_url}" alt="${company.name} Logo" />` : ''}
               </div>
             </div>
-          </div>
 
-          <div class="document-info">
-            <div class="document-title">${documentTitle}</div>
-            <div class="document-details">
-              <table>
-                <tr>
-                  <td class="label">${data.type === 'receipt' ? 'Receipt #' : data.type === 'remittance' ? 'Advice #' : data.type === 'lpo' ? 'LPO #' : documentTitle + ' #'}:</td>
-                  <td class="value">${data.number}</td>
-                </tr>
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
-                  <td class="value">${formatDate(data.date)}</td>
-                </tr>
-                ${data.due_date ? `
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
-                  <td class="value">${formatDate(data.due_date)}</td>
-                </tr>
-                ` : ''}
-                ${data.valid_until ? `
-                <tr>
-                  <td class="label">Valid Until:</td>
-                  <td class="value">${formatDate(data.valid_until)}</td>
-                </tr>
-                ` : ''}
-                ${data.lpo_number && data.type !== 'lpo' ? `
-                <tr>
-                  <td class="label">LPO Number:</td>
-                  <td class="value">${data.lpo_number}</td>
-                </tr>
-                ` : ''}
-                <tr>
-                  <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
-                  <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? '#10B981' : '#7C3AED'};">${formatCurrency(data.total_amount)}</td>
-                </tr>
-              </table>
+            <!-- Row 2: Parties - Client left, Company details right -->
+            <div class="header-row party-row">
+              <div class="party-left">
+                <div class="client-label">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+                <div class="customer-name">${data.customer.name}</div>
+                <div class="customer-details">
+                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                  ${data.customer.city ? `${data.customer.city}` : ''}
+                  ${data.customer.country ? `, ${data.customer.country}` : ''}
+                </div>
+              </div>
+              <div class="party-right">
+                <div class="company-details">
+                  ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+                  ${company.address ? `${company.address}<br>` : ''}
+                  ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+                  ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+                  ${company.email ? `Email: ${company.email}` : ''}
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 3: Document meta right (dates and amount) -->
+            <div class="header-row meta-row">
+              <div style="flex:1"></div>
+              <div class="document-info">
+                <div class="document-details">
+                  <table>
+                    <tr>
+                      <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
+                      <td class="value">${formatDate(data.date)}</td>
+                    </tr>
+                    ${data.due_date ? `
+                    <tr>
+                      <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
+                      <td class="value">${formatDate(data.due_date)}</td>
+                    </tr>
+                    ` : ''}
+                    ${data.valid_until ? `
+                    <tr>
+                      <td class="label">Valid Until:</td>
+                      <td class="value">${formatDate(data.valid_until)}</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                      <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
+                      <td class="value" style="font-weight: bold; color: #111827;">${formatCurrency(data.total_amount)}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 4: Document number left -->
+            <div class="header-row number-row">
+              <div class="document-number">${documentTitle} ${data.number}</div>
             </div>
           </div>
         </div>
@@ -780,8 +781,8 @@ export const generatePDF = (data: DocumentData) => {
                   <td>${(item as any).unit_of_measure || 'pcs'}</td>
                   <td style="font-size: 10px;">
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ?
-                      '<span style="color: #10B981; font-weight: bold;">✓ Complete</span>' :
-                      '<span style="color: #F59E0B; font-weight: bold;">⚠ Partial</span>'
+                      '<span style="color: #111827; font-weight: bold;">✓ Complete</span>' :
+                      '<span style="color: #111827; font-weight: bold;">⚠ Partial</span>'
                     }
                   </td>
                   ` : `
@@ -825,11 +826,11 @@ export const generatePDF = (data: DocumentData) => {
             ${(data.type === 'invoice' || data.type === 'proforma') && data.paid_amount !== undefined ? `
             <tr class="payment-info">
               <td class="label">Paid Amount:</td>
-              <td class="amount" style="color: #10B981;">${formatCurrency(data.paid_amount || 0)}</td>
+              <td class="amount" style="color: #111827;">${formatCurrency(data.paid_amount || 0)}</td>
             </tr>
             <tr class="balance-info">
               <td class="label" style="font-weight: bold;">Balance Due:</td>
-              <td class="amount" style="font-weight: bold; color: ${(data.balance_due || 0) > 0 ? '#DC2626' : '#10B981'};">${formatCurrency(data.balance_due || 0)}</td>
+              <td class="amount" style="font-weight: bold; color: #111827;">${formatCurrency(data.balance_due || 0)}</td>
             </tr>
             ` : ''}
           </table>
@@ -854,43 +855,48 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section -->
+        <!-- Notes / Terms Section -->
         ${data.notes || data.terms_and_conditions ? `
-        <div class="notes-section">
-          ${data.notes ? `
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
+        ${data.type === 'invoice' ? `
+          <div class="notes-section">
+            ${data.terms_and_conditions ? `
+            <div class="terms" style="width:100%">
+              <div class="section-subtitle">Terms & Conditions</div>
+              <div class="terms-content">${data.terms_and_conditions}</div>
+            </div>
+            ` : ''}
+            ${data.notes ? `
+            <div class="notes" style="width:100%">
+              <div class="section-subtitle">Notes</div>
+              <div class="notes-content">${data.notes}</div>
+            </div>
+            ` : ''}
           </div>
-          ` : ''}
-          
-          ${data.terms_and_conditions ? `
-          <div class="terms">
-            <div class="section-subtitle">Terms & Conditions</div>
-            <div class="terms-content">${data.terms_and_conditions}</div>
+        ` : `
+          <div class="notes-section">
+            ${data.notes ? `
+            <div class="notes">
+              <div class="section-subtitle">Notes</div>
+              <div class="notes-content">${data.notes}</div>
+            </div>
+            ` : ''}
+            ${data.terms_and_conditions ? `
+            <div class="terms">
+              <div class="section-subtitle">Terms & Conditions</div>
+              <div class="terms-content">${data.terms_and_conditions}</div>
+            </div>
+            ` : ''}
           </div>
-          ` : ''}
-        </div>
+        `}
         ` : ''}
         
-        <!-- Bank Details (invoices, quotations, and proformas) -->
-        ${(data.type === 'invoice' || data.type === 'quotation' || data.type === 'proforma') ? `
+        <!-- Bank Details (only invoices and proformas) -->
+        ${(data.type === 'invoice' || data.type === 'proforma') ? `
         <div class="bank-details">
           <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
         ` : ''}
 
-        <!-- Footer -->
-        <div class="footer">
-          <strong>Thank you for your business!</strong><br>
-          <strong>${company.name}</strong><br>
-          This document was generated on ${new Date().toLocaleString()}
-          ${data.type === 'proforma' ? '<br><em>This is a proforma invoice and not a request for payment</em>' : ''}
-          ${data.type === 'delivery' ? '<br><em>This delivery note confirms the items delivered</em>' : ''}
-          ${data.type === 'receipt' ? '<br><em>This receipt serves as proof of payment received</em>' : ''}
-          ${data.type === 'remittance' ? '<br><em>This remittance advice details payments made to your account</em>' : ''}
-          ${data.type === 'lpo' ? '<br><em>This Local Purchase Order serves as an official request for goods/services</em>' : ''}
-        </div>
       </div>
     </body>
     </html>
@@ -960,7 +966,36 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
     paid_amount: invoice.paid_amount || 0,
     balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
     notes: invoice.notes,
-    terms_and_conditions: invoice.terms_and_conditions,
+    terms_and_conditions: documentType === 'INVOICE' ? `Terms
+1. PAYMENT.
+Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees.
+Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
+2. PAYMENT, PRICE, TRANSPORTATION
+Seller shall have the continuing right to approve Buyer’s credit. Seller may at any time demand advance payment, additional security or guarantee of prompt payment. If Buyer refuses to give the payment,
+security or guarantee demanded, Seller may terminate the Agreement, refuse to deliver any undelivered
+goods and Buyer shall immediately become liable to Seller for the unpaid price of all goods delivered & for
+damages. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s
+fees incurred by Seller in collecting said sums.
+3. SERVICE CHARGE AND INTEREST
+A service charge of 3% of the total invoice cost per month will be made on past due accounts unless
+otherwise agreed in writing by both parties.
+4. FORCE MAJEURE
+Seller shall not be liable for any damages resulting from: any delay or failure of performance arising from
+any cause not reasonably within Seller’s control; accidents to, breakdowns or mechanical failure of
+machinery or equipment, however caused; strikes or other labor troubles, shortage of labor,
+transportation, raw materials, energy sources, or failure of usual means of supply; fire; flood; war, declared
+or undeclared; insurrection; riots; acts of God or the public enemy; or priorities, allocations or limitations or
+other acts required or requested by Federal, State or local governments or any of their sub-divisions,
+bureaus or agencies. Seller may, at its option, cancel this Agreement or delay performance hereunder for
+any period reasonably necessary due to any of the foregoing, during which time this Agreement shall
+remain in full force and effect. Seller shall have the further right to then allocate its available goods
+between its own uses and its customers in such manner as Seller may consider equitable.
+5. INDEMINITY
+Buyer shall indemnify and hold Seller harmless from and against any and all claims, demands, lawsuits,
+damages, liabilities, costs and expenses (including attorney’s fees), incurred by reason of any injury to or
+death of any person, or damage to any property, resulting from or arising out of any act, error, omission,
+negligence, or misconduct by Buyer in connection with the goods sold hereunder.
+6. ANY OTHER TERMS AND CONDITIONS....` : invoice.terms_and_conditions,
   };
 
   return generatePDF(documentData);
