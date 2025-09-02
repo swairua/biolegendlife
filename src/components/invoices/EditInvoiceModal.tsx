@@ -513,7 +513,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
                     <TableHead>Unit Price</TableHead>
                     <TableHead>Discount %</TableHead>
                     <TableHead>Disc. Before VAT</TableHead>
-                    <TableHead>Tax %</TableHead>
+                    <TableHead>VAT %</TableHead>
                     <TableHead>Tax Incl.</TableHead>
                     <TableHead>Line Total</TableHead>
                     <TableHead></TableHead>
