@@ -119,13 +119,16 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          gap: 24px;
           margin-bottom: 30px;
           padding-bottom: 20px;
           border-bottom: 2px solid #7C3AED;
+          flex-wrap: nowrap;
         }
         
         .company-info {
-          flex: 1;
+          flex: 1 1 auto;
+          min-width: 0;
         }
         
         .logo {
@@ -155,8 +158,8 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
         
         .document-info {
           text-align: right;
-          flex: 1;
-          max-width: 300px;
+          flex: 0 0 400px;
+          max-width: 400px;
         }
         
         .document-title {
@@ -455,7 +458,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
             <div class="logo" style="margin-left:auto;">
               <img src="${companyData.logo_url || ''}" alt="${companyData.name} Logo" />
             </div>
-            <div class="document-title">Credit Note</div>
+            <div class="document-title" style="margin-top:8px;">Credit Note</div>
             <div class="document-details">
               <table>
                 <tr>
