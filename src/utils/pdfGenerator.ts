@@ -200,8 +200,8 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .logo {
-          width: 320px;
-          height: 160px;
+          width: 360px;
+          height: 180px;
           margin-bottom: 15px;
           border-radius: 8px;
           overflow: hidden;
@@ -581,38 +581,14 @@ export const generatePDF = (data: DocumentData) => {
         
         <!-- Header Section -->
         <div class="header">
-          <div class="company-info">
-            <div class="logo">
+          <div class="document-info">
+            <div class="logo" style="margin-left:auto;">
               ${company.logo_url ?
                 `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
                  <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
                 `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
               }
             </div>
-            <div class="company-name">${company.name}</div>
-            <div class="company-details">
-              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-              ${company.address ? `${company.address}<br>` : ''}
-              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `Email: ${company.email}` : ''}
-            </div>
-
-            <!-- Client Details Section -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #5B21B6; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                ${data.customer.city ? `${data.customer.city}` : ''}
-                ${data.customer.country ? `, ${data.customer.country}` : ''}
-              </div>
-            </div>
-          </div>
-
-          <div class="document-info">
             <div class="document-title">${documentTitle}</div>
             <div class="document-details">
               <table>
@@ -647,6 +623,29 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? '#10B981' : '#7C3AED'};">${formatCurrency(data.total_amount)}</td>
                 </tr>
               </table>
+            </div>
+          </div>
+
+          <div class="company-info">
+            <div class="company-details">
+              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+              ${company.address ? `${company.address}<br>` : ''}
+              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+              ${company.email ? `Email: ${company.email}` : ''}
+            </div>
+
+            <!-- Client Details Section -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
+              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #5B21B6; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
+              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
+                ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                ${data.customer.city ? `${data.customer.city}` : ''}
+                ${data.customer.country ? `, ${data.customer.country}` : ''}
+              </div>
             </div>
           </div>
         </div>
@@ -873,8 +872,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
         
-        <!-- Bank Details (invoices, quotations, and proformas) -->
-        ${(data.type === 'invoice' || data.type === 'quotation' || data.type === 'proforma') ? `
+        <!-- Bank Details (only invoices and proformas) -->
+        ${(data.type === 'invoice' || data.type === 'proforma') ? `
         <div class="bank-details">
           <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
