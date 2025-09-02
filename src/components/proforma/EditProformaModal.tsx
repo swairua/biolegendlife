@@ -417,7 +417,7 @@ export const EditProformaModal = ({
                       <TableHead>Description</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
-                      <TableHead>Tax %</TableHead>
+                      <TableHead>VAT %</TableHead>
                       <TableHead>Apply Tax</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead></TableHead>
