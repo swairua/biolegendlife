@@ -237,7 +237,7 @@ export const generatePDF = (data: DocumentData) => {
           font-size: 28px;
           font-weight: bold;
           margin: 0 0 15px 0;
-          color: #0891B2;
+          color: #5B21B6;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -274,7 +274,7 @@ export const generatePDF = (data: DocumentData) => {
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: #0891B2;
+          color: #5B21B6;
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -431,7 +431,7 @@ export const generatePDF = (data: DocumentData) => {
         .section-subtitle {
           font-size: 12px;
           font-weight: bold;
-          color: #0891B2;
+          color: #5B21B6;
           margin: 0 0 10px 0;
           text-transform: uppercase;
         }
@@ -485,7 +485,7 @@ export const generatePDF = (data: DocumentData) => {
         .field-label {
           font-size: 10px;
           font-weight: bold;
-          color: #0891B2;
+          color: #5B21B6;
           margin-bottom: 4px;
           text-transform: uppercase;
         }
@@ -516,7 +516,7 @@ export const generatePDF = (data: DocumentData) => {
         .signature-label {
           font-size: 11px;
           font-weight: bold;
-          color: #0891B2;
+          color: #5B21B6;
           margin-bottom: 20px;
           text-transform: uppercase;
         }
@@ -542,7 +542,7 @@ export const generatePDF = (data: DocumentData) => {
           left: 50%;
           transform: translate(-50%, -50%) rotate(-45deg);
           font-size: 72px;
-          color: rgba(8, 145, 178, 0.1);
+          color: rgba(124, 58, 237, 0.08);
           font-weight: bold;
           z-index: -1;
           pointer-events: none;
@@ -600,7 +600,7 @@ export const generatePDF = (data: DocumentData) => {
 
             <!-- Client Details Section -->
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #0891B2; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #5B21B6; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
               <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
               <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
                 ${data.customer.email ? `${data.customer.email}<br>` : ''}
