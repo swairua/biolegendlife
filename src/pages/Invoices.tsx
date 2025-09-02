@@ -47,7 +47,7 @@ import { EditInvoiceModal } from '@/components/invoices/EditInvoiceModal';
 import { ViewInvoiceModal } from '@/components/invoices/ViewInvoiceModal';
 import { RecordPaymentModal } from '@/components/payments/RecordPaymentModal';
 import { CreateDeliveryNoteModal } from '@/components/delivery/CreateDeliveryNoteModal';
-import { downloadInvoicePDF } from '@/utils/pdfGenerator';
+import { downloadInvoiceJsPDF } from '@/utils/jsPdfGenerator';
 
 interface Invoice {
   id: string;
@@ -173,7 +173,7 @@ export default function Invoices() {
         logo_url: currentCompany.logo_url
       } : undefined;
 
-      downloadInvoicePDF(invoice, 'INVOICE', companyDetails);
+      downloadInvoiceJsPDF(invoice, 'INVOICE', companyDetails);
       toast.success(`PDF download started for ${invoice.invoice_number}`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
