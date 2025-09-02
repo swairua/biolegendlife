@@ -183,8 +183,9 @@ export const generatePDF = (data: DocumentData) => {
           background: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
           padding: 20mm;
-          padding-bottom: 40mm;
           position: relative;
+          display: flex;
+          flex-direction: column;
         }
         
         .header {
