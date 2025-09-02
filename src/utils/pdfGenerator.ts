@@ -1025,7 +1025,7 @@ caused by any act, error, omission, negligence, or misconduct of the Buyer in co
 
 6. Other Terms and Conditions
 
-Any additional terms and conditions not covered above shall be subject to further written agreement between the Buyer and Seller
+Any additional terms and conditions not covered above shall be subject to further written agreement between the Buyer and Seller.
 1. PAYMENT.
 Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees.
 Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
