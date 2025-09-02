@@ -58,7 +58,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
   const [notes, setNotes] = useState('');
-  const [termsAndConditions, setTermsAndConditions] = useState('Payment due within 30 days of invoice date.');
+  const [termsAndConditions, setTermsAndConditions] = useState('We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!');
   
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [searchProduct, setSearchProduct] = useState('');
@@ -385,7 +385,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
     setQuotationDate(new Date().toISOString().split('T')[0]);
     setValidUntil(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
     setNotes('');
-    setTermsAndConditions('Payment due within 30 days of invoice date.');
+    setTermsAndConditions('We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!');
     setItems([]);
     setSearchProduct('');
   };
