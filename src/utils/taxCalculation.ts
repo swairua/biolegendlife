@@ -52,18 +52,11 @@ export function calculateItemTax(item: TaxableItem): CalculatedItem {
   let lineTotal = 0;
   const rate = Math.max(0, item.tax_percentage || 0);
 
-  if (rate > 0) {
-    if (item.tax_inclusive) {
-      // Tax-inclusive: unit prices include tax
-      taxAmount = taxableAmount * (rate / (100 + rate));
-      lineTotal = taxableAmount; // already includes tax
-    } else {
-      // Tax-exclusive: add tax on top
-      taxAmount = taxableAmount * (rate / 100);
-      lineTotal = taxableAmount + taxAmount;
-    }
+  // Treat unit prices as tax-exclusive. Apply tax ONLY when checkbox is checked.
+  if (rate > 0 && item.tax_inclusive) {
+    taxAmount = taxableAmount * (rate / 100);
+    lineTotal = taxableAmount + taxAmount;
   } else {
-    // No tax
     taxAmount = 0;
     lineTotal = taxableAmount;
   }
