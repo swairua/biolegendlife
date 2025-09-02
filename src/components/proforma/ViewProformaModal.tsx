@@ -200,8 +200,8 @@ export const ViewProformaModal = ({
                       <TableHead>Description</TableHead>
                       <TableHead>Quantity</TableHead>
                       <TableHead>Unit Price</TableHead>
-                      <TableHead>Tax %</TableHead>
-                      <TableHead>Tax Amount</TableHead>
+                      <TableHead>VAT %</TableHead>
+                      <TableHead>VAT Amount</TableHead>
                       <TableHead className="text-right">Total</TableHead>
                     </TableRow>
                   </TableHeader>
