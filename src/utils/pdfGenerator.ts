@@ -892,7 +892,7 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Bank Details (for invoices and proformas) -->
         ${(data.type === 'invoice' || data.type === 'proforma') ? `
-        <div class="invoice-bank-details">
+        <div class="invoice-bank-details bank-details">
           <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
         ` : ''}
