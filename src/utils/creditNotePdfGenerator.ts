@@ -122,7 +122,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
           gap: 24px;
           margin-bottom: 30px;
           padding-bottom: 20px;
-          border-bottom: 2px solid #7C3AED;
+          border-bottom: 1px solid #D1D5DB;
           flex-wrap: nowrap;
         }
         
@@ -166,7 +166,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
           font-size: 28px;
           font-weight: bold;
           margin: 0 0 15px 0;
-          color: #7C3AED;
+          color: #111827;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
@@ -217,7 +217,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
         .section-title {
           font-size: 14px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
           margin: 0 0 15px 0;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -244,14 +244,14 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
           border-collapse: collapse;
           margin: 20px 0;
           font-size: 11px;
-          border: 2px solid #7C3AED;
+          border: 1px solid #E5E7EB;
           border-radius: 8px;
           overflow: hidden;
         }
         
         .items-table thead {
-          background: #7C3AED;
-          color: white;
+          background: #F3F4F6;
+          color: #111827;
         }
         
         .items-table th {
@@ -289,7 +289,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
         }
         
         .items-table tbody tr:hover {
-          background: #e3f2fd;
+          background: #F9FAFB;
         }
         
         .description-cell {
@@ -341,35 +341,35 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
         }
         
         .totals-table .total-row {
-          border-top: 2px solid #7C3AED;
+          border-top: 1px solid #111827;
           background: #f8f9fa;
         }
         
         .totals-table .total-row .label {
           font-size: 14px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .totals-table .total-row .amount {
           font-size: 16px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
 
         .totals-table .balance-row {
-          border-top: 1px solid #7C3AED;
-          background: #e3f2fd;
+          border-top: 1px solid #D1D5DB;
+          background: #F9FAFB;
         }
 
         .totals-table .balance-row .label {
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
 
         .totals-table .balance-row .amount {
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
         }
         
         .notes-section {
@@ -389,7 +389,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
         .section-subtitle {
           font-size: 12px;
           font-weight: bold;
-          color: #7C3AED;
+          color: #111827;
           margin: 0 0 10px 0;
           text-transform: uppercase;
         }
@@ -419,7 +419,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
           left: 50%;
           transform: translate(-50%, -50%) rotate(-45deg);
           font-size: 72px;
-          color: rgba(124, 58, 237, 0.08);
+          color: rgba(0, 0, 0, 0.06);
           font-weight: bold;
           z-index: -1;
           pointer-events: none;
@@ -475,7 +475,7 @@ export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: C
                 </tr>
                 <tr>
                   <td class="label">Credit Amount:</td>
-                  <td class="value" style="font-weight: bold; color: #7C3AED;">${formatCurrency(creditNote.total_amount)}</td>
+                  <td class="value" style="font-weight: bold; color: #111827;">${formatCurrency(creditNote.total_amount)}</td>
                 </tr>
               </table>
             </div>
