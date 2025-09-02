@@ -893,7 +893,9 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Footer -->
         <div class="footer">
-          <strong>Thank you for your business!</strong><br>
+          ${data.type === 'quotation'
+            ? '<strong>We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!</strong><br>'
+            : '<strong>Thank you for your business!</strong><br>'}
           <strong>${company.name}</strong><br>
           This document was generated on ${new Date().toLocaleString()}
           ${data.type === 'proforma' ? '<br><em>This is a proforma invoice and not a request for payment</em>' : ''}
