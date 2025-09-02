@@ -457,6 +457,15 @@ export const generatePDF = (data: DocumentData) => {
           max-width: 100%;
           word-spacing: 0.1em;
           hyphens: auto;
+          page-break-inside: avoid;
+          orphans: 3;
+          widows: 3;
+        }
+
+        .terms-content p,
+        .terms-content div {
+          page-break-inside: avoid;
+          margin-bottom: 8px;
         }
         
         .footer { display: none; }
