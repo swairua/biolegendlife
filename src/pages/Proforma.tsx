@@ -102,7 +102,7 @@ export default function Proforma() {
         subtotal: proforma.subtotal,
         tax_amount: proforma.tax_amount,
         status: proforma.status,
-        notes: proforma.notes || 'This is a proforma invoice for advance payment.',
+        notes: proforma.notes || '',
         terms_and_conditions: proforma.terms_and_conditions || 'Payment required before goods are delivered.',
       };
 
