@@ -187,20 +187,28 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 24px;
           margin-bottom: 30px;
           padding-bottom: 20px;
           border-bottom: 2px solid #7C3AED;
-          flex-wrap: nowrap;
         }
+
+        .header-rows { width: 100%; }
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+        .logo-row { justify-content: flex-end; }
+        .party-row { margin-top: 6px; }
+        .meta-row { margin-top: 6px; }
+        .number-row { margin-top: 10px; }
+        .party-left, .party-right { flex: 1 1 0; min-width: 0; }
+        .party-right { text-align: right; }
+        .document-info { text-align: right; flex: 0 0 380px; max-width: 380px; margin-left: auto; }
+        .document-title { font-size: 28px; font-weight: bold; margin: 0 0 15px 0; color: #5B21B6; text-transform: uppercase; letter-spacing: 1px; }
+        .document-number { font-size: 24px; font-weight: 700; color: #5B21B6; }
+        .company-details { font-size: 11px; line-height: 1.6; color: #666; margin-bottom: 0; }
+        .client-label { font-size: 12px; font-weight: bold; color: #5B21B6; text-transform: uppercase; margin-bottom: 4px; }
+        .customer-name { font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529; }
+        .customer-details { font-size: 10px; color: #666; line-height: 1.4; }
         
-        .company-info {
-          flex: 1 1 auto;
-          min-width: 0;
-        }
+        .company-info { flex: 1 1 auto; min-width: 0; }
         
         .logo {
           width: 360px;
@@ -230,11 +238,7 @@ export const generatePDF = (data: DocumentData) => {
           margin-bottom: 0;
         }
         
-        .document-info {
-          text-align: right;
-          flex: 0 0 400px;
-          max-width: 400px;
-        }
+        .document-info { text-align: right; flex: 0 0 380px; max-width: 380px; }
         
         .document-title {
           font-size: 28px;
@@ -584,71 +588,76 @@ export const generatePDF = (data: DocumentData) => {
         
         <!-- Header Section -->
         <div class="header">
-          <div class="document-info">
-            <div class="logo" style="margin-left:auto;">
-              ${company.logo_url ?
-                `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                 <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
-                `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
-              }
-            </div>
-            <div class="document-title" style="margin-top:8px;">${documentTitle}</div>
-            <div class="document-details">
-              <table>
-                <tr>
-                  <td class="label">${data.type === 'receipt' ? 'Receipt #' : data.type === 'remittance' ? 'Advice #' : data.type === 'lpo' ? 'LPO #' : documentTitle + ' #'}:</td>
-                  <td class="value">${data.number}</td>
-                </tr>
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
-                  <td class="value">${formatDate(data.date)}</td>
-                </tr>
-                ${data.due_date ? `
-                <tr>
-                  <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
-                  <td class="value">${formatDate(data.due_date)}</td>
-                </tr>
-                ` : ''}
-                ${data.valid_until ? `
-                <tr>
-                  <td class="label">Valid Until:</td>
-                  <td class="value">${formatDate(data.valid_until)}</td>
-                </tr>
-                ` : ''}
-                ${data.lpo_number && data.type !== 'lpo' ? `
-                <tr>
-                  <td class="label">LPO Number:</td>
-                  <td class="value">${data.lpo_number}</td>
-                </tr>
-                ` : ''}
-                <tr>
-                  <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
-                  <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? '#10B981' : '#7C3AED'};">${formatCurrency(data.total_amount)}</td>
-                </tr>
-              </table>
-            </div>
-          </div>
-
-          <div class="company-info">
-            <div class="company-details">
-              ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
-              ${company.address ? `${company.address}<br>` : ''}
-              ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
-              ${company.phone ? `Tel: ${company.phone}<br>` : ''}
-              ${company.email ? `Email: ${company.email}` : ''}
-            </div>
-
-            <!-- Client Details Section -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e9ecef;">
-              <div class="section-title" style="font-size: 12px; font-weight: bold; color: #5B21B6; margin-bottom: 8px; text-transform: uppercase;">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
-              <div class="customer-name" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #212529;">${data.customer.name}</div>
-              <div class="customer-details" style="font-size: 10px; color: #666; line-height: 1.4;">
-                ${data.customer.email ? `${data.customer.email}<br>` : ''}
-                ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
-                ${data.customer.address ? `${data.customer.address}<br>` : ''}
-                ${data.customer.city ? `${data.customer.city}` : ''}
-                ${data.customer.country ? `, ${data.customer.country}` : ''}
+          <div class="header-rows">
+            <!-- Row 1: Logo right -->
+            <div class="header-row logo-row">
+              <div class="logo">
+                ${company.logo_url ?
+                  `<img src="${company.logo_url}" alt="${company.name} Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                   <div style="display:none; width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">Logo not available</div>` :
+                  `<div style="width:100%; height:100%; background:#f8f9fa; border:2px dashed #e9ecef; display:flex; align-items:center; justify-content:center; font-size:12px; color:#6c757d; text-align:center;">No logo configured</div>`
+                }
               </div>
+            </div>
+
+            <!-- Row 2: Parties - Client left, Company details right -->
+            <div class="header-row party-row">
+              <div class="party-left">
+                <div class="client-label">${data.type === 'lpo' ? 'Supplier' : 'Client'}</div>
+                <div class="customer-name">${data.customer.name}</div>
+                <div class="customer-details">
+                  ${data.customer.email ? `${data.customer.email}<br>` : ''}
+                  ${data.customer.phone ? `${data.customer.phone}<br>` : ''}
+                  ${data.customer.address ? `${data.customer.address}<br>` : ''}
+                  ${data.customer.city ? `${data.customer.city}` : ''}
+                  ${data.customer.country ? `, ${data.customer.country}` : ''}
+                </div>
+              </div>
+              <div class="party-right">
+                <div class="company-details">
+                  ${company.tax_number ? `PIN: ${company.tax_number}<br>` : ''}
+                  ${company.address ? `${company.address}<br>` : ''}
+                  ${company.city ? `${company.city}` : ''}${company.country ? `, ${company.country}` : ''}<br>
+                  ${company.phone ? `Tel: ${company.phone}<br>` : ''}
+                  ${company.email ? `Email: ${company.email}` : ''}
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 3: Document meta right (dates and amount) -->
+            <div class="header-row meta-row">
+              <div style="flex:1"></div>
+              <div class="document-info">
+                <div class="document-details">
+                  <table>
+                    <tr>
+                      <td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td>
+                      <td class="value">${formatDate(data.date)}</td>
+                    </tr>
+                    ${data.due_date ? `
+                    <tr>
+                      <td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td>
+                      <td class="value">${formatDate(data.due_date)}</td>
+                    </tr>
+                    ` : ''}
+                    ${data.valid_until ? `
+                    <tr>
+                      <td class="label">Valid Until:</td>
+                      <td class="value">${formatDate(data.valid_until)}</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                      <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
+                      <td class="value" style="font-weight: bold; color: ${data.type === 'receipt' ? '#10B981' : '#7C3AED'};">${formatCurrency(data.total_amount)}</td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 4: Document number left -->
+            <div class="header-row number-row">
+              <div class="document-number">${documentTitle} ${data.number}</div>
             </div>
           </div>
         </div>
