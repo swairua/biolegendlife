@@ -573,7 +573,7 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
+        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .invoice-terms-section {\n          margin: 30px 0 20px 0;\n          page-break-inside: avoid;\n        }\n        \n        .invoice-terms {\n          width: 100%;\n          padding: 20px;\n          background: #f8f9fa;\n          border-radius: 8px;\n          border: 1px solid #e9ecef;\n          margin-bottom: 20px;\n        }\n        \n        .invoice-bank-details {\n          margin: 20px 0 40px 0;\n          padding: 15px;\n          background: #f0f0f0;\n          border-radius: 8px;\n          border: 1px solid #ddd;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          line-height: 1.4;\n          page-break-inside: avoid;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -867,11 +867,18 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Terms Section (for invoices only) -->
         ${data.terms_and_conditions && data.type === 'invoice' ? `
-        <div class="notes-section">
-          <div class="terms" style="width:100%">
+        <div class="invoice-terms-section">
+          <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
             <div class="terms-content">${data.terms_and_conditions}</div>
           </div>
+        </div>
+        ` : ''}
+
+        <!-- Bank Details (for invoices and proformas) -->
+        ${(data.type === 'invoice' || data.type === 'proforma') ? `
+        <div class="invoice-bank-details">
+          <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
         ` : ''}
 
@@ -879,13 +886,6 @@ export const generatePDF = (data: DocumentData) => {
         ${data.type === 'quotation' ? `
         <div class="quotation-footer">
           We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!
-        </div>
-        ` : ''}
-        
-        <!-- Bank Details (only invoices and proformas) -->
-        ${(data.type === 'invoice' || data.type === 'proforma') ? `
-        <div class="bank-details">
-          <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
         ` : ''}
 
