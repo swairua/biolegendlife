@@ -245,7 +245,7 @@ export function ViewInvoiceModal({
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
                     <TableHead>Discount %</TableHead>
-                    <TableHead>Tax %</TableHead>
+                    <TableHead>VAT %</TableHead>
                     <TableHead className="text-right">Line Total</TableHead>
                   </TableRow>
                 </TableHeader>
