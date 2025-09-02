@@ -452,6 +452,12 @@ export const generatePDF = (data: DocumentData) => {
           line-height: 1.6;
           color: #666;
           white-space: pre-wrap;
+          text-align: justify;
+          width: 100%;
+          max-width: 100%;
+          column-count: 2;
+          column-gap: 20px;
+          column-fill: balance;
         }
         
         .footer { display: none; }
