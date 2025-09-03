@@ -227,6 +227,8 @@ export const EditProformaModal = ({
       return;
     }
 
+    setUpdateError(''); // Clear previous errors
+
     try {
       if (!proforma.id) {
         toast.error('Proforma ID is missing - cannot update');
