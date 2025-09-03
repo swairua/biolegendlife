@@ -508,9 +508,23 @@ export const useUpdateProforma = () => {
       queryClient.invalidateQueries({ queryKey: ['proforma_invoice', data.id] });
       toast.success(`Proforma invoice ${data.proforma_number} updated successfully!`);
     },
-    onError: (error) => {
+    onError: async (error, variables) => {
       const errorMessage = serializeError(error);
       console.error('Error updating proforma:', errorMessage);
+
+      // If it's an access/permission error, run diagnostics
+      if (errorMessage.includes('permission') ||
+          errorMessage.includes('access') ||
+          errorMessage.includes('company') ||
+          errorMessage.includes('blocked')) {
+        console.log('Running RLS diagnostics for error analysis...');
+        try {
+          await logProformaRLSDiagnostics(variables.proformaId);
+        } catch (diagError) {
+          console.error('RLS diagnostics failed:', diagError);
+        }
+      }
+
       toast.error(`Error updating proforma: ${errorMessage}`);
     },
   });
