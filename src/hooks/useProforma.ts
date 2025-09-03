@@ -389,6 +389,10 @@ export const useUpdateProforma = () => {
         }
       }
 
+      // Log what we're trying to update
+      console.log('Attempting update with payload:', JSON.stringify(proforma, null, 2));
+      console.log('Proforma ID for update:', proformaId);
+
       // Update the proforma invoice
       const { data: proformaData, error: proformaError } = await supabase
         .from('proforma_invoices')
@@ -396,6 +400,9 @@ export const useUpdateProforma = () => {
         .eq('id', proformaId)
         .select()
         .maybeSingle();
+
+      console.log('Update response - data:', proformaData);
+      console.log('Update response - error:', proformaError);
 
       if (proformaError) {
         const errorMessage = serializeError(proformaError);
