@@ -283,6 +283,18 @@ export const generateJsPDF = (data: DocumentData) => {
   doc.text(formatCurrency(data.total_amount), pageWidth - margin, yPosition, { align: 'right' });
   yPosition += 15;
 
+  // Check if we need to move content to next page to make room for footer
+  if (data.type === 'invoice' || data.type === 'proforma') {
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const availableSpace = pageHeight - yPosition;
+
+    // If there's not enough space for footer, move to next page
+    if (availableSpace < footerHeight + 20) {
+      doc.addPage();
+      renderBankFooter(doc);
+    }
+  }
+
   // Terms and Conditions for Invoices
   if (data.terms_and_conditions && data.type === 'invoice') {
     // Check if we need a new page (reserve space for footer)
@@ -292,9 +304,6 @@ export const generateJsPDF = (data: DocumentData) => {
     if (availableHeight < 50) {
       doc.addPage();
       yPosition = 20;
-      if (data.type === 'invoice' || data.type === 'proforma') {
-        renderBankFooter(doc);
-      }
     }
 
     doc.setFontSize(12);
@@ -314,9 +323,6 @@ export const generateJsPDF = (data: DocumentData) => {
       if (i > 0) {
         doc.addPage();
         yPosition = 20;
-        if (data.type === 'invoice' || data.type === 'proforma') {
-          renderBankFooter(doc);
-        }
       }
 
       const pageLines = termsLines.slice(i, i + maxLinesPerPage);
@@ -334,18 +340,15 @@ export const generateJsPDF = (data: DocumentData) => {
     const pageHeight = docToUse.internal.pageSize.getHeight();
     const lineHeight = 4;
     const paddingV = 4;
-    const textWidth = contentWidth - 4;
+    const textWidth = contentWidth;
     const lines = docToUse.splitTextToSize(bankDetails, textWidth);
-    const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
-    const yTop = pageHeight - rectHeight - 15; // keep bottom margin
+    const textHeight = lines.length * lineHeight;
+    const yTop = pageHeight - textHeight - paddingV - 15; // keep bottom margin
 
-    docToUse.setDrawColor(221, 221, 221);
-    docToUse.setFillColor(240, 240, 240);
-    docToUse.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
-
+    // Remove card background - just render text directly
     docToUse.setFontSize(9);
     docToUse.setTextColor(17, 24, 39);
-    docToUse.text(lines, margin + 2, yTop + paddingV + lineHeight);
+    docToUse.text(lines, margin, yTop + paddingV);
   };
 
   // Calculate footer height for margin calculations
@@ -353,9 +356,9 @@ export const generateJsPDF = (data: DocumentData) => {
     const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
     const lineHeight = 4;
     const paddingV = 4;
-    const textWidth = contentWidth - 4;
+    const textWidth = contentWidth;
     const lines = doc.splitTextToSize(bankDetails, textWidth);
-    return Math.max(16, lines.length * lineHeight + paddingV * 2) + 15; // include bottom margin
+    return lines.length * lineHeight + paddingV + 15; // include bottom margin
   };
 
   const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
