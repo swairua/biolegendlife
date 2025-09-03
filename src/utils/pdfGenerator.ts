@@ -1294,9 +1294,13 @@ export const generatePDFDownload = async (data: DocumentData) => {
   // Convert canvas to pages
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  const pageHeightPx = (canvas.width * pageHeight) / imgWidth; // pixel height per PDF page at the chosen scale
 
-  if (imgHeight <= pageHeight) {
+  // Reserve space for footer on last page for invoices and proformas
+  const footerReservedSpace = (data.type === 'invoice' || data.type === 'proforma') ? 25 : 0; // 25mm for footer
+  const effectivePageHeight = pageHeight - footerReservedSpace;
+  const pageHeightPx = (canvas.width * effectivePageHeight) / imgWidth; // pixel height per PDF page at the chosen scale
+
+  if (imgHeight <= effectivePageHeight) {
     const imgData = canvas.toDataURL('image/png');
     pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
   } else {
@@ -1305,7 +1309,14 @@ export const generatePDFDownload = async (data: DocumentData) => {
     while (renderedHeight < canvas.height) {
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
-      pageCanvas.height = Math.min(pageHeightPx, canvas.height - renderedHeight);
+
+      // For the last page, reserve space for footer
+      const isLastPage = (renderedHeight + pageHeightPx) >= canvas.height;
+      const currentPageHeight = isLastPage ?
+        Math.min(pageHeightPx, canvas.height - renderedHeight) :
+        Math.min(pageHeightPx, canvas.height - renderedHeight);
+
+      pageCanvas.height = currentPageHeight;
       const ctx = pageCanvas.getContext('2d');
       if (!ctx) break;
       ctx.drawImage(
