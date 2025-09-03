@@ -25,14 +25,16 @@ interface ProformaUpdateErrorHandlerProps {
   onDismiss?: () => void;
 }
 
-export const ProformaUpdateErrorHandler = ({ 
-  error, 
-  proformaId, 
-  onRetry, 
-  onDismiss 
+export const ProformaUpdateErrorHandler = ({
+  error,
+  proformaId,
+  onRetry,
+  onDismiss
 }: ProformaUpdateErrorHandlerProps) => {
   const [diagnostics, setDiagnostics] = useState<RLSDiagnostics | null>(null);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
+  const [fixResult, setFixResult] = useState<RLSFixResult | null>(null);
+  const [isAttemptingFix, setIsAttemptingFix] = useState(false);
 
   const runDiagnostics = async () => {
     setIsRunningDiagnostics(true);
