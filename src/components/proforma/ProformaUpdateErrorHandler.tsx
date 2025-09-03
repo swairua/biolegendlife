@@ -151,6 +151,49 @@ export const ProformaUpdateErrorHandler = ({
               )}
             </div>
 
+            {fixResult && (
+              <Card className={`border-muted ${fixResult.success ? 'border-success/20 bg-success/5' : 'border-destructive/20 bg-destructive/5'}`}>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Wrench className="h-4 w-4" />
+                    Fix Attempt Result
+                  </CardTitle>
+                  <CardDescription>
+                    {fixResult.message}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium flex items-center gap-2">
+                      {fixResult.success ? (
+                        <CheckCircle className="h-4 w-4 text-success" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-warning" />
+                      )}
+                      Actions Taken:
+                    </h4>
+                    <ul className="text-xs space-y-1">
+                      {fixResult.actions.map((action, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-muted-foreground">•</span>
+                          <span>{action}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {fixResult.success && (
+                    <div className="bg-success/10 border border-success/20 rounded-lg p-3">
+                      <div className="text-sm text-success flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        Fix completed successfully! Try updating the proforma again.
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {diagnostics && (
               <Card className="border-muted">
                 <CardHeader>
