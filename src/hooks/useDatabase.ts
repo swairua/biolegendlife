@@ -1057,7 +1057,7 @@ export const useCreatePayment = () => {
       // If other error, try fallback when it's a type/enum issue; otherwise throw
       if (error) {
         const msg = (error.message || '').toLowerCase();
-        if (msg.includes('document_status') || (msg.includes('enum') && msg.includes('does not exist'))) {
+        if (msg.includes('document_status') || (msg.includes('enum') && msg.includes('does not exist')) || msg.includes('case types') || msg.includes('cannot be matched')) {
           // Fallback: Manual payment recording with invoice updates
           const { invoice_id, ...paymentFields } = paymentData;
 
