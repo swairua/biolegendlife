@@ -1351,7 +1351,7 @@ export const generatePDFDownload = async (data: DocumentData) => {
     // Set to last page only
     pdf.setPage(totalPages);
 
-    // Calculate footer positioning with extra margin to avoid overlap
+    // Calculate footer positioning to avoid overlap
     const margin = 10;
     const contentWidth = pageWidth - (margin * 2);
     const lineHeight = 4;
@@ -1362,7 +1362,9 @@ export const generatePDFDownload = async (data: DocumentData) => {
     pdf.setFontSize(9);
     const lines = pdf.splitTextToSize(bankDetails, textWidth);
     const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
-    const yTop = pageHeight - rectHeight - 20; // Increased bottom margin to prevent overlap
+
+    // Position footer at the very bottom of the page
+    const yTop = pageHeight - rectHeight - 15; // 15mm from bottom edge
 
     // Draw background rectangle
     pdf.setDrawColor(221, 221, 221);
