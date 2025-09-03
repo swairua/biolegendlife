@@ -108,7 +108,7 @@ export const ProformaUpdateErrorHandler = ({
               This usually happens due to permission issues. Click "Run Diagnostics" to check your access.
             </p>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -122,14 +122,28 @@ export const ProformaUpdateErrorHandler = ({
                 )}
                 Run Diagnostics
               </Button>
-              
+
+              <Button
+                variant="default"
+                size="sm"
+                onClick={attemptFix}
+                disabled={isAttemptingFix}
+              >
+                {isAttemptingFix ? (
+                  <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Wrench className="h-4 w-4 mr-2" />
+                )}
+                Attempt To Fix
+              </Button>
+
               {onRetry && (
                 <Button variant="secondary" size="sm" onClick={onRetry}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
                 </Button>
               )}
-              
+
               {onDismiss && (
                 <Button variant="ghost" size="sm" onClick={onDismiss}>
                   Dismiss
