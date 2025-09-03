@@ -1120,6 +1120,71 @@ export const useCreatePayment = () => {
       }
 
       if (!data || !data.success) {
+        const msg = (data?.error || '').toLowerCase();
+        // Fall back to manual method for enum/CASE/type issues
+        if (msg.includes('document_status') || msg.includes('case types') || msg.includes('cannot be matched') || (msg.includes('enum') && msg.includes('does not exist'))) {
+          const { invoice_id, ...paymentFields } = paymentData;
+
+          const { data: paymentResult, error: paymentError } = await supabase
+            .from('payments')
+            .insert([paymentFields])
+            .select()
+            .single();
+
+          if (paymentError) throw paymentError;
+
+          let allocationError: any = null;
+          try {
+            const { error: tableCheckError } = await supabase
+              .from('payment_allocations')
+              .select('id')
+              .limit(1);
+
+            if (tableCheckError && tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist')) {
+              allocationError = new Error('payment_allocations table does not exist. Please run the table setup SQL.');
+            } else {
+              const { error: insertError } = await supabase
+                .from('payment_allocations')
+                .insert([{ payment_id: paymentResult.id, invoice_id: invoice_id, amount_allocated: paymentData.amount }]);
+              allocationError = insertError;
+            }
+          } catch (err) {
+            allocationError = err;
+          }
+
+          const { data: invoice, error: fetchError } = await supabase
+            .from('invoices')
+            .select('id, total_amount, paid_amount, balance_due')
+            .eq('id', invoice_id)
+            .single();
+
+          if (!fetchError && invoice) {
+            const newPaidAmount = (invoice.paid_amount || 0) + paymentData.amount;
+            const newBalanceDue = invoice.total_amount - newPaidAmount;
+            let newStatus = invoice.status;
+            if (newBalanceDue <= 0) newStatus = 'paid';
+            else if (newPaidAmount > 0) newStatus = 'partial';
+
+            const { error: invoiceError } = await supabase
+              .from('invoices')
+              .update({ paid_amount: newPaidAmount, balance_due: newBalanceDue, status: newStatus, updated_at: new Date().toISOString() })
+              .eq('id', invoice_id);
+
+            if (invoiceError) {
+              console.error('Failed to update invoice balance:', invoiceError);
+            }
+          }
+
+          return {
+            success: true,
+            payment_id: paymentResult.id,
+            invoice_id: invoice_id,
+            amount_allocated: paymentData.amount,
+            fallback_used: true,
+            allocation_failed: !!allocationError,
+            allocation_error: allocationError ? JSON.stringify(allocationError) : null
+          };
+        }
         throw new Error(data?.error || 'Failed to record payment');
       }
 
