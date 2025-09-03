@@ -146,17 +146,8 @@ export const CreateProformaModal = ({
       if (item.id === id) {
         let updatedItem = { ...item, [field]: value };
 
-        // Special handling for tax_inclusive checkbox
-        if (field === 'tax_inclusive') {
-          // When checking VAT Inclusive, auto-apply default tax rate if no VAT is set
-          if (value && item.tax_percentage === 0) {
-            updatedItem.tax_percentage = defaultTaxRate;
-          }
-          // When unchecking VAT Inclusive, reset VAT to 0
-          if (!value) {
-            updatedItem.tax_percentage = 0;
-          }
-        }
+        // Note: tax_inclusive indicates whether the unit_price includes tax,
+        // not whether tax should be applied. Tax percentage is controlled separately.
 
         return calculateItemTotals(updatedItem);
       }
