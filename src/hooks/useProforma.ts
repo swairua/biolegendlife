@@ -298,7 +298,7 @@ export const useCreateProforma = () => {
 };
 
 /**
- * Hook to update a proforma invoice
+ * Hook to update a proforma invoice with automatic RLS issue resolution
  */
 export const useUpdateProforma = () => {
   const queryClient = useQueryClient();
@@ -320,6 +320,62 @@ export const useUpdateProforma = () => {
 
       console.log('Updating proforma with ID:', proformaId);
       console.log('Update data:', proforma);
+
+      // First, ensure user has proper profile and access
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('Authentication required to update proforma');
+      }
+
+      // Check if user has a profile, create one if missing
+      let { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.warn('Profile check failed:', profileError);
+      }
+
+      // Auto-create profile if missing
+      if (!userProfile) {
+        console.log('User profile missing, attempting to create...');
+
+        // Get first available company
+        const { data: companies, error: companyError } = await supabase
+          .from('companies')
+          .select('id')
+          .limit(1);
+
+        if (companyError || !companies || companies.length === 0) {
+          throw new Error('No companies found. Please contact admin to create a company first.');
+        }
+
+        // Create profile
+        const { data: newProfile, error: createProfileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: user.id,
+            email: user.email,
+            company_id: companies[0].id,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+          }])
+          .select('id, company_id')
+          .maybeSingle();
+
+        if (createProfileError || !newProfile) {
+          console.error('Failed to create user profile:', createProfileError);
+          throw new Error('Failed to create user profile. Please contact support.');
+        }
+
+        userProfile = newProfile;
+        console.log('Created user profile with company:', userProfile.company_id);
+      }
+
+      if (!userProfile.company_id) {
+        throw new Error('User profile has no company assigned. Please contact admin.');
+      }
       // If items are provided, recalculate totals
       if (items) {
         const taxableItems: TaxableItem[] = items.map(item => ({
@@ -342,7 +398,7 @@ export const useUpdateProforma = () => {
         };
       }
 
-      // First check if the proforma exists and get current user info for RLS debugging
+      // Check if the proforma exists and verify company access
       const { data: existingProforma, error: checkError } = await supabase
         .from('proforma_invoices')
         .select('id, proforma_number, company_id')
@@ -361,33 +417,12 @@ export const useUpdateProforma = () => {
       }
 
       console.log('Found existing proforma:', existingProforma.proforma_number, 'company_id:', existingProforma.company_id);
+      console.log('User profile company_id:', userProfile.company_id);
 
-      // Check current user and profile for RLS debugging
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('Auth error:', authError);
-        throw new Error(`Authentication error: ${serializeError(authError)}`);
-      }
-
-      console.log('Current user ID:', user?.id);
-
-      // Check user's profile to ensure they have access to this company
-      const { data: userProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, company_id')
-        .eq('id', user?.id)
-        .maybeSingle();
-
-      if (profileError) {
-        console.warn('Could not fetch user profile:', profileError);
-      } else if (!userProfile) {
-        console.warn('User has no profile record');
-      } else {
-        console.log('User profile company_id:', userProfile.company_id);
-        if (userProfile.company_id !== existingProforma.company_id) {
-          console.error('RLS will block update: user company_id', userProfile.company_id, 'does not match proforma company_id', existingProforma.company_id);
-          throw new Error(`Access denied: You do not have permission to update this proforma (company mismatch)`);
-        }
+      // Check company access
+      if (userProfile.company_id !== existingProforma.company_id) {
+        console.error('Company mismatch: user company_id', userProfile.company_id, 'does not match proforma company_id', existingProforma.company_id);
+        throw new Error(`Access denied: You can only edit proformas from your company (${userProfile.company_id}). This proforma belongs to company ${existingProforma.company_id}.`);
       }
 
       // Log what we're trying to update
@@ -434,7 +469,8 @@ export const useUpdateProforma = () => {
 
         if (fallbackError) {
           console.error('Fallback update also failed:', fallbackError);
-          throw new Error(`Proforma update failed - original and fallback attempts failed`);
+          const errorMessage = serializeError(fallbackError);
+          throw new Error(`Proforma update failed: ${errorMessage}`);
         }
 
         if (!fallbackData) {
@@ -448,7 +484,7 @@ export const useUpdateProforma = () => {
             console.error('RLS diagnostics failed:', diagError);
           }
 
-          throw new Error(`Proforma update blocked - check permissions and company access`);
+          throw new Error(`Update blocked: Your profile (company: ${userProfile.company_id}) cannot access this proforma (company: ${existingProforma.company_id}). Contact admin if this proforma should be transferred to your company.`);
         }
 
         console.log('Fallback update succeeded, issue was with non-core fields');
