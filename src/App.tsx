@@ -30,6 +30,7 @@ import OptimizedCustomers from "./pages/OptimizedCustomers";
 import CustomerPerformanceOptimizerPage from "./pages/CustomerPerformanceOptimizerPage";
 import SetupAndTest from "./components/SetupAndTest";
 import AuthTest from "./components/AuthTest";
+import RLSDebug from "./pages/RLSDebug";
 
 const App = () => {
 
