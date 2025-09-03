@@ -303,14 +303,6 @@ export const CreateProformaModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Error Notification */}
-          {createError && (
-            <ProformaErrorSolution
-              error={createError}
-              onResolved={() => setCreateError('')}
-              compact={true}
-            />
-          )}
 
           {/* Header Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
