@@ -876,6 +876,8 @@ export const useCreatePayment = () => {
 
   return useMutation({
     mutationFn: async (paymentData: Omit<Payment, 'id' | 'created_at' | 'updated_at'> & { invoice_id: string }) => {
+      // Precondition: ensure required enum exists
+      try { await ensureDocumentStatusEnum(); } catch {}
       // Validate UUID fields before insert
       if (!paymentData.company_id || typeof paymentData.company_id !== 'string' || paymentData.company_id.length !== 36) {
         throw new Error('Invalid company ID. Please refresh and try again.');
