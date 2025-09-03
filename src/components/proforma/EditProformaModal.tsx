@@ -305,6 +305,19 @@ export const EditProformaModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Error Handler */}
+          {updateError && proforma && (
+            <ProformaUpdateErrorHandler
+              error={updateError}
+              proformaId={proforma.id}
+              onRetry={() => {
+                setUpdateError('');
+                handleSubmit(new Event('submit') as any);
+              }}
+              onDismiss={() => setUpdateError('')}
+            />
+          )}
+
           {/* Header Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
