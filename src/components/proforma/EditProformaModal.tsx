@@ -259,7 +259,19 @@ export const EditProformaModal = ({
       handleClose();
     } catch (error) {
       console.error('Error updating proforma:', error);
-      // Error handling is done in the hook
+
+      // Provide user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage.includes('company mismatch') || errorMessage.includes('Access denied')) {
+        toast.error('Permission denied: You can only edit proformas from your company');
+      } else if (errorMessage.includes('not found')) {
+        toast.error('Proforma not found or has been deleted');
+      } else if (errorMessage.includes('check permissions')) {
+        toast.error('Update failed: Please check your permissions and try again');
+      } else {
+        toast.error(`Failed to update proforma: ${errorMessage}`);
+      }
     }
   };
 
