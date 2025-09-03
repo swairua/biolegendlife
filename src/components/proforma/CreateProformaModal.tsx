@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useCustomers, useProducts, useGenerateDocumentNumber, useTaxSettings } from '@/hooks/useDatabase';
 import { useCreateProformaWithItems } from '@/hooks/useQuotationItems';
+import { calculateItemTax, calculateDocumentTotals } from '@/utils/taxCalculation';
 import { toast } from 'sonner';
 
 interface ProformaItem {
@@ -145,17 +146,8 @@ export const CreateProformaModal = ({
       if (item.id === id) {
         let updatedItem = { ...item, [field]: value };
 
-        // Special handling for tax_inclusive checkbox
-        if (field === 'tax_inclusive') {
-          // When checking VAT Inclusive, auto-apply default tax rate if no VAT is set
-          if (value && item.tax_percentage === 0) {
-            updatedItem.tax_percentage = defaultTaxRate;
-          }
-          // When unchecking VAT Inclusive, reset VAT to 0
-          if (!value) {
-            updatedItem.tax_percentage = 0;
-          }
-        }
+        // Note: tax_inclusive indicates whether the unit_price includes tax,
+        // not whether tax should be applied. Tax percentage is controlled separately.
 
         return calculateItemTotals(updatedItem);
       }
@@ -164,25 +156,19 @@ export const CreateProformaModal = ({
   };
 
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
-    const baseAmount = item.quantity * item.unit_price;
-
-    if (item.tax_percentage === 0 || !item.tax_inclusive) {
-      // No tax or tax checkbox unchecked
-      return {
-        ...item,
-        tax_amount: 0,
-        line_total: parseFloat(baseAmount.toFixed(2))
-      };
-    }
-
-    // Tax checkbox checked: add tax to the base amount
-    const taxAmount = baseAmount * (item.tax_percentage / 100);
-    const lineTotal = baseAmount + taxAmount;
+    const calculatedItem = calculateItemTax({
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      tax_percentage: item.tax_percentage,
+      tax_inclusive: item.tax_inclusive,
+      discount_percentage: 0,
+      discount_amount: 0
+    });
 
     return {
       ...item,
-      tax_amount: parseFloat(taxAmount.toFixed(2)),
-      line_total: parseFloat(lineTotal.toFixed(2))
+      tax_amount: calculatedItem.tax_amount,
+      line_total: calculatedItem.line_total
     };
   };
 
@@ -191,18 +177,21 @@ export const CreateProformaModal = ({
   };
 
   const calculateTotals = () => {
-    // Unit prices are always tax-exclusive, so subtotal is always the base amount
-    const subtotal = items.reduce((sum, item) => {
-      return sum + (item.quantity * item.unit_price);
-    }, 0);
+    const taxableItems = items.map(item => ({
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      tax_percentage: item.tax_percentage,
+      tax_inclusive: item.tax_inclusive,
+      discount_percentage: 0,
+      discount_amount: 0
+    }));
 
-    const totalTax = items.reduce((sum, item) => sum + item.tax_amount, 0);
-    const total = items.reduce((sum, item) => sum + item.line_total, 0);
+    const totals = calculateDocumentTotals(taxableItems);
 
     return {
-      subtotal: parseFloat(subtotal.toFixed(2)),
-      totalTax: parseFloat(totalTax.toFixed(2)),
-      total: parseFloat(total.toFixed(2)),
+      subtotal: totals.subtotal,
+      totalTax: totals.tax_total,
+      total: totals.total_amount,
     };
   };
 

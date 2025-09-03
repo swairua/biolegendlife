@@ -224,9 +224,11 @@ const buildDocumentHTML = (data: DocumentData) => {
     @media screen { body { background: #f5f5f5; padding: 20px; } }
     .payment-banner { background: transparent; padding: 0; margin: 0 0 10px 0; border-left: none; font-size: 10px; color: #111827; text-align: center; border-radius: 0; font-weight: 600; }
     .bank-details { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 10px; color: #111827; text-align: center; font-weight: 600; }
-    .invoice-terms-section { margin: 30px 0 20px 0; page-break-inside: avoid; }
-    .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
-    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 15px; background: #f0f0f0; border-radius: 8px; border: 1px solid #ddd; font-size: 10px; color: #111827; text-align: center; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
+    .invoice-terms-section { margin: 30px 0 40px 0; page-break-inside: avoid; }
+    .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 0; }
+    .invoice-bank-details { display: none; } /* Hidden since footer is added programmatically to each page */
+    /* Ensure terms section has adequate bottom margin when bank footer is present */
+    .invoice-terms-section:last-of-type { margin-bottom: 60px; }
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
 </head>
@@ -921,7 +923,7 @@ export const generatePDF = (data: DocumentData) => {
           }
         }
         \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .invoice-terms-section {\n          margin: 30px 0 20px 0;\n          page-break-inside: avoid;\n        }\n        \n        .invoice-terms {\n          width: 100%;\n          padding: 20px;\n          background: #f8f9fa;\n          border-radius: 8px;\n          border: 1px solid #e9ecef;\n          margin-bottom: 20px;\n        }\n        \n        .invoice-bank-details {\n          margin-top: auto;
-          margin-bottom: 0;\n          padding: 15px;\n          background: #f0f0f0;\n          border-radius: 8px;\n          border: 1px solid #ddd;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          line-height: 1.4;\n          page-break-inside: avoid;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
+          display: none;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
     </head>
     <body>
       <div class="page">
@@ -1203,8 +1205,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section (only for non-quotation documents) -->
-        ${data.notes && data.type !== 'quotation' ? `
+        <!-- Notes Section (exclude from invoices and quotations) -->
+        ${data.notes && data.type !== 'quotation' && data.type !== 'invoice' ? `
         <div class="notes-section">
           <div class="notes">
             <div class="section-subtitle">Notes</div>
@@ -1213,8 +1215,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Terms Section (for invoices only) -->
-        ${data.terms_and_conditions && data.type === 'invoice' ? `
+        <!-- Terms Section (for invoices and proformas - positioned above bank footer) -->
+        ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
         <div class="invoice-terms-section">
           <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
@@ -1271,7 +1273,7 @@ export const generatePDFDownload = async (data: DocumentData) => {
   iframe.style.left = '-10000px';
   iframe.style.top = '0';
   iframe.style.width = '210mm';
-  iframe.style.height = '297mm';
+  iframe.style.height = '297mm'; // Full A4 height
   iframe.srcdoc = html;
   document.body.appendChild(iframe);
 
@@ -1297,31 +1299,82 @@ export const generatePDFDownload = async (data: DocumentData) => {
   const pageHeightPx = (canvas.width * pageHeight) / imgWidth; // pixel height per PDF page at the chosen scale
 
   if (imgHeight <= pageHeight) {
+    // Single page - fits entirely
     const imgData = canvas.toDataURL('image/png');
     pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
   } else {
+    // Multi-page document
     let renderedHeight = 0;
-    const imgDataPages: string[] = [];
+    const imgDataPages: { dataUrl: string; actualHeight: number }[] = [];
+
     while (renderedHeight < canvas.height) {
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
-      pageCanvas.height = Math.min(pageHeightPx, canvas.height - renderedHeight);
+
+      // Calculate remaining content height
+      const remainingHeight = canvas.height - renderedHeight;
+      const currentPageHeightPx = Math.min(pageHeightPx, remainingHeight);
+
+      pageCanvas.height = currentPageHeightPx;
       const ctx = pageCanvas.getContext('2d');
       if (!ctx) break;
+
       ctx.drawImage(
         canvas,
-        0, renderedHeight, canvas.width, pageCanvas.height,
+        0, renderedHeight, canvas.width, currentPageHeightPx,
         0, 0, pageCanvas.width, pageCanvas.height
       );
-      imgDataPages.push(pageCanvas.toDataURL('image/png'));
-      renderedHeight += pageCanvas.height;
+
+      imgDataPages.push({
+        dataUrl: pageCanvas.toDataURL('image/png'),
+        actualHeight: currentPageHeightPx
+      });
+
+      renderedHeight += currentPageHeightPx;
     }
 
-    imgDataPages.forEach((img, idx) => {
+    // Add pages to PDF with correct proportions
+    imgDataPages.forEach((pageData, idx) => {
       if (idx > 0) pdf.addPage();
-      const h = (pageHeightPx * imgWidth) / canvas.width; // map cropped height to mm
-      pdf.addImage(img, 'PNG', 0, 0, imgWidth, h);
+
+      // Calculate the actual height in mm for this specific page
+      const pageHeightMm = (pageData.actualHeight * imgWidth) / canvas.width;
+      pdf.addImage(pageData.dataUrl, 'PNG', 0, 0, imgWidth, pageHeightMm);
     });
+  }
+
+  // Add bank footer only to the last page for invoices and proformas
+  if (data.type === 'invoice' || data.type === 'proforma') {
+    const totalPages = pdf.getNumberOfPages();
+    const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
+
+    // Set to last page only
+    pdf.setPage(totalPages);
+
+    // Calculate footer positioning to avoid overlap
+    const margin = 10;
+    const contentWidth = pageWidth - (margin * 2);
+    const lineHeight = 4;
+    const paddingV = 4;
+    const textWidth = contentWidth - 4;
+
+    // Split text to fit width
+    pdf.setFontSize(9);
+    const lines = pdf.splitTextToSize(bankDetails, textWidth);
+    const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
+
+    // Position footer at the very bottom of the page
+    const yTop = pageHeight - rectHeight - 15; // 15mm from bottom edge
+
+    // Draw background rectangle
+    pdf.setDrawColor(221, 221, 221);
+    pdf.setFillColor(240, 240, 240);
+    pdf.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
+
+    // Add text
+    pdf.setTextColor(17, 24, 39);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(lines, margin + 2, yTop + paddingV + lineHeight);
   }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma_Invoice' :
