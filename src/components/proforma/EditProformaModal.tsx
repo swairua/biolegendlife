@@ -171,16 +171,19 @@ export const EditProformaModal = ({
   };
 
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
-    const baseAmount = item.quantity * item.unit_price;
-
-    const taxAmount = (item.tax_percentage > 0)
-      ? baseAmount * (item.tax_percentage / 100)
-      : 0;
+    const calculatedItem = calculateItemTax({
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      tax_percentage: item.tax_percentage,
+      tax_inclusive: item.tax_inclusive,
+      discount_percentage: 0,
+      discount_amount: 0
+    });
 
     return {
       ...item,
-      tax_amount: parseFloat(taxAmount.toFixed(2)),
-      line_total: parseFloat((baseAmount + taxAmount).toFixed(2))
+      tax_amount: calculatedItem.tax_amount,
+      line_total: calculatedItem.line_total
     };
   };
 
