@@ -3,16 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  AlertTriangle, 
-  RefreshCw, 
-  User, 
-  Building, 
+import {
+  AlertTriangle,
+  RefreshCw,
+  User,
+  Building,
   FileText,
   CheckCircle,
-  XCircle
+  XCircle,
+  Wrench,
+  Info
 } from 'lucide-react';
 import { logProformaRLSDiagnostics, diagnoseProformaRLS, type RLSDiagnostics } from '@/utils/rlsDiagnostics';
+import { attemptRLSFix, type RLSFixResult } from '@/utils/rlsFixer';
 import { toast } from 'sonner';
 
 interface ProformaUpdateErrorHandlerProps {
