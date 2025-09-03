@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { fixProformaRLSPolicies, testRLSPolicies, debugRLSContext } from './fixProformaRLS';
 
 /**
  * Utility functions to fix RLS permission issues
@@ -167,7 +168,7 @@ export async function fixProformaCompanyAccess(proformaId: string): Promise<RLSF
 }
 
 /**
- * Attempt to fix RLS issues step by step
+ * Attempt to fix RLS issues step by step with improved policies
  */
 export async function attemptRLSFix(proformaId: string): Promise<RLSFixResult> {
   const result: RLSFixResult = {
@@ -180,7 +181,7 @@ export async function attemptRLSFix(proformaId: string): Promise<RLSFixResult> {
     // Step 1: Ensure user profile
     result.actions.push('Step 1: Checking user profile...');
     const profileResult = await ensureUserProfile();
-    
+
     if (!profileResult.success) {
       result.message = `Profile issue: ${profileResult.message}`;
       result.actions.push(...profileResult.actions);
@@ -192,7 +193,7 @@ export async function attemptRLSFix(proformaId: string): Promise<RLSFixResult> {
     // Step 2: Check company access
     result.actions.push('Step 2: Checking company access...');
     const companyResult = await fixProformaCompanyAccess(proformaId);
-    
+
     if (!companyResult.success) {
       result.message = `Company access issue: ${companyResult.message}`;
       result.actions.push(...companyResult.actions);
@@ -201,32 +202,54 @@ export async function attemptRLSFix(proformaId: string): Promise<RLSFixResult> {
 
     result.actions.push('✓ Company access verified');
 
-    // Step 3: Test update permission
+    // Step 3: Test update permission (initial test)
     result.actions.push('Step 3: Testing update permission...');
-    const { data: updateTest, error: updateError } = await supabase
-      .from('proforma_invoices')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', proformaId)
-      .select('id')
-      .maybeSingle();
+    const initialTest = await testRLSPolicies(proformaId);
 
-    if (updateError) {
-      result.message = `Update test failed: ${updateError.message}`;
-      result.actions.push('RLS policy is still blocking updates');
-      result.actions.push('Contact database administrator');
+    if (initialTest.success) {
+      result.success = true;
+      result.message = 'All RLS checks passed! You should be able to update the proforma now.';
+      result.actions.push('✓ Update permission verified');
+      result.actions.push('Try updating the proforma again');
       return result;
     }
 
-    if (!updateTest) {
-      result.message = 'Update test returned no data - RLS still blocking';
-      result.actions.push('RLS policy configuration issue');
-      result.actions.push('Contact database administrator');
+    // Step 4: If initial test failed, try fixing RLS policies
+    result.actions.push('Step 4: RLS policies need fixing...');
+    result.actions.push('Applying improved RLS policies...');
+
+    const policyFix = await fixProformaRLSPolicies();
+
+    if (!policyFix.success) {
+      result.message = `Failed to fix RLS policies: ${policyFix.error}`;
+      result.actions.push('Policy fix failed - contact database administrator');
+      result.actions.push('User may need elevated database permissions');
+      return result;
+    }
+
+    result.actions.push('✓ RLS policies updated');
+
+    // Step 5: Test again after policy fix
+    result.actions.push('Step 5: Testing after policy fix...');
+    const finalTest = await testRLSPolicies(proformaId);
+
+    if (!finalTest.success) {
+      result.message = `Update still blocked after policy fix: ${finalTest.error}`;
+      result.actions.push('Advanced RLS issue detected');
+
+      // Run debug context to get more info
+      const debugInfo = await debugRLSContext();
+      if (debugInfo.success) {
+        result.actions.push(`Debug info: ${JSON.stringify(debugInfo.data)}`);
+      }
+
+      result.actions.push('Contact database administrator with debug info');
       return result;
     }
 
     result.success = true;
-    result.message = 'All RLS checks passed! You should be able to update the proforma now.';
-    result.actions.push('✓ Update permission verified');
+    result.message = 'RLS policies fixed! Update permission is now working.';
+    result.actions.push('✓ Update permission verified after policy fix');
     result.actions.push('Try updating the proforma again');
 
   } catch (error) {
@@ -268,23 +291,29 @@ export async function createEmergencyBypass(proformaId: string): Promise<RLSFixR
  */
 export async function getRLSPolicyInfo(): Promise<string[]> {
   const info = [
-    'RLS Policies for proforma_invoices:',
+    'RLS Policies for proforma_invoices (Improved):',
     '',
-    '1. SELECT: company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid())',
-    '2. INSERT: company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid())',
-    '3. UPDATE: company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid())',
-    '4. DELETE: company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid())',
+    '1. SELECT: EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND company_id = proforma.company_id)',
+    '2. INSERT: EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND company_id = proforma.company_id)',
+    '3. UPDATE: EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND company_id = proforma.company_id)',
+    '4. DELETE: EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND company_id = proforma.company_id)',
     '',
     'Requirements:',
     '- User must be authenticated (auth.uid() returns valid ID)',
     '- User must have a profile record in the profiles table',
-    '- Profile must have a company_id that matches the proforma\'s company_id',
+    '- Profile must have a NON-NULL company_id that matches the proforma\'s company_id',
+    '',
+    'Improvements:',
+    '- Uses EXISTS instead of IN for better NULL handling',
+    '- Explicitly checks for NON-NULL company_id',
+    '- More robust against edge cases',
     '',
     'Common Issues:',
     '- Missing profile record',
     '- Profile has null company_id',
     '- Proforma belongs to different company',
-    '- Authentication token expired'
+    '- Authentication token expired',
+    '- Old RLS policies with poor NULL handling'
   ];
 
   return info;

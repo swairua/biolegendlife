@@ -135,7 +135,7 @@ export const ProformaUpdateErrorHandler = ({
                 ) : (
                   <Wrench className="h-4 w-4 mr-2" />
                 )}
-                Attempt To Fix
+                Auto-Fix RLS Policies
               </Button>
 
               {onRetry && (
