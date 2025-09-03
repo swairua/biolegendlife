@@ -52,8 +52,8 @@ export function calculateItemTax(item: TaxableItem): CalculatedItem {
   let lineTotal = 0;
   const rate = Math.max(0, item.tax_percentage || 0);
 
-  // Treat unit prices as tax-exclusive. Apply tax ONLY when checkbox is checked.
-  if (rate > 0 && item.tax_inclusive) {
+  // Treat unit prices as tax-exclusive. If a VAT rate is set (>0), add tax to the line total.
+  if (rate > 0) {
     taxAmount = taxableAmount * (rate / 100);
     lineTotal = taxableAmount + taxAmount;
   } else {

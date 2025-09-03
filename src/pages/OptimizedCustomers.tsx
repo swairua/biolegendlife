@@ -314,7 +314,18 @@ export default function OptimizedCustomers() {
         method: payment.payment_method || 'Cash'
       })) || [];
 
-      generateCustomerStatementPDF(customer, invoices, payments);
+      const companyDetails = currentCompany ? {
+        name: currentCompany.name,
+        address: currentCompany.address,
+        city: currentCompany.city,
+        country: currentCompany.country,
+        phone: currentCompany.phone,
+        email: currentCompany.email,
+        tax_number: currentCompany.tax_number,
+        logo_url: currentCompany.logo_url
+      } : undefined;
+
+      generateCustomerStatementPDF(customer, invoices, payments, { statement_date: new Date().toISOString().split('T')[0] }, companyDetails);
       toast.success(`Statement generated for ${customer.name}`);
     } catch (error) {
       console.error('Error generating statement:', error);

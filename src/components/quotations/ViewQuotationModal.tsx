@@ -41,11 +41,11 @@ export function ViewQuotationModal({
   onDownload,
   onSend
 }: ViewQuotationModalProps) {
-  if (!quotation) return null;
-
-  // Get company data for logo
+  // Get company data for logo (hooks must be called unconditionally)
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
+
+  if (!quotation) return null;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {

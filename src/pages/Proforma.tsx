@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { useProformas, useConvertProformaToInvoice, type ProformaWithItems } from '@/hooks/useProforma';
 import { useCompanies } from '@/hooks/useDatabase';
+import { CreateInvoiceModal } from '@/components/invoices/CreateInvoiceModal';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { CreateProformaModalOptimized } from '@/components/proforma/CreateProformaModalOptimized';
 import { EditProformaModal } from '@/components/proforma/EditProformaModal';
@@ -43,6 +45,8 @@ export default function Proforma() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedProforma, setSelectedProforma] = useState<ProformaWithItems | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
+  const [invoicePrefill, setInvoicePrefill] = useState<{ customer: any | null; items: any[]; notes?: string; terms?: string; invoiceDate?: string; dueDate?: string } | null>(null);
 
   // Get company data
   const { data: companies } = useCompanies();
@@ -102,7 +106,7 @@ export default function Proforma() {
         subtotal: proforma.subtotal,
         tax_amount: proforma.tax_amount,
         status: proforma.status,
-        notes: proforma.notes || 'This is a proforma invoice for advance payment.',
+        notes: proforma.notes || '',
         terms_and_conditions: proforma.terms_and_conditions || 'Payment required before goods are delivered.',
       };
 
@@ -137,9 +141,39 @@ export default function Proforma() {
 
   const handleCreateInvoice = async (proforma: ProformaWithItems) => {
     try {
-      await convertToInvoice.mutateAsync(proforma.id!);
+      if (!currentCompany?.id) {
+        toast.error('No company selected.');
+        return;
+      }
+
+      const items = (proforma.proforma_items || []).map((pi: any, idx: number) => ({
+        id: `pf-${idx}`,
+        product_id: pi.product_id || undefined,
+        product_name: pi.products?.name || pi.product_name || pi.description || 'Item',
+        description: pi.description || pi.products?.name || 'Item',
+        quantity: Number(pi.quantity || 0),
+        unit_price: Number(pi.unit_price || 0),
+        discount_before_vat: Number(pi.discount_percentage || 0),
+        tax_percentage: Number(pi.tax_percentage || 0),
+        tax_amount: Number(pi.tax_amount || 0),
+        tax_inclusive: !!pi.tax_inclusive,
+        line_total: Number(pi.line_total || (Number(pi.quantity || 0) * Number(pi.unit_price || 0)))
+      }));
+
+      setInvoicePrefill({
+        customer: proforma.customers,
+        items,
+        notes: `Converted from proforma ${proforma.proforma_number}`,
+        terms: proforma.terms_and_conditions || 'Payment due within 30 days of invoice date.',
+        invoiceDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      });
+      setSelectedProforma(proforma);
+      setShowCreateInvoiceModal(true);
     } catch (error) {
       console.error('Error converting proforma to invoice:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Error converting proforma to invoice: ${message}`);
     }
   };
 
@@ -439,6 +473,43 @@ export default function Proforma() {
         onSendEmail={handleSendEmail}
         onCreateInvoice={handleCreateInvoice}
       />
+
+      {showCreateInvoiceModal && invoicePrefill && (
+        <CreateInvoiceModal
+          open={showCreateInvoiceModal}
+          onOpenChange={async (open) => {
+            setShowCreateInvoiceModal(open);
+            if (!open) setInvoicePrefill(null);
+          }}
+          onSuccess={async () => {
+            try {
+              if (selectedProforma?.id) {
+                const { error } = await supabase
+                  .from('proforma_invoices')
+                  .update({ status: 'converted' })
+                  .eq('id', selectedProforma.id)
+                  .select()
+                  .maybeSingle();
+                if (error) console.error('Post-conversion status update failed:', error);
+              }
+              toast.success('Invoice created and inventory updated.');
+              setSelectedProforma(null);
+              setInvoicePrefill(null);
+              setShowCreateInvoiceModal(false);
+              refetch();
+            } catch (e) {
+              console.error('Post-conversion handling error:', e);
+              refetch();
+            }
+          }}
+          preSelectedCustomer={invoicePrefill.customer}
+          initialItems={invoicePrefill.items}
+          initialNotes={invoicePrefill.notes}
+          initialTerms={invoicePrefill.terms}
+          initialInvoiceDate={invoicePrefill.invoiceDate}
+          initialDueDate={invoicePrefill.dueDate}
+        />
+      )}
     </div>
   );
 }

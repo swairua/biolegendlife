@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ensureDocumentStatusEnum } from '@/utils/ensureDocumentStatusEnum';
 
 // Types
 export interface Company {
@@ -875,6 +876,8 @@ export const useCreatePayment = () => {
 
   return useMutation({
     mutationFn: async (paymentData: Omit<Payment, 'id' | 'created_at' | 'updated_at'> & { invoice_id: string }) => {
+      // Precondition: ensure required enum exists
+      try { await ensureDocumentStatusEnum(); } catch {}
       // Validate UUID fields before insert
       if (!paymentData.company_id || typeof paymentData.company_id !== 'string' || paymentData.company_id.length !== 36) {
         throw new Error('Invalid company ID. Please refresh and try again.');
@@ -887,7 +890,7 @@ export const useCreatePayment = () => {
       }
 
       // Try using the database function first
-      const { data, error } = await supabase.rpc('record_payment_with_allocation', {
+      let { data, error } = await supabase.rpc('record_payment_with_allocation', {
         p_company_id: paymentData.company_id,
         p_customer_id: paymentData.customer_id,
         p_invoice_id: paymentData.invoice_id,
@@ -898,6 +901,56 @@ export const useCreatePayment = () => {
         p_reference_number: paymentData.reference_number || paymentData.payment_number,
         p_notes: paymentData.notes || null
       });
+
+      // Auto-fix: missing enum type document_status
+      if (error && (error.message?.toLowerCase().includes('document_status') || (error.message?.toLowerCase().includes('enum') && error.message?.toLowerCase().includes('does not exist')))) {
+        try {
+          const fix = await ensureDocumentStatusEnum();
+          if (fix.ok) {
+            // Retry RPC once after fixing enum
+            const retry = await supabase.rpc('record_payment_with_allocation', {
+              p_company_id: paymentData.company_id,
+              p_customer_id: paymentData.customer_id,
+              p_invoice_id: paymentData.invoice_id,
+              p_payment_number: paymentData.payment_number,
+              p_payment_date: paymentData.payment_date,
+              p_amount: paymentData.amount,
+              p_payment_method: paymentData.payment_method,
+              p_reference_number: paymentData.reference_number || paymentData.payment_number,
+              p_notes: paymentData.notes || null
+            });
+            data = retry.data;
+            error = retry.error;
+          }
+        } catch (_) {
+          // Ignore fix failure, will fall back below
+        }
+      }
+
+      // Auto-fix: CASE type mismatch with document_status enum
+      if (error && (error.message?.toLowerCase().includes('case types') || error.message?.toLowerCase().includes('cannot be matched'))) {
+        try {
+          const { ensureRecordPaymentFunction } = await import('@/utils/ensureRecordPaymentFunction');
+          const fix = await ensureRecordPaymentFunction();
+          if (fix.ok) {
+            const retry = await supabase.rpc('record_payment_with_allocation', {
+              p_company_id: paymentData.company_id,
+              p_customer_id: paymentData.customer_id,
+              p_invoice_id: paymentData.invoice_id,
+              p_payment_number: paymentData.payment_number,
+              p_payment_date: paymentData.payment_date,
+              p_amount: paymentData.amount,
+              p_payment_method: paymentData.payment_method,
+              p_reference_number: paymentData.reference_number || paymentData.payment_number,
+              p_notes: paymentData.notes || null
+            });
+            data = retry.data;
+            error = retry.error;
+          }
+        } catch (_) {
+          // Ignore fix failure, will fall back below
+        }
+      }
 
       // If function doesn't exist (PGRST202), fall back to manual approach
       if (error && error.code === 'PGRST202') {
@@ -1001,13 +1054,137 @@ export const useCreatePayment = () => {
         };
       }
 
-      // If other error, throw it
+      // If any RPC error, fall back to manual flow
       if (error) {
-        console.error('Database function error:', error);
-        throw error;
+        const { invoice_id, ...paymentFields } = paymentData;
+
+        const { data: paymentResult, error: paymentError } = await supabase
+          .from('payments')
+          .insert([paymentFields])
+          .select()
+          .single();
+
+        if (paymentError) throw paymentError;
+
+        let allocationError: any = null;
+        try {
+          const { error: tableCheckError } = await supabase
+            .from('payment_allocations')
+            .select('id')
+            .limit(1);
+
+          if (tableCheckError && tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist')) {
+            allocationError = new Error('payment_allocations table does not exist. Please run the table setup SQL.');
+          } else {
+            const { error: insertError } = await supabase
+              .from('payment_allocations')
+              .insert([{ payment_id: paymentResult.id, invoice_id: invoice_id, amount_allocated: paymentData.amount }]);
+            allocationError = insertError;
+          }
+        } catch (err) {
+          allocationError = err;
+        }
+
+        const { data: invoice, error: fetchError } = await supabase
+          .from('invoices')
+          .select('id, total_amount, paid_amount, balance_due')
+          .eq('id', invoice_id)
+          .single();
+
+        if (!fetchError && invoice) {
+          const newPaidAmount = (invoice.paid_amount || 0) + paymentData.amount;
+          const newBalanceDue = invoice.total_amount - newPaidAmount;
+          let newStatus = invoice.status;
+          if (newBalanceDue <= 0) newStatus = 'paid';
+          else if (newPaidAmount > 0) newStatus = 'partial';
+
+          const { error: invoiceError } = await supabase
+            .from('invoices')
+            .update({ paid_amount: newPaidAmount, balance_due: newBalanceDue, status: newStatus, updated_at: new Date().toISOString() })
+            .eq('id', invoice_id);
+
+          if (invoiceError) {
+            console.error('Failed to update invoice balance:', invoiceError);
+          }
+        }
+
+        return {
+          success: true,
+          payment_id: paymentResult.id,
+          invoice_id: invoice_id,
+          amount_allocated: paymentData.amount,
+          fallback_used: true,
+          allocation_failed: !!allocationError,
+          allocation_error: allocationError ? JSON.stringify(allocationError) : null
+        };
       }
 
       if (!data || !data.success) {
+        const msg = (data?.error || '').toLowerCase();
+        // Fall back to manual method for enum/CASE/type issues
+        if (msg.includes('document_status') || msg.includes('case types') || msg.includes('cannot be matched') || (msg.includes('enum') && msg.includes('does not exist'))) {
+          const { invoice_id, ...paymentFields } = paymentData;
+
+          const { data: paymentResult, error: paymentError } = await supabase
+            .from('payments')
+            .insert([paymentFields])
+            .select()
+            .single();
+
+          if (paymentError) throw paymentError;
+
+          let allocationError: any = null;
+          try {
+            const { error: tableCheckError } = await supabase
+              .from('payment_allocations')
+              .select('id')
+              .limit(1);
+
+            if (tableCheckError && tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist')) {
+              allocationError = new Error('payment_allocations table does not exist. Please run the table setup SQL.');
+            } else {
+              const { error: insertError } = await supabase
+                .from('payment_allocations')
+                .insert([{ payment_id: paymentResult.id, invoice_id: invoice_id, amount_allocated: paymentData.amount }]);
+              allocationError = insertError;
+            }
+          } catch (err) {
+            allocationError = err;
+          }
+
+          const { data: invoice, error: fetchError } = await supabase
+            .from('invoices')
+            .select('id, total_amount, paid_amount, balance_due')
+            .eq('id', invoice_id)
+            .single();
+
+          if (!fetchError && invoice) {
+            const newPaidAmount = (invoice.paid_amount || 0) + paymentData.amount;
+            const newBalanceDue = invoice.total_amount - newPaidAmount;
+            let newStatus = invoice.status;
+            if (newBalanceDue <= 0) newStatus = 'paid';
+            else if (newPaidAmount > 0) newStatus = 'partial';
+
+            const { error: invoiceError } = await supabase
+              .from('invoices')
+              .update({ paid_amount: newPaidAmount, balance_due: newBalanceDue, status: newStatus, updated_at: new Date().toISOString() })
+              .eq('id', invoice_id);
+
+            if (invoiceError) {
+              console.error('Failed to update invoice balance:', invoiceError);
+            }
+          }
+
+          return {
+            success: true,
+            payment_id: paymentResult.id,
+            invoice_id: invoice_id,
+            amount_allocated: paymentData.amount,
+            fallback_used: true,
+            allocation_failed: !!allocationError,
+            allocation_error: allocationError ? JSON.stringify(allocationError) : null
+          };
+        }
         throw new Error(data?.error || 'Failed to record payment');
       }
 
@@ -1185,6 +1362,7 @@ export const useUpdateRemittanceAdviceItems = () => {
 export const useQuotations = (companyId?: string) => {
   return useQuery({
     queryKey: ['quotations', companyId],
+    enabled: !!companyId,
     queryFn: async () => {
       if (!companyId) return [];
 

@@ -29,7 +29,9 @@ import { toast } from 'sonner';
 import { CreateQuotationModal } from '@/components/quotations/CreateQuotationModal';
 import { ViewQuotationModal } from '@/components/quotations/ViewQuotationModal';
 import { EditQuotationModal } from '@/components/quotations/EditQuotationModal';
-import { downloadQuotationJsPDF } from '@/utils/jsPdfGenerator';
+import { downloadQuotationPDF } from '@/utils/pdfGenerator';
+import { CreateInvoiceModal } from '@/components/invoices/CreateInvoiceModal';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Quotation {
   id: string;
@@ -65,6 +67,8 @@ function getStatusColor(status: string) {
       return 'bg-destructive-light text-destructive border-destructive/20';
     case 'expired':
       return 'bg-destructive-light text-destructive border-destructive/20';
+    case 'converted':
+      return 'bg-primary-light text-primary border-primary/20';
     default:
       return 'bg-muted text-muted-foreground border-muted-foreground/20';
   }
@@ -76,7 +80,9 @@ export default function Quotations() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
-  
+  const [showCreateInvoiceModal, setShowCreateInvoiceModal] = useState(false);
+  const [invoicePrefill, setInvoicePrefill] = useState<{ customer: any | null; items: any[]; notes?: string; terms?: string; invoiceDate?: string; dueDate?: string } | null>(null);
+
   // Get current user and company from context
   const { profile, loading: authLoading } = useAuth();
   const { data: companies } = useCompanies();
@@ -132,7 +138,7 @@ export default function Quotations() {
         logo_url: currentCompany.logo_url
       } : undefined;
 
-      downloadQuotationJsPDF(quotation, companyDetails);
+      downloadQuotationPDF(quotation, companyDetails);
       toast.success(`PDF download started for ${quotation.quotation_number}`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
@@ -201,68 +207,42 @@ Website: www.biolegendscientific.co.ke`;
 
   const handleConvertToInvoice = async (quotation: Quotation) => {
     try {
-      // Validate required fields
       if (!currentCompany?.id) {
-        toast.error('No company selected. Please ensure you are associated with a company.');
+        toast.error('No company selected.');
         return;
       }
-
-      if (!profile?.id) {
-        toast.error('User not authenticated. Please sign in and try again.');
-        return;
-      }
-
       if (!quotation.customers?.id) {
-        toast.error('Invalid customer data. Cannot convert quotation to invoice.');
+        toast.error('Invalid customer data.');
         return;
       }
 
-      // TODO: In a real app, this would create an invoice from the quotation data
-      const invoiceData = {
-        company_id: currentCompany.id,
-        customer_id: quotation.customers.id,
-        quotation_id: quotation.id,
-        invoice_date: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'draft',
-        subtotal: quotation.subtotal || 0,
-        tax_amount: quotation.tax_amount || 0,
-        total_amount: quotation.total_amount,
-        paid_amount: 0,
-        balance_due: quotation.total_amount,
-        terms_and_conditions: quotation.terms_and_conditions || 'Payment due within 30 days of invoice date.',
+      const items = (quotation.quotation_items || []).map((qi: any, idx: number) => ({
+        id: `q-${idx}`,
+        product_id: qi.product_id || undefined,
+        product_name: qi.products?.name || qi.description || 'Item',
+        description: qi.description || qi.products?.name || 'Item',
+        quantity: Number(qi.quantity || 0),
+        unit_price: Number(qi.unit_price || 0),
+        discount_before_vat: Number(qi.discount_percentage || 0),
+        tax_percentage: Number(qi.tax_percentage || 0),
+        tax_amount: Number(qi.tax_amount || 0),
+        tax_inclusive: !!qi.tax_inclusive,
+        line_total: Number(qi.line_total || (Number(qi.quantity || 0) * Number(qi.unit_price || 0)))
+      }));
+
+      setInvoicePrefill({
+        customer: quotation.customers,
+        items,
         notes: `Converted from quotation ${quotation.quotation_number}`,
-        created_by: profile.id
-      };
-
-      // Simulate conversion
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast.success(`Quotation ${quotation.quotation_number} converted to invoice successfully!`);
-
-      // TODO: Navigate to the new invoice or refresh quotations
-      refetch();
+        terms: quotation.terms_and_conditions || 'Payment due within 30 days of invoice date.',
+        invoiceDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      });
+      setSelectedQuotation(quotation);
+      setShowCreateInvoiceModal(true);
     } catch (error) {
-      console.error('Error converting quotation to invoice:', error);
-
-      let errorMessage = 'Please try again.';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (error && typeof error === 'object') {
-        const supabaseError = error as any;
-        if (supabaseError.message) {
-          errorMessage = supabaseError.message;
-        } else if (supabaseError.details) {
-          errorMessage = supabaseError.details;
-        } else if (supabaseError.hint) {
-          errorMessage = supabaseError.hint;
-        } else {
-          errorMessage = JSON.stringify(error);
-        }
-      }
-
-      toast.error(`Failed to convert quotation to invoice: ${errorMessage}`);
+      console.error('Error preparing conversion:', error);
+      toast.error('Failed to prepare invoice conversion.');
     }
   };
 
@@ -479,12 +459,13 @@ Website: www.biolegendscientific.co.ke`;
                               <span className="hidden sm:inline">Send</span>
                             </Button>
                           )}
-                          {quotation.status === 'accepted' && (
+                          {quotation.status !== 'converted' && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleConvertToInvoice(quotation)}
                               className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
+                              title="Convert to Invoice"
                             >
                               <FileText className="h-4 w-4 mr-1" />
                               <span className="hidden sm:inline">Convert</span>
@@ -523,6 +504,38 @@ Website: www.biolegendscientific.co.ke`;
         quotation={selectedQuotation}
         onSuccess={handleEditSuccess}
       />
+
+      {/* Create Invoice from Quotation */}
+      {showCreateInvoiceModal && invoicePrefill && (
+        <CreateInvoiceModal
+          open={showCreateInvoiceModal}
+          onOpenChange={(open) => {
+            setShowCreateInvoiceModal(open);
+            if (!open) setInvoicePrefill(null);
+          }}
+          onSuccess={async () => {
+            try {
+              if (selectedQuotation?.id) {
+                await supabase.from('quotations').update({ status: 'converted' }).eq('id', selectedQuotation.id);
+              }
+              toast.success('Invoice created and inventory updated.');
+              setSelectedQuotation(null);
+              setInvoicePrefill(null);
+              setShowCreateInvoiceModal(false);
+              refetch();
+            } catch (e) {
+              console.error('Post-conversion update failed:', e);
+              refetch();
+            }
+          }}
+          preSelectedCustomer={invoicePrefill.customer}
+          initialItems={invoicePrefill.items}
+          initialNotes={invoicePrefill.notes}
+          initialTerms={invoicePrefill.terms}
+          initialInvoiceDate={invoicePrefill.invoiceDate}
+          initialDueDate={invoicePrefill.dueDate}
+        />
+      )}
     </div>
   );
 }

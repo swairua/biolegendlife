@@ -24,7 +24,7 @@ import {
   DollarSign,
   Download
 } from 'lucide-react';
-import { usePayments, useCompanies } from '@/hooks/useDatabase';
+import { usePayments, useCompanies, useCreatePayment } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { generatePaymentReceiptPDF } from '@/utils/pdfGenerator';
 
@@ -88,10 +88,40 @@ export default function Payments() {
   const currentCompany = companies[0];
   const { data: payments = [], isLoading, error } = usePayments(currentCompany?.id);
   const { data: invoices = [] } = useInvoices(currentCompany?.id);
-
+  const createPayment = useCreatePayment();
 
   const handleRecordPayment = () => {
     setShowRecordModal(true);
+  };
+
+  const handleAddTestPayment = async () => {
+    try {
+      if (!currentCompany?.id) {
+        toast.error('No company found');
+        return;
+      }
+      const latestInvoice = invoices[0];
+      if (!latestInvoice) {
+        toast.error('No invoices found');
+        return;
+      }
+      const paymentNumber = `PAY-${Date.now()}`;
+      await createPayment.mutateAsync({
+        company_id: latestInvoice.company_id,
+        customer_id: latestInvoice.customer_id,
+        invoice_id: latestInvoice.id,
+        payment_number: paymentNumber,
+        payment_date: new Date().toISOString().split('T')[0],
+        amount: Math.min(100, latestInvoice.balance_due || latestInvoice.total_amount || 100),
+        payment_method: 'bank_transfer',
+        reference_number: paymentNumber,
+        notes: 'Test payment'
+      } as any);
+      toast.success('Test payment recorded');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to add test payment');
+    }
   };
 
   const handleViewPayment = (payment: Payment) => {
@@ -191,10 +221,16 @@ export default function Payments() {
             Track and manage customer payments (All amounts in KES)
           </p>
         </div>
-        <Button className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card" size="lg" onClick={handleRecordPayment}>
-          <Plus className="h-4 w-4 mr-2" />
-          Record Payment
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleAddTestPayment}>
+            <DollarSign className="h-4 w-4 mr-2" />
+            Add Test Payment
+          </Button>
+          <Button className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card" size="lg" onClick={handleRecordPayment}>
+            <Plus className="h-4 w-4 mr-2" />
+            Record Payment
+          </Button>
+        </div>
       </div>
 
       {/* System Status Check */}

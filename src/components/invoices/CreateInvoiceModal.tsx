@@ -55,9 +55,15 @@ interface CreateInvoiceModalProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
   preSelectedCustomer?: any;
+  initialItems?: InvoiceItem[];
+  initialNotes?: string;
+  initialTerms?: string;
+  initialLpoNumber?: string;
+  initialInvoiceDate?: string;
+  initialDueDate?: string;
 }
 
-export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedCustomer }: CreateInvoiceModalProps) {
+export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedCustomer, initialItems, initialNotes, initialTerms, initialLpoNumber, initialInvoiceDate, initialDueDate }: CreateInvoiceModalProps) {
   const [selectedCustomerId, setSelectedCustomerId] = useState(preSelectedCustomer?.id || '');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState(
@@ -96,12 +102,22 @@ export function CreateInvoiceModal({ open, onOpenChange, onSuccess, preSelectedC
   const defaultTax = taxSettings?.find(tax => tax.is_default && tax.is_active);
   const defaultTaxRate = defaultTax?.rate || 16; // Fallback to 16% if no default is set
 
-  // Handle pre-selected customer
+  // Handle pre-selected customer and initial prefill from quotation
   useEffect(() => {
-    if (preSelectedCustomer && open) {
-      setSelectedCustomerId(preSelectedCustomer.id);
+    if (open) {
+      if (preSelectedCustomer) {
+        setSelectedCustomerId(preSelectedCustomer.id);
+      }
+      if (initialItems && initialItems.length > 0) {
+        setItems(initialItems.map((it, idx) => ({ ...it, id: it.id || `init-${idx}` })));
+      }
+      if (typeof initialNotes === 'string') setNotes(initialNotes);
+      if (typeof initialTerms === 'string') setTermsAndConditions(initialTerms);
+      if (typeof initialLpoNumber === 'string') setLpoNumber(initialLpoNumber);
+      if (typeof initialInvoiceDate === 'string') setInvoiceDate(initialInvoiceDate);
+      if (typeof initialDueDate === 'string') setDueDate(initialDueDate);
     }
-  }, [preSelectedCustomer, open]);
+  }, [open, preSelectedCustomer, initialItems, initialNotes, initialTerms, initialLpoNumber, initialInvoiceDate, initialDueDate]);
 
   // Use optimized search results or popular products when no search term
   const displayProducts = searchProduct.trim() ? searchedProducts : popularProducts;

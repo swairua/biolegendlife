@@ -532,7 +532,7 @@ export const useConvertProformaToInvoice = () => {
         .update({ status: 'converted' })
         .eq('id', proformaId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error converting proforma to invoice:', error);
