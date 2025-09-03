@@ -17,8 +17,8 @@ export function EnhancedLogin() {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'admin@biolegendscientific.co.ke',
+    password: 'Biolegend2024!Admin',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
