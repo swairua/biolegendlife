@@ -303,15 +303,22 @@ export const useUpdateProforma = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      proformaId, 
-      proforma, 
-      items 
-    }: { 
-      proformaId: string; 
-      proforma: Partial<ProformaInvoice>; 
-      items?: ProformaItem[] 
+    mutationFn: async ({
+      proformaId,
+      proforma,
+      items
+    }: {
+      proformaId: string;
+      proforma: Partial<ProformaInvoice>;
+      items?: ProformaItem[]
     }) => {
+      // Validate proformaId
+      if (!proformaId || typeof proformaId !== 'string') {
+        throw new Error(`Invalid proformaId: ${proformaId}`);
+      }
+
+      console.log('Updating proforma with ID:', proformaId);
+      console.log('Update data:', proforma);
       // If items are provided, recalculate totals
       if (items) {
         const taxableItems: TaxableItem[] = items.map(item => ({
