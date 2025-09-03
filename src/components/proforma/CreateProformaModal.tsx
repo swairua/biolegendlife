@@ -165,25 +165,19 @@ export const CreateProformaModal = ({
   };
 
   const calculateItemTotals = (item: ProformaItem): ProformaItem => {
-    const baseAmount = item.quantity * item.unit_price;
-
-    if (item.tax_percentage === 0 || !item.tax_inclusive) {
-      // No tax or tax checkbox unchecked
-      return {
-        ...item,
-        tax_amount: 0,
-        line_total: parseFloat(baseAmount.toFixed(2))
-      };
-    }
-
-    // Tax checkbox checked: add tax to the base amount
-    const taxAmount = baseAmount * (item.tax_percentage / 100);
-    const lineTotal = baseAmount + taxAmount;
+    const calculatedItem = calculateItemTax({
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      tax_percentage: item.tax_percentage,
+      tax_inclusive: item.tax_inclusive,
+      discount_percentage: 0,
+      discount_amount: 0
+    });
 
     return {
       ...item,
-      tax_amount: parseFloat(taxAmount.toFixed(2)),
-      line_total: parseFloat(lineTotal.toFixed(2))
+      tax_amount: calculatedItem.tax_amount,
+      line_total: calculatedItem.line_total
     };
   };
 
