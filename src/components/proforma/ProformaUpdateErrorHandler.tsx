@@ -280,6 +280,33 @@ export const ProformaUpdateErrorHandler = ({
                 </CardContent>
               </Card>
             )}
+
+            {/* RLS Policy Information */}
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPolicyInfo(!showPolicyInfo)}
+              >
+                <Info className="h-4 w-4 mr-2" />
+                {showPolicyInfo ? 'Hide' : 'Show'} RLS Policy Info
+              </Button>
+
+              {showPolicyInfo && (
+                <Card className="border-muted bg-muted/20">
+                  <CardHeader>
+                    <CardTitle className="text-base">RLS Policy Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-xs font-mono space-y-1 text-muted-foreground">
+                      {getRLSPolicyInfo().map((line, index) => (
+                        <div key={index}>{line}</div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -289,7 +316,7 @@ export const ProformaUpdateErrorHandler = ({
                 Try Again
               </Button>
             )}
-            
+
             {onDismiss && (
               <Button variant="ghost" size="sm" onClick={onDismiss}>
                 Dismiss
