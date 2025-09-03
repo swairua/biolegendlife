@@ -1271,9 +1271,7 @@ export const generatePDFDownload = async (data: DocumentData) => {
   iframe.style.left = '-10000px';
   iframe.style.top = '0';
   iframe.style.width = '210mm';
-  // Adjust height to account for footer space for invoices and proformas
-  const iframeHeight = (data.type === 'invoice' || data.type === 'proforma') ? '272mm' : '297mm'; // Reserve 25mm for footer
-  iframe.style.height = iframeHeight;
+  iframe.style.height = '297mm'; // Full A4 height
   iframe.srcdoc = html;
   document.body.appendChild(iframe);
 
