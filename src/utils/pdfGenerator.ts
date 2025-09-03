@@ -1324,37 +1324,36 @@ export const generatePDFDownload = async (data: DocumentData) => {
     });
   }
 
-  // Add bank footer to all pages for invoices and proformas
+  // Add bank footer only to the last page for invoices and proformas
   if (data.type === 'invoice' || data.type === 'proforma') {
     const totalPages = pdf.getNumberOfPages();
     const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
 
-    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-      pdf.setPage(pageNum);
+    // Set to last page only
+    pdf.setPage(totalPages);
 
-      // Calculate footer positioning
-      const margin = 10;
-      const contentWidth = pageWidth - (margin * 2);
-      const lineHeight = 4;
-      const paddingV = 4;
-      const textWidth = contentWidth - 4;
+    // Calculate footer positioning with extra margin to avoid overlap
+    const margin = 10;
+    const contentWidth = pageWidth - (margin * 2);
+    const lineHeight = 4;
+    const paddingV = 4;
+    const textWidth = contentWidth - 4;
 
-      // Split text to fit width
-      pdf.setFontSize(9);
-      const lines = pdf.splitTextToSize(bankDetails, textWidth);
-      const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
-      const yTop = pageHeight - rectHeight - 15; // keep bottom margin
+    // Split text to fit width
+    pdf.setFontSize(9);
+    const lines = pdf.splitTextToSize(bankDetails, textWidth);
+    const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
+    const yTop = pageHeight - rectHeight - 20; // Increased bottom margin to prevent overlap
 
-      // Draw background rectangle
-      pdf.setDrawColor(221, 221, 221);
-      pdf.setFillColor(240, 240, 240);
-      pdf.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
+    // Draw background rectangle
+    pdf.setDrawColor(221, 221, 221);
+    pdf.setFillColor(240, 240, 240);
+    pdf.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
 
-      // Add text
-      pdf.setTextColor(17, 24, 39);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(lines, margin + 2, yTop + paddingV + lineHeight);
-    }
+    // Add text
+    pdf.setTextColor(17, 24, 39);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(lines, margin + 2, yTop + paddingV + lineHeight);
   }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma_Invoice' :
