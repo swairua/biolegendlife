@@ -439,6 +439,15 @@ export const useUpdateProforma = () => {
 
         if (!fallbackData) {
           console.error('Even fallback update returned no data - likely RLS issue');
+
+          // Run RLS diagnostics to help debug the issue
+          console.log('Running RLS diagnostics...');
+          try {
+            await logProformaRLSDiagnostics(proformaId);
+          } catch (diagError) {
+            console.error('RLS diagnostics failed:', diagError);
+          }
+
           throw new Error(`Proforma update blocked - check permissions and company access`);
         }
 
