@@ -341,6 +341,26 @@ export const useUpdateProforma = () => {
         };
       }
 
+      // First check if the proforma exists
+      const { data: existingProforma, error: checkError } = await supabase
+        .from('proforma_invoices')
+        .select('id, proforma_number')
+        .eq('id', proformaId)
+        .maybeSingle();
+
+      if (checkError) {
+        const errorMessage = serializeError(checkError);
+        console.error('Error checking proforma existence:', errorMessage);
+        throw new Error(`Failed to check proforma existence: ${errorMessage}`);
+      }
+
+      if (!existingProforma) {
+        console.error('Proforma not found with ID:', proformaId);
+        throw new Error(`Proforma with ID ${proformaId} not found`);
+      }
+
+      console.log('Found existing proforma:', existingProforma.proforma_number);
+
       // Update the proforma invoice
       const { data: proformaData, error: proformaError } = await supabase
         .from('proforma_invoices')
@@ -356,9 +376,11 @@ export const useUpdateProforma = () => {
       }
 
       if (!proformaData) {
-        console.error('No proforma found with ID:', proformaId);
-        throw new Error(`Proforma with ID ${proformaId} not found or could not be updated`);
+        console.error('Update returned no data for proforma ID:', proformaId);
+        throw new Error(`Proforma update failed - no data returned`);
       }
+
+      console.log('Successfully updated proforma:', proformaData.proforma_number);
 
       // Update items if provided
       if (items) {
