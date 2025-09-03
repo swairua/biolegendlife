@@ -224,8 +224,8 @@ const buildDocumentHTML = (data: DocumentData) => {
     @media screen { body { background: #f5f5f5; padding: 20px; } }
     .payment-banner { background: transparent; padding: 0; margin: 0 0 10px 0; border-left: none; font-size: 10px; color: #111827; text-align: center; border-radius: 0; font-weight: 600; }
     .bank-details { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 10px; color: #111827; text-align: center; font-weight: 600; }
-    .invoice-terms-section { margin: 30px 0 20px 0; page-break-inside: avoid; }
-    .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
+    .invoice-terms-section { margin: 30px 0 40px 0; page-break-inside: avoid; }
+    .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 0; }
     .invoice-bank-details { display: none; } /* Hidden since footer is added programmatically to each page */
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
