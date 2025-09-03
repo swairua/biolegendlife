@@ -67,6 +67,8 @@ function getStatusColor(status: string) {
       return 'bg-destructive-light text-destructive border-destructive/20';
     case 'expired':
       return 'bg-destructive-light text-destructive border-destructive/20';
+    case 'converted':
+      return 'bg-primary-light text-primary border-primary/20';
     default:
       return 'bg-muted text-muted-foreground border-muted-foreground/20';
   }
@@ -457,12 +459,13 @@ Website: www.biolegendscientific.co.ke`;
                               <span className="hidden sm:inline">Send</span>
                             </Button>
                           )}
-                          {quotation.status === 'accepted' && (
+                          {quotation.status !== 'converted' && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleConvertToInvoice(quotation)}
                               className="bg-success-light text-success border-success/20 hover:bg-success hover:text-success-foreground"
+                              title="Convert to Invoice"
                             >
                               <FileText className="h-4 w-4 mr-1" />
                               <span className="hidden sm:inline">Convert</span>
