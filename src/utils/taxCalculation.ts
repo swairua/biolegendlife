@@ -52,11 +52,13 @@ export function calculateItemTax(item: TaxableItem): CalculatedItem {
   let lineTotal = 0;
   const rate = Math.max(0, item.tax_percentage || 0);
 
-  // Treat unit prices as tax-exclusive. If a VAT rate is set (>0), add tax to the line total.
-  if (rate > 0) {
+  // Apply tax based on the rate and tax_inclusive setting
+  if (rate > 0 && item.tax_inclusive) {
+    // When tax_inclusive is checked, add tax to the base amount
     taxAmount = taxableAmount * (rate / 100);
     lineTotal = taxableAmount + taxAmount;
   } else {
+    // When tax_inclusive is not checked, no tax is applied
     taxAmount = 0;
     lineTotal = taxableAmount;
   }

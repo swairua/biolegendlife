@@ -30,6 +30,7 @@ import OptimizedCustomers from "./pages/OptimizedCustomers";
 import CustomerPerformanceOptimizerPage from "./pages/CustomerPerformanceOptimizerPage";
 import SetupAndTest from "./components/SetupAndTest";
 import AuthTest from "./components/AuthTest";
+import RLSDebug from "./pages/RLSDebug";
 
 const App = () => {
 
@@ -287,8 +288,8 @@ const App = () => {
           {/* Customer Performance Optimizer - Database and customer performance optimization */}
           <Route path="/customer-performance-optimizer" element={<CustomerPerformanceOptimizerPage />} />
 
-
-
+          {/* RLS Debug Tool - Diagnose and fix Row Level Security issues */}
+          <Route path="/rls-debug" element={<RLSDebug />} />
 
           {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
