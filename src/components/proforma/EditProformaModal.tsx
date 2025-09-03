@@ -264,9 +264,11 @@ export const EditProformaModal = ({
     } catch (error) {
       console.error('Error updating proforma:', error);
 
-      // Provide user-friendly error message
+      // Set error state for the error handler component
       const errorMessage = error instanceof Error ? error.message : String(error);
+      setUpdateError(errorMessage);
 
+      // Also show a toast for immediate feedback
       if (errorMessage.includes('company mismatch') || errorMessage.includes('Access denied')) {
         toast.error('Permission denied: You can only edit proformas from your company');
       } else if (errorMessage.includes('not found')) {
