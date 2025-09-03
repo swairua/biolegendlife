@@ -135,7 +135,7 @@ export const ProformaUpdateErrorHandler = ({
                 ) : (
                   <Wrench className="h-4 w-4 mr-2" />
                 )}
-                Attempt To Fix
+                Auto-Fix RLS Policies
               </Button>
 
               {onRetry && (
@@ -183,13 +183,39 @@ export const ProformaUpdateErrorHandler = ({
                     </ul>
                   </div>
 
-                  {fixResult.success && (
+                  {fixResult.success ? (
                     <div className="bg-success/10 border border-success/20 rounded-lg p-3">
                       <div className="text-sm text-success flex items-center gap-2">
                         <CheckCircle className="h-4 w-4" />
                         Fix completed successfully! Try updating the proforma again.
                       </div>
                     </div>
+                  ) : (
+                    fixResult.message.includes('SQL generated') && (
+                      <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+                        <div className="text-sm text-warning-foreground space-y-2">
+                          <div className="flex items-center gap-2 font-medium">
+                            <AlertTriangle className="h-4 w-4" />
+                            Manual Database Fix Required
+                          </div>
+                          <p>The RLS policies need to be updated manually in your database.</p>
+                          <div className="mt-3">
+                            <p className="font-medium mb-2">Instructions:</p>
+                            <ol className="list-decimal list-inside space-y-1 text-xs">
+                              <li>Open your browser's developer console (F12)</li>
+                              <li>Look for the SQL statements logged to console</li>
+                              <li>Copy the SQL statements</li>
+                              <li>Go to Supabase Dashboard → SQL Editor</li>
+                              <li>Paste and run the SQL</li>
+                              <li>Return here and try updating the proforma again</li>
+                            </ol>
+                          </div>
+                          <div className="mt-3 p-2 bg-muted rounded text-xs font-mono">
+                            The SQL is also saved in localStorage as 'proforma_rls_fix_sql'
+                          </div>
+                        </div>
+                      </div>
+                    )
                   )}
                 </CardContent>
               </Card>

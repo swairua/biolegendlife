@@ -123,10 +123,13 @@ export const EditProformaModal = ({
             line_total: item.line_total || 0,
           };
 
-          // Recalculate tax to ensure consistency
+          // Recalculate tax to ensure consistency with new logic
           const calculated = calculateItemTax(proformaItem);
           return {
             ...proformaItem,
+            base_amount: calculated.base_amount,
+            discount_total: calculated.discount_total,
+            taxable_amount: calculated.taxable_amount,
             tax_amount: calculated.tax_amount,
             line_total: calculated.line_total,
           };
@@ -175,19 +178,18 @@ export const EditProformaModal = ({
       if (item.id === id) {
         let updatedItem = { ...item, [field]: value };
 
-        // Special handling for tax_inclusive checkbox
-        if (field === 'tax_inclusive') {
-          // When checking tax inclusive, auto-apply default tax rate if no tax is set
-          if (value && item.tax_percentage === 0) {
-            updatedItem.tax_percentage = defaultTaxRate;
-          }
-          // When unchecking tax inclusive, keep the tax rate but it won't be applied
+        // Auto-apply default tax rate when tax_inclusive is checked and no tax is set
+        if (field === 'tax_inclusive' && value && item.tax_percentage === 0) {
+          updatedItem.tax_percentage = defaultTaxRate;
         }
 
         // Recalculate using proper tax utility
         const calculated = calculateItemTax(updatedItem);
         return {
           ...updatedItem,
+          base_amount: calculated.base_amount,
+          discount_total: calculated.discount_total,
+          taxable_amount: calculated.taxable_amount,
           tax_amount: calculated.tax_amount,
           line_total: calculated.line_total,
         };
@@ -468,7 +470,7 @@ export const EditProformaModal = ({
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
                       <TableHead>VAT %</TableHead>
-                      <TableHead>Apply Tax</TableHead>
+                      <TableHead>Tax Type</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
@@ -514,14 +516,18 @@ export const EditProformaModal = ({
                             max="100"
                             step="0.01"
                             className="w-20"
-                            disabled={item.tax_inclusive}
                           />
                         </TableCell>
                         <TableCell>
-                          <Checkbox
-                            checked={item.tax_inclusive}
-                            onCheckedChange={(checked) => updateItem(item.id, 'tax_inclusive', checked)}
-                          />
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={item.tax_inclusive}
+                              onCheckedChange={(checked) => updateItem(item.id, 'tax_inclusive', checked)}
+                            />
+                            <span className="text-xs text-muted-foreground">
+                              {item.tax_inclusive ? 'Incl.' : 'Excl.'}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell>{formatCurrency(item.line_total)}</TableCell>
                         <TableCell>
