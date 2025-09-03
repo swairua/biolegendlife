@@ -38,7 +38,6 @@ import { ProformaSetupBanner } from '@/components/proforma/ProformaSetupBanner';
 import { downloadInvoicePDF, downloadQuotationPDF } from '@/utils/pdfGenerator';
 import { formatCurrency } from '@/utils/taxCalculation';
 import { ensureProformaSchema } from '@/utils/proformaDatabaseSetup';
-import { AuthDiagnostic } from '@/components/auth/AuthDiagnostic';
 
 export default function Proforma() {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -200,9 +199,6 @@ export default function Proforma() {
 
   return (
     <div className="space-y-6">
-      {/* Temporary Auth Diagnostic */}
-      <AuthDiagnostic />
-
       {/* Database Setup Banner */}
       <ProformaSetupBanner />
 
