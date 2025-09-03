@@ -2,11 +2,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Fix RLS policies for proforma tables with improved logic
+ * Uses manual SQL execution since exec_sql function may not exist
  */
 export async function fixProformaRLSPolicies() {
   console.log('🔧 Fixing proforma RLS policies...');
 
+  // Manual approach: provide SQL for user to run manually
   const fixSQL = `
+-- COPY AND PASTE THIS SQL INTO YOUR SUPABASE SQL EDITOR
+-- This will fix the RLS policies to handle NULL values properly
+
 -- Drop existing policies first
 DROP POLICY IF EXISTS "Users can view proformas from their company" ON proforma_invoices;
 DROP POLICY IF EXISTS "Users can insert proformas for their company" ON proforma_invoices;
@@ -22,9 +27,9 @@ DROP POLICY IF EXISTS "Users can delete proforma items from their company" ON pr
 CREATE POLICY "Users can view proformas from their company" ON proforma_invoices
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE profiles.id = auth.uid() 
-            AND profiles.company_id IS NOT NULL 
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.company_id IS NOT NULL
             AND profiles.company_id = proforma_invoices.company_id
         )
     );
@@ -32,9 +37,9 @@ CREATE POLICY "Users can view proformas from their company" ON proforma_invoices
 CREATE POLICY "Users can insert proformas for their company" ON proforma_invoices
     FOR INSERT WITH CHECK (
         EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE profiles.id = auth.uid() 
-            AND profiles.company_id IS NOT NULL 
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.company_id IS NOT NULL
             AND profiles.company_id = proforma_invoices.company_id
         )
     );
@@ -42,9 +47,9 @@ CREATE POLICY "Users can insert proformas for their company" ON proforma_invoice
 CREATE POLICY "Users can update proformas from their company" ON proforma_invoices
     FOR UPDATE USING (
         EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE profiles.id = auth.uid() 
-            AND profiles.company_id IS NOT NULL 
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.company_id IS NOT NULL
             AND profiles.company_id = proforma_invoices.company_id
         )
     );
@@ -52,9 +57,9 @@ CREATE POLICY "Users can update proformas from their company" ON proforma_invoic
 CREATE POLICY "Users can delete proformas from their company" ON proforma_invoices
     FOR DELETE USING (
         EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE profiles.id = auth.uid() 
-            AND profiles.company_id IS NOT NULL 
+            SELECT 1 FROM profiles
+            WHERE profiles.id = auth.uid()
+            AND profiles.company_id IS NOT NULL
             AND profiles.company_id = proforma_invoices.company_id
         )
     );
@@ -106,19 +111,23 @@ CREATE POLICY "Users can delete proforma items from their company" ON proforma_i
 `;
 
   try {
-    // Execute the SQL to fix policies
-    const { error } = await supabase.rpc('exec_sql', { sql: fixSQL });
-    
-    if (error) {
-      console.error('Failed to fix RLS policies:', error);
-      return { success: false, error: error.message };
+    console.log('RLS Fix SQL Ready');
+    console.log('Copy this SQL to Supabase SQL Editor:');
+    console.log(fixSQL);
+
+    // Save to localStorage for easy copying
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('proforma_rls_fix_sql', fixSQL);
     }
 
-    console.log('✅ RLS policies fixed successfully');
-    return { success: true };
+    return {
+      success: true,
+      sql: fixSQL,
+      message: 'SQL generated - please run manually in Supabase SQL Editor'
+    };
 
   } catch (error) {
-    console.error('Exception fixing RLS policies:', error);
+    console.error('Exception generating RLS fix SQL:', error);
     return { success: false, error: String(error) };
   }
 }
@@ -177,31 +186,45 @@ export async function testRLSPolicies(proformaId: string) {
 }
 
 /**
- * Debug RLS by showing auth context
+ * Debug RLS by showing auth context using simple queries
  */
 export async function debugRLSContext() {
   console.log('🔍 Debugging RLS context...');
 
   try {
-    // Get auth context using a direct query
-    const { data, error } = await supabase.rpc('exec_sql', {
-      sql: `
-        SELECT 
-          auth.uid() as auth_uid,
-          (SELECT id FROM profiles WHERE id = auth.uid()) as profile_exists,
-          (SELECT company_id FROM profiles WHERE id = auth.uid()) as user_company_id,
-          (SELECT COUNT(*) FROM companies) as companies_count,
-          current_setting('role') as current_role
-      `
-    });
-
-    if (error) {
-      console.error('Debug query failed:', error);
-      return { success: false, error: error.message };
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      return { success: false, error: `Auth error: ${authError.message}` };
     }
 
-    console.log('🔍 RLS Debug Context:', data);
-    return { success: true, data: data };
+    if (!user) {
+      return { success: false, error: 'No authenticated user' };
+    }
+
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, company_id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    // Get companies count
+    const { count: companiesCount, error: companiesError } = await supabase
+      .from('companies')
+      .select('*', { count: 'exact', head: true });
+
+    const debugData = {
+      auth_uid: user.id,
+      profile_exists: !!profile,
+      user_company_id: profile?.company_id || null,
+      companies_count: companiesCount || 0,
+      profile_error: profileError?.message || null,
+      companies_error: companiesError?.message || null
+    };
+
+    console.log('🔍 RLS Debug Context:', debugData);
+    return { success: true, data: debugData };
 
   } catch (error) {
     console.error('Exception debugging RLS:', error);
