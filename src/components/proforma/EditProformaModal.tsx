@@ -85,6 +85,7 @@ export const EditProformaModal = ({
   const [items, setItems] = useState<ProformaItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showProductSearch, setShowProductSearch] = useState(false);
+  const [updateError, setUpdateError] = useState<string>('');
 
   const { data: customers } = useCustomers(companyId);
   const { data: products } = useProducts(companyId);
