@@ -444,9 +444,10 @@ export const useUpdateProforma = () => {
         console.log('Fallback update succeeded, issue was with non-core fields');
         // Continue with fallback data but note the issue
         console.warn('Some fields may not have been updated due to schema mismatch');
+        proformaData = fallbackData;
       }
 
-      console.log('Successfully updated proforma:', proformaData.proforma_number);
+      console.log('Successfully updated proforma:', proformaData!.proforma_number);
 
       // Update items if provided
       if (items) {
