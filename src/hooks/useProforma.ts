@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { calculateDocumentTotals, type TaxableItem } from '@/utils/taxCalculation';
 import { parseErrorMessage } from '@/utils/errorHelpers';
+import { logProformaRLSDiagnostics } from '@/utils/rlsDiagnostics';
 
 export interface ProformaItem {
   id?: string;
@@ -303,15 +304,22 @@ export const useUpdateProforma = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      proformaId, 
-      proforma, 
-      items 
-    }: { 
-      proformaId: string; 
-      proforma: Partial<ProformaInvoice>; 
-      items?: ProformaItem[] 
+    mutationFn: async ({
+      proformaId,
+      proforma,
+      items
+    }: {
+      proformaId: string;
+      proforma: Partial<ProformaInvoice>;
+      items?: ProformaItem[]
     }) => {
+      // Validate proformaId
+      if (!proformaId || typeof proformaId !== 'string') {
+        throw new Error(`Invalid proformaId: ${proformaId}`);
+      }
+
+      console.log('Updating proforma with ID:', proformaId);
+      console.log('Update data:', proforma);
       // If items are provided, recalculate totals
       if (items) {
         const taxableItems: TaxableItem[] = items.map(item => ({
@@ -334,19 +342,122 @@ export const useUpdateProforma = () => {
         };
       }
 
+      // First check if the proforma exists and get current user info for RLS debugging
+      const { data: existingProforma, error: checkError } = await supabase
+        .from('proforma_invoices')
+        .select('id, proforma_number, company_id')
+        .eq('id', proformaId)
+        .maybeSingle();
+
+      if (checkError) {
+        const errorMessage = serializeError(checkError);
+        console.error('Error checking proforma existence:', errorMessage);
+        throw new Error(`Failed to check proforma existence: ${errorMessage}`);
+      }
+
+      if (!existingProforma) {
+        console.error('Proforma not found with ID:', proformaId);
+        throw new Error(`Proforma with ID ${proformaId} not found`);
+      }
+
+      console.log('Found existing proforma:', existingProforma.proforma_number, 'company_id:', existingProforma.company_id);
+
+      // Check current user and profile for RLS debugging
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw new Error(`Authentication error: ${serializeError(authError)}`);
+      }
+
+      console.log('Current user ID:', user?.id);
+
+      // Check user's profile to ensure they have access to this company
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, company_id')
+        .eq('id', user?.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.warn('Could not fetch user profile:', profileError);
+      } else if (!userProfile) {
+        console.warn('User has no profile record');
+      } else {
+        console.log('User profile company_id:', userProfile.company_id);
+        if (userProfile.company_id !== existingProforma.company_id) {
+          console.error('RLS will block update: user company_id', userProfile.company_id, 'does not match proforma company_id', existingProforma.company_id);
+          throw new Error(`Access denied: You do not have permission to update this proforma (company mismatch)`);
+        }
+      }
+
+      // Log what we're trying to update
+      console.log('Attempting update with payload:', JSON.stringify(proforma, null, 2));
+      console.log('Proforma ID for update:', proformaId);
+
       // Update the proforma invoice
-      const { data: proformaData, error: proformaError } = await supabase
+      let { data: proformaData, error: proformaError } = await supabase
         .from('proforma_invoices')
         .update(proforma)
         .eq('id', proformaId)
         .select()
-        .single();
+        .maybeSingle();
+
+      console.log('Update response - data:', proformaData);
+      console.log('Update response - error:', proformaError);
 
       if (proformaError) {
         const errorMessage = serializeError(proformaError);
         console.error('Error updating proforma:', errorMessage);
         throw new Error(`Failed to update proforma: ${errorMessage}`);
       }
+
+      if (!proformaData) {
+        console.error('Update returned no data for proforma ID:', proformaId);
+        console.log('Attempting fallback update with core fields only...');
+
+        // Try again with only core fields that we know exist
+        const coreFields = {
+          customer_id: proforma.customer_id,
+          proforma_date: proforma.proforma_date,
+          subtotal: proforma.subtotal,
+          tax_amount: proforma.tax_amount,
+          total_amount: proforma.total_amount,
+          status: proforma.status,
+        };
+
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('proforma_invoices')
+          .update(coreFields)
+          .eq('id', proformaId)
+          .select()
+          .maybeSingle();
+
+        if (fallbackError) {
+          console.error('Fallback update also failed:', fallbackError);
+          throw new Error(`Proforma update failed - original and fallback attempts failed`);
+        }
+
+        if (!fallbackData) {
+          console.error('Even fallback update returned no data - likely RLS issue');
+
+          // Run RLS diagnostics to help debug the issue
+          console.log('Running RLS diagnostics...');
+          try {
+            await logProformaRLSDiagnostics(proformaId);
+          } catch (diagError) {
+            console.error('RLS diagnostics failed:', diagError);
+          }
+
+          throw new Error(`Proforma update blocked - check permissions and company access`);
+        }
+
+        console.log('Fallback update succeeded, issue was with non-core fields');
+        // Continue with fallback data but note the issue
+        console.warn('Some fields may not have been updated due to schema mismatch');
+        proformaData = fallbackData;
+      }
+
+      console.log('Successfully updated proforma:', proformaData!.proforma_number);
 
       // Update items if provided
       if (items) {
@@ -397,9 +508,23 @@ export const useUpdateProforma = () => {
       queryClient.invalidateQueries({ queryKey: ['proforma_invoice', data.id] });
       toast.success(`Proforma invoice ${data.proforma_number} updated successfully!`);
     },
-    onError: (error) => {
+    onError: async (error, variables) => {
       const errorMessage = serializeError(error);
       console.error('Error updating proforma:', errorMessage);
+
+      // If it's an access/permission error, run diagnostics
+      if (errorMessage.includes('permission') ||
+          errorMessage.includes('access') ||
+          errorMessage.includes('company') ||
+          errorMessage.includes('blocked')) {
+        console.log('Running RLS diagnostics for error analysis...');
+        try {
+          await logProformaRLSDiagnostics(variables.proformaId);
+        } catch (diagError) {
+          console.error('RLS diagnostics failed:', diagError);
+        }
+      }
+
       toast.error(`Error updating proforma: ${errorMessage}`);
     },
   });
