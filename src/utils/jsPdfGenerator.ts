@@ -224,7 +224,7 @@ export const generateJsPDF = (data: DocumentData) => {
       startY: yPosition,
       head: [['Description', 'Qty', 'Unit Price', 'Tax %', 'Total']],
       body: tableData,
-      margin: { left: margin, right: margin },
+      margin: { left: margin, right: margin, bottom: footerHeight },
       styles: {
         fontSize: 9,
         cellPadding: 3,
@@ -242,6 +242,9 @@ export const generateJsPDF = (data: DocumentData) => {
         3: { halign: 'center', cellWidth: 20 },
         4: { halign: 'right', cellWidth: 30 },
       },
+      didDrawPage: (data.type === 'invoice' || data.type === 'proforma') ? (pageData) => {
+        renderBankFooter(doc);
+      } : undefined,
     });
 
     yPosition = (doc as any).lastAutoTable.finalY + 10;
@@ -282,10 +285,16 @@ export const generateJsPDF = (data: DocumentData) => {
 
   // Terms and Conditions for Invoices
   if (data.terms_and_conditions && data.type === 'invoice') {
-    // Check if we need a new page
-    if (yPosition > 200) {
+    // Check if we need a new page (reserve space for footer)
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const availableHeight = pageHeight - yPosition - footerHeight - 20; // extra margin
+
+    if (availableHeight < 50) {
       doc.addPage();
       yPosition = 20;
+      if (data.type === 'invoice' || data.type === 'proforma') {
+        renderBankFooter(doc);
+      }
     }
 
     doc.setFontSize(12);
@@ -295,18 +304,21 @@ export const generateJsPDF = (data: DocumentData) => {
 
     doc.setFontSize(9);
     doc.setTextColor(50, 50, 50);
-    
+
     // Split terms into sections and ensure they don't break badly
     const termsLines = doc.splitTextToSize(data.terms_and_conditions, contentWidth);
     const lineHeight = 4;
-    const maxLinesPerPage = Math.floor((doc.internal.pageSize.getHeight() - yPosition - 40) / lineHeight);
-    
+    const maxLinesPerPage = Math.floor((pageHeight - yPosition - footerHeight - 20) / lineHeight);
+
     for (let i = 0; i < termsLines.length; i += maxLinesPerPage) {
       if (i > 0) {
         doc.addPage();
         yPosition = 20;
+        if (data.type === 'invoice' || data.type === 'proforma') {
+          renderBankFooter(doc);
+        }
       }
-      
+
       const pageLines = termsLines.slice(i, i + maxLinesPerPage);
       doc.text(pageLines, margin, yPosition);
       yPosition += pageLines.length * lineHeight;
@@ -316,31 +328,46 @@ export const generateJsPDF = (data: DocumentData) => {
   }
 
   // Footer renderer (Bank Details) for invoices and proformas at the very bottom, full width
-  const renderBankFooter = () => {
+  const renderBankFooter = (docInstance?: jsPDF) => {
+    const docToUse = docInstance || doc;
     const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
-    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageHeight = docToUse.internal.pageSize.getHeight();
+    const lineHeight = 4;
+    const paddingV = 4;
+    const textWidth = contentWidth - 4;
+    const lines = docToUse.splitTextToSize(bankDetails, textWidth);
+    const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
+    const yTop = pageHeight - rectHeight - 15; // keep bottom margin
+
+    docToUse.setDrawColor(221, 221, 221);
+    docToUse.setFillColor(240, 240, 240);
+    docToUse.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
+
+    docToUse.setFontSize(9);
+    docToUse.setTextColor(17, 24, 39);
+    docToUse.text(lines, margin + 2, yTop + paddingV + lineHeight);
+  };
+
+  // Calculate footer height for margin calculations
+  const getFooterHeight = () => {
+    const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
     const lineHeight = 4;
     const paddingV = 4;
     const textWidth = contentWidth - 4;
     const lines = doc.splitTextToSize(bankDetails, textWidth);
-    const rectHeight = Math.max(16, lines.length * lineHeight + paddingV * 2);
-    const yTop = pageHeight - rectHeight - 15; // keep bottom margin
-
-    doc.setDrawColor(221, 221, 221);
-    doc.setFillColor(240, 240, 240);
-    doc.roundedRect(margin, yTop, contentWidth, rectHeight, 2, 2, 'FD');
-
-    doc.setFontSize(9);
-    doc.setTextColor(17, 24, 39);
-    doc.text(lines, margin + 2, yTop + paddingV + lineHeight);
+    return Math.max(16, lines.length * lineHeight + paddingV * 2) + 15; // include bottom margin
   };
 
-  // Apply footer to all pages for invoices and proformas
+  const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
+
+  // Apply footer to pages without table content (if any)
   if (data.type === 'invoice' || data.type === 'proforma') {
     const pages = doc.getNumberOfPages();
     for (let p = 1; p <= pages; p++) {
       doc.setPage(p);
-      renderBankFooter();
+      // Only render footer if it wasn't already rendered by didDrawPage
+      // This ensures footer appears on all pages, including title pages
+      renderBankFooter(doc);
     }
   }
 

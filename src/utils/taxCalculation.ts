@@ -36,37 +36,52 @@ export interface DocumentTotals {
  * Calculate tax for a single item
  */
 export function calculateItemTax(item: TaxableItem): CalculatedItem {
-  const baseAmount = item.quantity * item.unit_price;
+  const gross = item.quantity * item.unit_price;
+  const rate = Math.max(0, item.tax_percentage || 0) / 100;
 
-  // Calculate discount
-  let discountTotal = 0;
-  if (item.discount_percentage && item.discount_percentage > 0) {
-    discountTotal = baseAmount * (item.discount_percentage / 100);
-  } else if (item.discount_amount && item.discount_amount > 0) {
-    discountTotal = Math.min(item.discount_amount, baseAmount); // Don't allow discount to exceed base amount
-  }
-
-  const taxableAmount = baseAmount - discountTotal;
-
+  // Determine base amounts and apply discounts correctly
+  let baseAmountForSubtotal = gross; // amount to treat as 'base_amount' in returned structure
+  let taxableAmount = 0;
   let taxAmount = 0;
   let lineTotal = 0;
-  const rate = Math.max(0, item.tax_percentage || 0);
+  let discountApplied = 0;
 
-  // Apply tax based on the rate and tax_inclusive setting
   if (rate > 0 && item.tax_inclusive) {
-    // When tax_inclusive is checked, add tax to the base amount
-    taxAmount = taxableAmount * (rate / 100);
-    lineTotal = taxableAmount + taxAmount;
+    // gross is tax-inclusive. Get exclusive gross.
+    const exclusiveGross = gross / (1 + rate);
+
+    // Compute discount (percentage or fixed) on the exclusive amount
+    if (item.discount_percentage && item.discount_percentage > 0) {
+      discountApplied = exclusiveGross * (item.discount_percentage / 100);
+    } else if (item.discount_amount && item.discount_amount > 0) {
+      // ensure discount doesn't exceed exclusiveGross
+      discountApplied = Math.min(item.discount_amount, exclusiveGross);
+    }
+
+    const exclusiveAfterDiscount = exclusiveGross - discountApplied;
+    taxableAmount = parseFloat(exclusiveAfterDiscount.toFixed(2));
+    taxAmount = parseFloat((taxableAmount * rate).toFixed(2));
+    lineTotal = parseFloat((taxableAmount + taxAmount).toFixed(2));
+    baseAmountForSubtotal = parseFloat(exclusiveGross.toFixed(2));
   } else {
-    // When tax_inclusive is not checked, no tax is applied
-    taxAmount = 0;
-    lineTotal = taxableAmount;
+    // Tax is applied on top (tax-exclusive prices) or tax rate is 0
+    // Compute discount on gross
+    if (item.discount_percentage && item.discount_percentage > 0) {
+      discountApplied = gross * (item.discount_percentage / 100);
+    } else if (item.discount_amount && item.discount_amount > 0) {
+      discountApplied = Math.min(item.discount_amount, gross);
+    }
+
+    taxableAmount = parseFloat((gross - discountApplied).toFixed(2));
+    taxAmount = parseFloat((taxableAmount * rate).toFixed(2));
+    lineTotal = parseFloat((taxableAmount + taxAmount).toFixed(2));
+    baseAmountForSubtotal = parseFloat(gross.toFixed(2));
   }
 
   return {
     ...item,
-    base_amount: parseFloat(baseAmount.toFixed(2)),
-    discount_total: parseFloat(discountTotal.toFixed(2)),
+    base_amount: baseAmountForSubtotal,
+    discount_total: parseFloat(discountApplied.toFixed(2)),
     taxable_amount: parseFloat(taxableAmount.toFixed(2)),
     tax_amount: parseFloat(taxAmount.toFixed(2)),
     line_total: parseFloat(lineTotal.toFixed(2))
