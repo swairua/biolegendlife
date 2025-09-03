@@ -41,7 +41,7 @@ export const ProformaUpdateErrorHandler = ({
     try {
       const result = await diagnoseProformaRLS(proformaId);
       setDiagnostics(result);
-      
+
       if (result.errors.length === 0) {
         toast.success('No RLS issues detected - try updating again');
       } else {
@@ -52,6 +52,33 @@ export const ProformaUpdateErrorHandler = ({
       toast.error('Failed to run diagnostics');
     } finally {
       setIsRunningDiagnostics(false);
+    }
+  };
+
+  const attemptFix = async () => {
+    setIsAttemptingFix(true);
+    setFixResult(null);
+
+    try {
+      toast.info('Attempting to fix RLS issues...');
+      const result = await attemptRLSFix(proformaId);
+      setFixResult(result);
+
+      if (result.success) {
+        toast.success('RLS issues fixed! Try updating again.');
+      } else {
+        toast.error(`Fix attempt failed: ${result.message}`);
+      }
+    } catch (fixError) {
+      console.error('Fix attempt failed:', fixError);
+      setFixResult({
+        success: false,
+        message: fixError instanceof Error ? fixError.message : 'Unknown error',
+        actions: ['Contact support for assistance']
+      });
+      toast.error('Failed to fix RLS issues');
+    } finally {
+      setIsAttemptingFix(false);
     }
   };
 
