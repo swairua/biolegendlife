@@ -15,7 +15,7 @@ import {
   Info
 } from 'lucide-react';
 import { logProformaRLSDiagnostics, diagnoseProformaRLS, type RLSDiagnostics } from '@/utils/rlsDiagnostics';
-import { attemptRLSFix, type RLSFixResult } from '@/utils/rlsFixer';
+import { attemptRLSFix, getRLSPolicyInfo, type RLSFixResult } from '@/utils/rlsFixer';
 import { toast } from 'sonner';
 
 interface ProformaUpdateErrorHandlerProps {
