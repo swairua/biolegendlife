@@ -88,10 +88,40 @@ export default function Payments() {
   const currentCompany = companies[0];
   const { data: payments = [], isLoading, error } = usePayments(currentCompany?.id);
   const { data: invoices = [] } = useInvoices(currentCompany?.id);
-
+  const createPayment = useCreatePayment();
 
   const handleRecordPayment = () => {
     setShowRecordModal(true);
+  };
+
+  const handleAddTestPayment = async () => {
+    try {
+      if (!currentCompany?.id) {
+        toast.error('No company found');
+        return;
+      }
+      const latestInvoice = invoices[0];
+      if (!latestInvoice) {
+        toast.error('No invoices found');
+        return;
+      }
+      const paymentNumber = `PAY-${Date.now()}`;
+      await createPayment.mutateAsync({
+        company_id: latestInvoice.company_id,
+        customer_id: latestInvoice.customer_id,
+        invoice_id: latestInvoice.id,
+        payment_number: paymentNumber,
+        payment_date: new Date().toISOString().split('T')[0],
+        amount: Math.min(100, latestInvoice.balance_due || latestInvoice.total_amount || 100),
+        payment_method: 'bank_transfer',
+        reference_number: paymentNumber,
+        notes: 'Test payment'
+      } as any);
+      toast.success('Test payment recorded');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to add test payment');
+    }
   };
 
   const handleViewPayment = (payment: Payment) => {
