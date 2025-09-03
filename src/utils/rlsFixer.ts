@@ -10,6 +10,7 @@ export interface RLSFixResult {
   success: boolean;
   message: string;
   actions: string[];
+  sql?: string;
 }
 
 /**
@@ -214,43 +215,34 @@ export async function attemptRLSFix(proformaId: string): Promise<RLSFixResult> {
       return result;
     }
 
-    // Step 4: If initial test failed, try fixing RLS policies
+    // Step 4: If initial test failed, generate RLS policy fix SQL
     result.actions.push('Step 4: RLS policies need fixing...');
-    result.actions.push('Applying improved RLS policies...');
+    result.actions.push('Generating improved RLS policy SQL...');
 
     const policyFix = await fixProformaRLSPolicies();
 
     if (!policyFix.success) {
-      result.message = `Failed to fix RLS policies: ${policyFix.error}`;
-      result.actions.push('Policy fix failed - contact database administrator');
-      result.actions.push('User may need elevated database permissions');
+      result.message = `Failed to generate RLS fix: ${policyFix.error}`;
+      result.actions.push('Could not generate policy fix SQL');
+      result.actions.push('Contact database administrator');
       return result;
     }
 
-    result.actions.push('✓ RLS policies updated');
+    result.actions.push('✓ RLS fix SQL generated');
+    result.actions.push('MANUAL STEP REQUIRED:');
+    result.actions.push('1. Go to Supabase > SQL Editor');
+    result.actions.push('2. Copy the SQL from browser console or localStorage');
+    result.actions.push('3. Paste and run the SQL');
+    result.actions.push('4. Return here and try updating again');
 
-    // Step 5: Test again after policy fix
-    result.actions.push('Step 5: Testing after policy fix...');
-    const finalTest = await testRLSPolicies(proformaId);
-
-    if (!finalTest.success) {
-      result.message = `Update still blocked after policy fix: ${finalTest.error}`;
-      result.actions.push('Advanced RLS issue detected');
-
-      // Run debug context to get more info
-      const debugInfo = await debugRLSContext();
-      if (debugInfo.success) {
-        result.actions.push(`Debug info: ${JSON.stringify(debugInfo.data)}`);
-      }
-
-      result.actions.push('Contact database administrator with debug info');
-      return result;
+    // Get debug info to show current state
+    const debugInfo = await debugRLSContext();
+    if (debugInfo.success) {
+      result.actions.push(`Current state: auth_uid=${debugInfo.data.auth_uid}, company_id=${debugInfo.data.user_company_id}`);
     }
 
-    result.success = true;
-    result.message = 'RLS policies fixed! Update permission is now working.';
-    result.actions.push('✓ Update permission verified after policy fix');
-    result.actions.push('Try updating the proforma again');
+    result.message = policyFix.message || 'SQL generated for manual execution in Supabase SQL Editor';
+    result.success = false; // Still requires manual intervention
 
   } catch (error) {
     result.message = `Fix attempt failed: ${error instanceof Error ? error.message : String(error)}`;
