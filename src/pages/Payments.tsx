@@ -221,10 +221,16 @@ export default function Payments() {
             Track and manage customer payments (All amounts in KES)
           </p>
         </div>
-        <Button className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card" size="lg" onClick={handleRecordPayment}>
-          <Plus className="h-4 w-4 mr-2" />
-          Record Payment
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleAddTestPayment}>
+            <DollarSign className="h-4 w-4 mr-2" />
+            Add Test Payment
+          </Button>
+          <Button className="gradient-primary text-primary-foreground hover:opacity-90 shadow-card" size="lg" onClick={handleRecordPayment}>
+            <Plus className="h-4 w-4 mr-2" />
+            Record Payment
+          </Button>
+        </div>
       </div>
 
       {/* System Status Check */}
