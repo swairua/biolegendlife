@@ -226,11 +226,15 @@ export const EditProformaModal = ({
     }
 
     try {
+      if (!proforma.id) {
+        toast.error('Proforma ID is missing - cannot update');
+        return;
+      }
+
       const totals = calculateTotals();
 
       // Update proforma using the hook
       const updatedProformaData = {
-        id: proforma.id,
         customer_id: formData.customer_id,
         proforma_date: formData.proforma_date,
         valid_until: formData.valid_until,
@@ -241,6 +245,9 @@ export const EditProformaModal = ({
         notes: formData.notes,
         terms_and_conditions: formData.terms_and_conditions,
       };
+
+      console.log('Attempting to update proforma:', proforma.id);
+      console.log('Update data:', updatedProformaData);
 
       await updateProforma.mutateAsync({
         proformaId: proforma.id,
