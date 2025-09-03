@@ -186,18 +186,21 @@ export const CreateProformaModal = ({
   };
 
   const calculateTotals = () => {
-    // Unit prices are always tax-exclusive, so subtotal is always the base amount
-    const subtotal = items.reduce((sum, item) => {
-      return sum + (item.quantity * item.unit_price);
-    }, 0);
+    const taxableItems = items.map(item => ({
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      tax_percentage: item.tax_percentage,
+      tax_inclusive: item.tax_inclusive,
+      discount_percentage: 0,
+      discount_amount: 0
+    }));
 
-    const totalTax = items.reduce((sum, item) => sum + item.tax_amount, 0);
-    const total = items.reduce((sum, item) => sum + item.line_total, 0);
+    const totals = calculateDocumentTotals(taxableItems);
 
     return {
-      subtotal: parseFloat(subtotal.toFixed(2)),
-      totalTax: parseFloat(totalTax.toFixed(2)),
-      total: parseFloat(total.toFixed(2)),
+      subtotal: totals.subtotal,
+      totalTax: totals.tax_total,
+      total: totals.total_amount,
     };
   };
 
