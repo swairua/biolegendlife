@@ -340,12 +340,17 @@ export const useUpdateProforma = () => {
         .update(proforma)
         .eq('id', proformaId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (proformaError) {
         const errorMessage = serializeError(proformaError);
         console.error('Error updating proforma:', errorMessage);
         throw new Error(`Failed to update proforma: ${errorMessage}`);
+      }
+
+      if (!proformaData) {
+        console.error('No proforma found with ID:', proformaId);
+        throw new Error(`Proforma with ID ${proformaId} not found or could not be updated`);
       }
 
       // Update items if provided
