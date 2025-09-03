@@ -1203,8 +1203,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section (only for non-quotation documents) -->
-        ${data.notes && data.type !== 'quotation' ? `
+        <!-- Notes Section (exclude from invoices and quotations) -->
+        ${data.notes && data.type !== 'quotation' && data.type !== 'invoice' ? `
         <div class="notes-section">
           <div class="notes">
             <div class="section-subtitle">Notes</div>
@@ -1213,8 +1213,8 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Terms Section (for invoices only) -->
-        ${data.terms_and_conditions && data.type === 'invoice' ? `
+        <!-- Terms Section (for invoices and proformas - positioned above bank footer) -->
+        ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
         <div class="invoice-terms-section">
           <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
