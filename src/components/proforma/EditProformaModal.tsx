@@ -243,6 +243,7 @@ export const EditProformaModal = ({
       };
 
       await updateProforma.mutateAsync({
+        proformaId: proforma.id,
         proforma: updatedProformaData,
         items: items
       });
