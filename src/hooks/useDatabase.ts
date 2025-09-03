@@ -1185,6 +1185,7 @@ export const useUpdateRemittanceAdviceItems = () => {
 export const useQuotations = (companyId?: string) => {
   return useQuery({
     queryKey: ['quotations', companyId],
+    enabled: !!companyId,
     queryFn: async () => {
       if (!companyId) return [];
 
