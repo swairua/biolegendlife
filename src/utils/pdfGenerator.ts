@@ -227,6 +227,8 @@ const buildDocumentHTML = (data: DocumentData) => {
     .invoice-terms-section { margin: 30px 0 40px 0; page-break-inside: avoid; }
     .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 0; }
     .invoice-bank-details { display: none; } /* Hidden since footer is added programmatically to each page */
+    /* Ensure terms section has adequate bottom margin when bank footer is present */
+    .invoice-terms-section:last-of-type { margin-bottom: 60px; }
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
 </head>
