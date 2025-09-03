@@ -35,6 +35,7 @@ export const ProformaUpdateErrorHandler = ({
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [fixResult, setFixResult] = useState<RLSFixResult | null>(null);
   const [isAttemptingFix, setIsAttemptingFix] = useState(false);
+  const [showPolicyInfo, setShowPolicyInfo] = useState(false);
 
   const runDiagnostics = async () => {
     setIsRunningDiagnostics(true);
