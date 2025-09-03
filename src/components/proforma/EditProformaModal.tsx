@@ -284,6 +284,7 @@ export const EditProformaModal = ({
   const handleClose = () => {
     setSearchTerm('');
     setShowProductSearch(false);
+    setUpdateError('');
     onOpenChange(false);
   };
 
