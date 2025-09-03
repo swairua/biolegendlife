@@ -24,7 +24,7 @@ import {
   DollarSign,
   Download
 } from 'lucide-react';
-import { usePayments, useCompanies } from '@/hooks/useDatabase';
+import { usePayments, useCompanies, useCreatePayment } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { generatePaymentReceiptPDF } from '@/utils/pdfGenerator';
 
