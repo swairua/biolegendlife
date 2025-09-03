@@ -1296,44 +1296,50 @@ export const generatePDFDownload = async (data: DocumentData) => {
   // Convert canvas to pages
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const pageHeightPx = (canvas.width * pageHeight) / imgWidth; // pixel height per PDF page at the chosen scale
 
-  // Reserve space for footer on last page for invoices and proformas
-  const footerReservedSpace = (data.type === 'invoice' || data.type === 'proforma') ? 25 : 0; // 25mm for footer
-  const effectivePageHeight = pageHeight - footerReservedSpace;
-  const pageHeightPx = (canvas.width * effectivePageHeight) / imgWidth; // pixel height per PDF page at the chosen scale
-
-  if (imgHeight <= effectivePageHeight) {
+  if (imgHeight <= pageHeight) {
+    // Single page - fits entirely
     const imgData = canvas.toDataURL('image/png');
     pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
   } else {
+    // Multi-page document
     let renderedHeight = 0;
-    const imgDataPages: string[] = [];
+    const imgDataPages: { dataUrl: string; actualHeight: number }[] = [];
+
     while (renderedHeight < canvas.height) {
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
 
-      // For the last page, reserve space for footer
-      const isLastPage = (renderedHeight + pageHeightPx) >= canvas.height;
-      const currentPageHeight = isLastPage ?
-        Math.min(pageHeightPx, canvas.height - renderedHeight) :
-        Math.min(pageHeightPx, canvas.height - renderedHeight);
+      // Calculate remaining content height
+      const remainingHeight = canvas.height - renderedHeight;
+      const currentPageHeightPx = Math.min(pageHeightPx, remainingHeight);
 
-      pageCanvas.height = currentPageHeight;
+      pageCanvas.height = currentPageHeightPx;
       const ctx = pageCanvas.getContext('2d');
       if (!ctx) break;
+
       ctx.drawImage(
         canvas,
-        0, renderedHeight, canvas.width, pageCanvas.height,
+        0, renderedHeight, canvas.width, currentPageHeightPx,
         0, 0, pageCanvas.width, pageCanvas.height
       );
-      imgDataPages.push(pageCanvas.toDataURL('image/png'));
-      renderedHeight += pageCanvas.height;
+
+      imgDataPages.push({
+        dataUrl: pageCanvas.toDataURL('image/png'),
+        actualHeight: currentPageHeightPx
+      });
+
+      renderedHeight += currentPageHeightPx;
     }
 
-    imgDataPages.forEach((img, idx) => {
+    // Add pages to PDF with correct proportions
+    imgDataPages.forEach((pageData, idx) => {
       if (idx > 0) pdf.addPage();
-      const h = (pageHeightPx * imgWidth) / canvas.width; // map cropped height to mm
-      pdf.addImage(img, 'PNG', 0, 0, imgWidth, h);
+
+      // Calculate the actual height in mm for this specific page
+      const pageHeightMm = (pageData.actualHeight * imgWidth) / canvas.width;
+      pdf.addImage(pageData.dataUrl, 'PNG', 0, 0, imgWidth, pageHeightMm);
     });
   }
 
