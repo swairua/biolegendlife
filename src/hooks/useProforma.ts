@@ -395,7 +395,7 @@ export const useUpdateProforma = () => {
       console.log('Proforma ID for update:', proformaId);
 
       // Update the proforma invoice
-      const { data: proformaData, error: proformaError } = await supabase
+      let { data: proformaData, error: proformaError } = await supabase
         .from('proforma_invoices')
         .update(proforma)
         .eq('id', proformaId)
