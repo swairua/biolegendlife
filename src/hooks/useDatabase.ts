@@ -888,7 +888,7 @@ export const useCreatePayment = () => {
       }
 
       // Try using the database function first
-      const { data, error } = await supabase.rpc('record_payment_with_allocation', {
+      let { data, error } = await supabase.rpc('record_payment_with_allocation', {
         p_company_id: paymentData.company_id,
         p_customer_id: paymentData.customer_id,
         p_invoice_id: paymentData.invoice_id,
@@ -899,6 +899,31 @@ export const useCreatePayment = () => {
         p_reference_number: paymentData.reference_number || paymentData.payment_number,
         p_notes: paymentData.notes || null
       });
+
+      // Auto-fix: missing enum type document_status
+      if (error && (error.message?.toLowerCase().includes('document_status') || error.message?.toLowerCase().includes('enum') && error.message?.toLowerCase().includes('does not exist'))) {
+        try {
+          const fix = await ensureDocumentStatusEnum();
+          if (fix.ok) {
+            // Retry RPC once after fixing enum
+            const retry = await supabase.rpc('record_payment_with_allocation', {
+              p_company_id: paymentData.company_id,
+              p_customer_id: paymentData.customer_id,
+              p_invoice_id: paymentData.invoice_id,
+              p_payment_number: paymentData.payment_number,
+              p_payment_date: paymentData.payment_date,
+              p_amount: paymentData.amount,
+              p_payment_method: paymentData.payment_method,
+              p_reference_number: paymentData.reference_number || paymentData.payment_number,
+              p_notes: paymentData.notes || null
+            });
+            data = retry.data;
+            error = retry.error;
+          }
+        } catch (_) {
+          // Ignore fix failure, will fall back below
+        }
+      }
 
       // If function doesn't exist (PGRST202), fall back to manual approach
       if (error && error.code === 'PGRST202') {
