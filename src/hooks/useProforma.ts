@@ -341,10 +341,10 @@ export const useUpdateProforma = () => {
         };
       }
 
-      // First check if the proforma exists
+      // First check if the proforma exists and get current user info for RLS debugging
       const { data: existingProforma, error: checkError } = await supabase
         .from('proforma_invoices')
-        .select('id, proforma_number')
+        .select('id, proforma_number, company_id')
         .eq('id', proformaId)
         .maybeSingle();
 
@@ -359,7 +359,35 @@ export const useUpdateProforma = () => {
         throw new Error(`Proforma with ID ${proformaId} not found`);
       }
 
-      console.log('Found existing proforma:', existingProforma.proforma_number);
+      console.log('Found existing proforma:', existingProforma.proforma_number, 'company_id:', existingProforma.company_id);
+
+      // Check current user and profile for RLS debugging
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw new Error(`Authentication error: ${serializeError(authError)}`);
+      }
+
+      console.log('Current user ID:', user?.id);
+
+      // Check user's profile to ensure they have access to this company
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, company_id')
+        .eq('id', user?.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.warn('Could not fetch user profile:', profileError);
+      } else if (!userProfile) {
+        console.warn('User has no profile record');
+      } else {
+        console.log('User profile company_id:', userProfile.company_id);
+        if (userProfile.company_id !== existingProforma.company_id) {
+          console.error('RLS will block update: user company_id', userProfile.company_id, 'does not match proforma company_id', existingProforma.company_id);
+          throw new Error(`Access denied: You do not have permission to update this proforma (company mismatch)`);
+        }
+      }
 
       // Update the proforma invoice
       const { data: proformaData, error: proformaError } = await supabase
