@@ -74,7 +74,7 @@ interface CompanyDetails {
 // Default company details (fallback) - logo will be determined dynamically
 const DEFAULT_COMPANY: CompanyDetails = {
   name: 'Biolegend Scientific Ltd',
-  address: 'P.O. Box 85988-00200, Nairobi\nAlpha Center, Eastern Bypass, Membley',
+  address: 'P.O. Box 85988-00200, NairobiAlpha Center, Eastern Bypass, Membley',
   city: 'Nairobi',
   country: 'Kenya',
   phone: '0741207690/0780165490',
@@ -920,8 +920,8 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-                .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .invoice-terms-section {\n          margin: 30px 0 20px 0;\n          page-break-inside: avoid;\n        }\n        \n        .invoice-terms {\n          width: 100%;\n          padding: 20px;\n          background: #f8f9fa;\n          border-radius: 8px;\n          border: 1px solid #e9ecef;\n          margin-bottom: 20px;\n        }\n        \n        .invoice-bank-details {\n          margin-top: auto;
-          margin-bottom: 0;\n          padding: 15px;\n          background: #f0f0f0;\n          border-radius: 8px;\n          border: 1px solid #ddd;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          line-height: 1.4;\n          page-break-inside: avoid;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
+                .payment-banner {          background: transparent;          padding: 0;          margin: 0 0 10px 0;          border-left: none;          font-size: 10px;          color: #111827;          text-align: center;          border-radius: 0;          font-weight: 600;        }                .bank-details {          position: absolute;          left: 20mm;          right: 20mm;          bottom: 10mm;          font-size: 10px;          color: #111827;          text-align: center;          font-weight: 600;        }                .invoice-terms-section {          margin: 30px 0 20px 0;          page-break-inside: avoid;        }                .invoice-terms {          width: 100%;          padding: 20px;          background: #f8f9fa;          border-radius: 8px;          border: 1px solid #e9ecef;          margin-bottom: 20px;        }                .invoice-bank-details {          margin-top: auto;
+          margin-bottom: 0;          padding: 15px;          background: #f0f0f0;          border-radius: 8px;          border: 1px solid #ddd;          font-size: 10px;          color: #111827;          text-align: center;          font-weight: 600;          line-height: 1.4;          page-break-inside: avoid;        }                .quotation-footer {          position: absolute;          left: 20mm;          right: 20mm;          bottom: 10mm;          font-size: 12px;          color: #111827;          text-align: center;          font-weight: 600;          font-style: italic;        }      </style>
     </head>
     <body>
       <div class="page">
@@ -1556,7 +1556,7 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
     subtotal: finalBalance,
     tax_amount: 0,
     total_amount: finalBalance,
-    notes: `Statement of Account as of ${new Date(statementDate).toLocaleDateString()}\n\nThis statement shows all transactions including invoices (debits) and payments (credits) with running balance.\n\nAging Summary for Outstanding Invoices:\nCurrent: $${current.toFixed(2)}\n1-30 Days: $${days30.toFixed(2)}\n31-60 Days: $${days60.toFixed(2)}\n61-90 Days: $${days90.toFixed(2)}\nOver 90 Days: $${over90.toFixed(2)}`,
+    notes: `Statement of Account as of ${new Date(statementDate).toLocaleDateString()}This statement shows all transactions including invoices (debits) and payments (credits) with running balance.Aging Summary for Outstanding Invoices:Current: $${current.toFixed(2)}1-30 Days: $${days30.toFixed(2)}31-60 Days: $${days60.toFixed(2)}61-90 Days: $${days90.toFixed(2)}Over 90 Days: $${over90.toFixed(2)}`,
     terms_and_conditions: 'Please remit payment for any outstanding amounts. Contact us if you have any questions about this statement.',
   };
 
@@ -1578,7 +1578,7 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     total_amount: typeof payment.amount === 'string' ?
       parseFloat(payment.amount.replace('$', '').replace(',', '')) :
       payment.amount,
-    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}\nInvoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
+    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}Reference: ${payment.reference_number || 'N/A'}Invoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms that payment has been received and processed.',
   };
 
@@ -1715,7 +1715,7 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
     subtotal: lpo.subtotal,
     tax_amount: lpo.tax_amount,
     total_amount: lpo.total_amount,
-    notes: `${lpo.notes || ''}${lpo.contact_person ? `\n\nContact Person: ${lpo.contact_person}` : ''}${lpo.contact_phone ? `\nContact Phone: ${lpo.contact_phone}` : ''}`.trim(),
+    notes: `${lpo.notes || ''}${lpo.contact_person ? `Contact Person: ${lpo.contact_person}` : ''}${lpo.contact_phone ? `Contact Phone: ${lpo.contact_phone}` : ''}`.trim(),
     terms_and_conditions: lpo.terms_and_conditions,
   };
 
