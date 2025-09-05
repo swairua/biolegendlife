@@ -1214,15 +1214,7 @@ export const generatePDF = (data: DocumentData) => {
         ` : ''}
 
         <!-- Notes Section (only for non-quotation documents) -->
-        ${data.notes && data.type !== 'quotation' ? `
-        <div class="notes-section">
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
-          </div>
-        </div>
-        ` : ''}
-
+        
         <!-- Terms Section (for invoices only) -->
         ${data.terms_and_conditions && data.type === 'invoice' ? `
         <div class="invoice-terms-section" style="page-break-before: always;">
