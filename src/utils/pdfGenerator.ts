@@ -212,7 +212,7 @@ const buildDocumentHTML = (data: DocumentData) => {
     .totals-table .total-row { border-top: 1px solid #111827; background: #f8f9fa; }
     .totals-table .total-row .label { font-size: 14px; font-weight: bold; color: #111827; }
     .totals-table .total-row .amount { font-size: 16px; font-weight: bold; color: #111827; }
-    .notes-section { margin-top: 30px; display: flex; gap: 20px; }
+    
     .notes, .terms { flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
     .section-subtitle { font-size: 12px; font-weight: bold; color: #111827; margin: 0 0 10px 0; text-transform: uppercase; }
     .notes-content, .terms-content { font-size: 11px; font-weight: 400; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
