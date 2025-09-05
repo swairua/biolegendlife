@@ -767,11 +767,7 @@ export const generatePDF = (data: DocumentData) => {
           color: #111827;
         }
         
-        .notes-section {
-          margin-top: 30px;
-          display: flex;
-          gap: 20px;
-        }
+        
         
         .notes, .terms {
           flex: 1;
