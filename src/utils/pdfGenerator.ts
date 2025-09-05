@@ -145,7 +145,19 @@ const buildDocumentHTML = (data: DocumentData) => {
   <style>
     @page { size: A4; margin: 15mm; }
     * { box-sizing: border-box; }
-    body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; color: #333; line-height: 1.4; font-size: 12px; background: white; }
+    body {
+      font-family: 'Arial', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      font-variant-ligatures: common-ligatures;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.4;
+      font-size: 12px;
+      background: white;
+    }
     .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20mm; position: relative; display: flex; flex-direction: column; }
     .header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #D1D5DB; }
     .header-rows { width: 100%; }
@@ -203,7 +215,7 @@ const buildDocumentHTML = (data: DocumentData) => {
     .notes-section { margin-top: 30px; display: flex; gap: 20px; }
     .notes, .terms { flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
     .section-subtitle { font-size: 12px; font-weight: bold; color: #111827; margin: 0 0 10px 0; text-transform: uppercase; }
-    .notes-content, .terms-content { font-size: 10px; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
+    .notes-content, .terms-content { font-size: 11px; font-weight: 400; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
     .terms-content p, .terms-content div { page-break-inside: avoid; margin-bottom: 8px; }
     .footer { display: none; }
     .delivery-info-section { margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
@@ -499,6 +511,10 @@ export const generatePDF = (data: DocumentData) => {
         
         body {
           font-family: 'Arial', sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+          font-variant-ligatures: common-ligatures;
           margin: 0;
           padding: 0;
           color: #333;
@@ -781,7 +797,8 @@ export const generatePDF = (data: DocumentData) => {
         }
         
         .notes-content, .terms-content {
-          font-size: 10px;
+          font-size: 11px;
+          font-weight: 400;
           line-height: 1.6;
           color: #666;
           white-space: pre-wrap;
