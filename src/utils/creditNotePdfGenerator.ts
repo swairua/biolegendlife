@@ -600,22 +600,60 @@ export const generateCreditNotePDF = async (creditNote: CreditNotePDFData, compa
     </html>
   `;
 
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
+  // Render the HTML using html2canvas + jsPDF to produce a consistent PDF
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-10000px';
+  iframe.style.top = '0';
+  iframe.style.width = '210mm';
+  iframe.style.height = '297mm';
+  iframe.srcdoc = htmlContent;
+  document.body.appendChild(iframe);
 
-  // Wait for content to load before printing
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
-  };
+  await new Promise<void>((resolve) => {
+    iframe.onload = () => setTimeout(resolve, 400);
+  });
 
-  // Fallback if onload doesn't fire
-  setTimeout(() => {
-    if (printWindow && !printWindow.closed) {
-      printWindow.print();
+  const pageEl = iframe.contentDocument?.querySelector('.page') as HTMLElement;
+  if (!pageEl) {
+    document.body.removeChild(iframe);
+    throw new Error('Failed to render credit note content');
+  }
+
+  const canvas = await html2canvas(pageEl, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const pageHeightPx = (canvas.width * pageHeight) / imgWidth;
+
+  if (imgHeight <= pageHeight) {
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+  } else {
+    let renderedHeight = 0;
+    const imgDataPages: string[] = [];
+    while (renderedHeight < canvas.height) {
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = Math.min(pageHeightPx, canvas.height - renderedHeight);
+      const ctx = pageCanvas.getContext('2d');
+      if (!ctx) break;
+      ctx.drawImage(canvas, 0, renderedHeight, canvas.width, pageCanvas.height, 0, 0, pageCanvas.width, pageCanvas.height);
+      imgDataPages.push(pageCanvas.toDataURL('image/png'));
+      renderedHeight += pageCanvas.height;
     }
-  }, 1000);
 
-  return printWindow;
+    imgDataPages.forEach((img, idx) => {
+      if (idx > 0) pdf.addPage();
+      const h = (pageHeightPx * imgWidth) / canvas.width;
+      pdf.addImage(img, 'PNG', 0, 0, imgWidth, h);
+    });
+  }
+
+  pdf.save(`CreditNote_${creditNote.credit_note_number}.pdf`);
+  document.body.removeChild(iframe);
+  return;
 };
