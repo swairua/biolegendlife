@@ -74,7 +74,7 @@ interface CompanyDetails {
 // Default company details (fallback) - logo will be determined dynamically
 const DEFAULT_COMPANY: CompanyDetails = {
   name: 'Biolegend Scientific Ltd',
-  address: 'P.O. Box 85988-00200, Nairobi\nAlpha Center, Eastern Bypass, Membley',
+  address: 'P.O. Box 85988-00200, NairobiAlpha Center, Eastern Bypass, Membley',
   city: 'Nairobi',
   country: 'Kenya',
   phone: '0741207690/0780165490',
@@ -145,7 +145,19 @@ const buildDocumentHTML = (data: DocumentData) => {
   <style>
     @page { size: A4; margin: 15mm; }
     * { box-sizing: border-box; }
-    body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; color: #333; line-height: 1.4; font-size: 12px; background: white; }
+    body {
+      font-family: 'Arial', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      font-variant-ligatures: common-ligatures;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.4;
+      font-size: 12px;
+      background: white;
+    }
     .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20mm; position: relative; display: flex; flex-direction: column; }
     .header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #D1D5DB; }
     .header-rows { width: 100%; }
@@ -200,10 +212,10 @@ const buildDocumentHTML = (data: DocumentData) => {
     .totals-table .total-row { border-top: 1px solid #111827; background: #f8f9fa; }
     .totals-table .total-row .label { font-size: 14px; font-weight: bold; color: #111827; }
     .totals-table .total-row .amount { font-size: 16px; font-weight: bold; color: #111827; }
-    .notes-section { margin-top: 30px; display: flex; gap: 20px; }
-    .notes, .terms { flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
+    
+    .terms { flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
     .section-subtitle { font-size: 12px; font-weight: bold; color: #111827; margin: 0 0 10px 0; text-transform: uppercase; }
-    .notes-content, .terms-content { font-size: 10px; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
+    .terms-content { font-size: 11px; font-weight: 400; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
     .terms-content p, .terms-content div { page-break-inside: avoid; margin-bottom: 8px; }
     .footer { display: none; }
     .delivery-info-section { margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
@@ -412,27 +424,20 @@ const buildDocumentHTML = (data: DocumentData) => {
       </div>
     </div>` : ''}
 
-    ${data.notes && data.type !== 'quotation' ? `
-    <div class="notes-section">
-      <div class="notes">
-        <div class="section-subtitle">Notes</div>
-        <div class="notes-content">${data.notes}</div>
-      </div>
-    </div>` : ''}
-
+    
     ${data.terms_and_conditions && data.type === 'invoice' ? `
-    <div class="invoice-terms-section">
+    <div class="invoice-terms-section" style="page-break-before: always;">
       <div class="invoice-terms">
         <div class="section-subtitle">Terms & Conditions</div>
         <div class="terms-content">${data.terms_and_conditions}</div>
       </div>
-    </div>` : ''}
-
-    ${(data.type === 'invoice' || data.type === 'proforma') ? `
+    </div>
     <div class="invoice-bank-details">
       <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
-    </div>` : ''}
+    </div>
+  ` : ''}
 
+    
     ${data.type === 'quotation' ? `
     <div class="quotation-footer">
       We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!
@@ -499,6 +504,10 @@ export const generatePDF = (data: DocumentData) => {
         
         body {
           font-family: 'Arial', sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+          font-variant-ligatures: common-ligatures;
           margin: 0;
           padding: 0;
           color: #333;
@@ -758,19 +767,9 @@ export const generatePDF = (data: DocumentData) => {
           color: #111827;
         }
         
-        .notes-section {
-          margin-top: 30px;
-          display: flex;
-          gap: 20px;
-        }
         
-        .notes, .terms {
-          flex: 1;
-          padding: 15px;
-          background: #f8f9fa;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
-        }
+        
+        .terms { flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
         
         .section-subtitle {
           font-size: 12px;
@@ -780,20 +779,7 @@ export const generatePDF = (data: DocumentData) => {
           text-transform: uppercase;
         }
         
-        .notes-content, .terms-content {
-          font-size: 10px;
-          line-height: 1.6;
-          color: #666;
-          white-space: pre-wrap;
-          text-align: justify;
-          width: 100%;
-          max-width: 100%;
-          word-spacing: 0.1em;
-          hyphens: auto;
-          page-break-inside: avoid;
-          orphans: 3;
-          widows: 3;
-        }
+        .terms-content { font-size: 11px; font-weight: 400; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
 
         .terms-content p,
         .terms-content div {
@@ -920,8 +906,8 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .invoice-terms-section {\n          margin: 30px 0 20px 0;\n          page-break-inside: avoid;\n        }\n        \n        .invoice-terms {\n          width: 100%;\n          padding: 20px;\n          background: #f8f9fa;\n          border-radius: 8px;\n          border: 1px solid #e9ecef;\n          margin-bottom: 20px;\n        }\n        \n        .invoice-bank-details {\n          margin-top: auto;
-          margin-bottom: 0;\n          padding: 15px;\n          background: #f0f0f0;\n          border-radius: 8px;\n          border: 1px solid #ddd;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          line-height: 1.4;\n          page-break-inside: avoid;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
+                .payment-banner {          background: transparent;          padding: 0;          margin: 0 0 10px 0;          border-left: none;          font-size: 10px;          color: #111827;          text-align: center;          border-radius: 0;          font-weight: 600;        }                .bank-details {          position: absolute;          left: 20mm;          right: 20mm;          bottom: 10mm;          font-size: 10px;          color: #111827;          text-align: center;          font-weight: 600;        }                .invoice-terms-section {          margin: 30px 0 20px 0;          page-break-inside: avoid;        }                .invoice-terms {          width: 100%;          padding: 20px;          background: #f8f9fa;          border-radius: 8px;          border: 1px solid #e9ecef;          margin-bottom: 20px;        }                .invoice-bank-details {          margin-top: auto;
+          margin-bottom: 0;          padding: 15px;          background: #f0f0f0;          border-radius: 8px;          border: 1px solid #ddd;          font-size: 10px;          color: #111827;          text-align: center;          font-weight: 600;          line-height: 1.4;          page-break-inside: avoid;        }                .quotation-footer {          position: absolute;          left: 20mm;          right: 20mm;          bottom: 10mm;          font-size: 12px;          color: #111827;          text-align: center;          font-weight: 600;          font-style: italic;        }      </style>
     </head>
     <body>
       <div class="page">
@@ -1204,27 +1190,22 @@ export const generatePDF = (data: DocumentData) => {
         ` : ''}
 
         <!-- Notes Section (only for non-quotation documents) -->
-        ${data.notes && data.type !== 'quotation' ? `
-        <div class="notes-section">
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
-          </div>
-        </div>
-        ` : ''}
-
+        
         <!-- Terms Section (for invoices only) -->
         ${data.terms_and_conditions && data.type === 'invoice' ? `
-        <div class="invoice-terms-section">
+        <div class="invoice-terms-section" style="page-break-before: always;">
           <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
             <div class="terms-content">${data.terms_and_conditions}</div>
           </div>
         </div>
-        ` : ''}
+        <div class="invoice-bank-details">
+          <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
+        </div>
+      ` : ''}
 
         <!-- Bank Details (for invoices and proformas) -->
-        ${(data.type === 'invoice' || data.type === 'proforma') ? `
+        ${!(data.terms_and_conditions && data.type === 'invoice') && (data.type === 'invoice' || data.type === 'proforma') ? `
         <div class="invoice-bank-details">
           <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
@@ -1242,24 +1223,8 @@ export const generatePDF = (data: DocumentData) => {
     </html>
   `;
 
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
-
-  // Wait for content to load before printing
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
-  };
-
-  // Fallback if onload doesn't fire
-  setTimeout(() => {
-    if (printWindow && !printWindow.closed) {
-      printWindow.print();
-    }
-  }, 1000);
-
-  return printWindow;
+  // Delegate to the html2canvas/jsPDF flow which preserves CSS and renders accurately
+  return generatePDFDownload(data);
 };
 
 // Direct download using html2canvas + jsPDF while preserving the exact HTML/CSS design
@@ -1556,7 +1521,7 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
     subtotal: finalBalance,
     tax_amount: 0,
     total_amount: finalBalance,
-    notes: `Statement of Account as of ${new Date(statementDate).toLocaleDateString()}\n\nThis statement shows all transactions including invoices (debits) and payments (credits) with running balance.\n\nAging Summary for Outstanding Invoices:\nCurrent: $${current.toFixed(2)}\n1-30 Days: $${days30.toFixed(2)}\n31-60 Days: $${days60.toFixed(2)}\n61-90 Days: $${days90.toFixed(2)}\nOver 90 Days: $${over90.toFixed(2)}`,
+    notes: `Statement of Account as of ${new Date(statementDate).toLocaleDateString()}This statement shows all transactions including invoices (debits) and payments (credits) with running balance.Aging Summary for Outstanding Invoices:Current: $${current.toFixed(2)}1-30 Days: $${days30.toFixed(2)}31-60 Days: $${days60.toFixed(2)}61-90 Days: $${days90.toFixed(2)}Over 90 Days: $${over90.toFixed(2)}`,
     terms_and_conditions: 'Please remit payment for any outstanding amounts. Contact us if you have any questions about this statement.',
   };
 
@@ -1578,7 +1543,7 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
     total_amount: typeof payment.amount === 'string' ?
       parseFloat(payment.amount.replace('$', '').replace(',', '')) :
       payment.amount,
-    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}\nInvoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
+    notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}Reference: ${payment.reference_number || 'N/A'}Invoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms that payment has been received and processed.',
   };
 
@@ -1715,7 +1680,7 @@ export const downloadLPOPDF = async (lpo: any, company?: CompanyDetails) => {
     subtotal: lpo.subtotal,
     tax_amount: lpo.tax_amount,
     total_amount: lpo.total_amount,
-    notes: `${lpo.notes || ''}${lpo.contact_person ? `\n\nContact Person: ${lpo.contact_person}` : ''}${lpo.contact_phone ? `\nContact Phone: ${lpo.contact_phone}` : ''}`.trim(),
+    notes: `${lpo.notes || ''}${lpo.contact_person ? `Contact Person: ${lpo.contact_person}` : ''}${lpo.contact_phone ? `Contact Phone: ${lpo.contact_phone}` : ''}`.trim(),
     terms_and_conditions: lpo.terms_and_conditions,
   };
 

@@ -21,12 +21,12 @@ export function useCreditNotePDFDownload() {
       };
 
       // Generate and download PDF
-      generateCreditNotePDF(creditNote, companyData);
+      await generateCreditNotePDF(creditNote, companyData);
       
       return { success: true };
     },
     onSuccess: () => {
-      toast.success('Credit note PDF downloaded successfully!');
+      toast.success('Credit note PDF opened in a new tab.');
     },
     onError: (error: any) => {
       console.error('Error generating PDF:', error);
