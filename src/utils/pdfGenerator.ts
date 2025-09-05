@@ -433,18 +433,21 @@ const buildDocumentHTML = (data: DocumentData) => {
     </div>` : ''}
 
     ${data.terms_and_conditions && data.type === 'invoice' ? `
+    </div>
+  </div>
+  <div class="page">
     <div class="invoice-terms-section">
       <div class="invoice-terms">
         <div class="section-subtitle">Terms & Conditions</div>
         <div class="terms-content">${data.terms_and_conditions}</div>
       </div>
-    </div>` : ''}
-
-    ${(data.type === 'invoice' || data.type === 'proforma') ? `
+    </div>
     <div class="invoice-bank-details">
       <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
-    </div>` : ''}
+    </div>
+  </div>` : ''}
 
+    
     ${data.type === 'quotation' ? `
     <div class="quotation-footer">
       We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!
@@ -1232,16 +1235,23 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Terms Section (for invoices only) -->
         ${data.terms_and_conditions && data.type === 'invoice' ? `
+        </div>
+      </div>
+      <div class="page">
         <div class="invoice-terms-section">
           <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
             <div class="terms-content">${data.terms_and_conditions}</div>
           </div>
         </div>
-        ` : ''}
+        <div class="invoice-bank-details">
+          <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
+        </div>
+      </div>
+      ` : ''}
 
         <!-- Bank Details (for invoices and proformas) -->
-        ${(data.type === 'invoice' || data.type === 'proforma') ? `
+        ${!(data.terms_and_conditions && data.type === 'invoice') && (data.type === 'invoice' || data.type === 'proforma') ? `
         <div class="invoice-bank-details">
           <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
         </div>
