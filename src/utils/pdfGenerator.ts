@@ -424,14 +424,7 @@ const buildDocumentHTML = (data: DocumentData) => {
       </div>
     </div>` : ''}
 
-    ${data.notes && data.type !== 'quotation' ? `
-    <div class="notes-section">
-      <div class="notes">
-        <div class="section-subtitle">Notes</div>
-        <div class="notes-content">${data.notes}</div>
-      </div>
-    </div>` : ''}
-
+    
     ${data.terms_and_conditions && data.type === 'invoice' ? `
     <div class="invoice-terms-section" style="page-break-before: always;">
       <div class="invoice-terms">
