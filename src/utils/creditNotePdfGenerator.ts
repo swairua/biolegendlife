@@ -55,7 +55,7 @@ const DEFAULT_COMPANY: CompanyData = {
   logo_url: '' // Will use company settings or fallback gracefully
 };
 
-export const generateCreditNotePDF = (creditNote: CreditNotePDFData, company?: CompanyData) => {
+export const generateCreditNotePDF = async (creditNote: CreditNotePDFData, company?: CompanyData) => {
   // Use company details from parameter or fall back to defaults
   const companyData = company || DEFAULT_COMPANY;
   
