@@ -769,13 +769,7 @@ export const generatePDF = (data: DocumentData) => {
         
         
         
-        .notes, .terms {
-          flex: 1;
-          padding: 15px;
-          background: #f8f9fa;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
-        }
+        .terms { flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
         
         .section-subtitle {
           font-size: 12px;
