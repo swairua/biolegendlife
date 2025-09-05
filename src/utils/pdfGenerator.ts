@@ -779,21 +779,7 @@ export const generatePDF = (data: DocumentData) => {
           text-transform: uppercase;
         }
         
-        .notes-content, .terms-content {
-          font-size: 11px;
-          font-weight: 400;
-          line-height: 1.6;
-          color: #666;
-          white-space: pre-wrap;
-          text-align: justify;
-          width: 100%;
-          max-width: 100%;
-          word-spacing: 0.1em;
-          hyphens: auto;
-          page-break-inside: avoid;
-          orphans: 3;
-          widows: 3;
-        }
+        .terms-content { font-size: 11px; font-weight: 400; line-height: 1.6; color: #666; white-space: pre-wrap; text-align: justify; width: 100%; max-width: 100%; word-spacing: 0.1em; hyphens: auto; page-break-inside: avoid; orphans: 3; widows: 3; }
 
         .terms-content p,
         .terms-content div {
