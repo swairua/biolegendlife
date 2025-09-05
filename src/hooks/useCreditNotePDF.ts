@@ -21,7 +21,7 @@ export function useCreditNotePDFDownload() {
       };
 
       // Generate and download PDF
-      generateCreditNotePDF(creditNote, companyData);
+      await generateCreditNotePDF(creditNote, companyData);
       
       return { success: true };
     },
