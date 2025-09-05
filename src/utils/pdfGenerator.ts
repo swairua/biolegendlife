@@ -1247,24 +1247,8 @@ export const generatePDF = (data: DocumentData) => {
     </html>
   `;
 
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
-
-  // Wait for content to load before printing
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
-  };
-
-  // Fallback if onload doesn't fire
-  setTimeout(() => {
-    if (printWindow && !printWindow.closed) {
-      printWindow.print();
-    }
-  }, 1000);
-
-  return printWindow;
+  // Delegate to the html2canvas/jsPDF flow which preserves CSS and renders accurately
+  return generatePDFDownload(data);
 };
 
 // Direct download using html2canvas + jsPDF while preserving the exact HTML/CSS design
