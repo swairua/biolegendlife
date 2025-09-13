@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
@@ -16,9 +16,15 @@ export function ProtectedRoute({
   requireAuth = true,
 }: ProtectedRouteProps) {
   const { isAuthenticated, loading } = useAuth();
+  const [grace, setGrace] = useState(true);
 
-  // Show loading state
-  if (loading) {
+  useEffect(() => {
+    const t = setTimeout(() => setGrace(false), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Show loading while initializing or during grace period to allow session restore
+  if (loading || (requireAuth && !isAuthenticated && grace)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
