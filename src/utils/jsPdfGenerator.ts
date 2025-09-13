@@ -336,29 +336,37 @@ export const generateJsPDF = (data: DocumentData) => {
   // Footer renderer (Bank Details) for invoices and proformas at the very bottom, full width
   const renderBankFooter = (docInstance?: jsPDF) => {
     const docToUse = docInstance || doc;
-    const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
     const pageHeight = docToUse.internal.pageSize.getHeight();
     const lineHeight = 4;
-    const paddingV = 4;
+    const paddingV = 2;
     const textWidth = contentWidth;
-    const lines = docToUse.splitTextToSize(bankDetails, textWidth);
-    const textHeight = lines.length * lineHeight;
-    const yTop = pageHeight - textHeight - paddingV - 15; // keep bottom margin
 
-    // Remove card background - just render text directly
+    const bankLines = [
+      'KCB BANK KENYA LTD – RIVER ROAD BRANCH, ACC: 1216348367, SWIFT: KCBLKENX, BANK CODE: 01, BRANCH CODE: 114',
+      'ABSA BANK KENYA PLC – THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE: 024, SWIFT: BARCKENX',
+      'NCBA BANK KENYA PLC – THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE: 07, SWIFT: CBAFKENX'
+    ];
+
+    const wrapped = bankLines.flatMap(line => docToUse.splitTextToSize(line, textWidth));
+    const textHeight = wrapped.length * lineHeight;
+    const yTop = pageHeight - textHeight - paddingV - 15;
+
     docToUse.setFontSize(9);
     docToUse.setTextColor(17, 24, 39);
-    docToUse.text(lines, margin, yTop + paddingV);
+    docToUse.text(wrapped, margin, yTop + paddingV);
   };
 
   // Calculate footer height for margin calculations
   const getFooterHeight = () => {
-    const bankDetails = 'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX';
+    const bankLines = [
+      'KCB BANK KENYA LTD – RIVER ROAD BRANCH, ACC: 1216348367, SWIFT: KCBLKENX, BANK CODE: 01, BRANCH CODE: 114',
+      'ABSA BANK KENYA PLC – THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE: 024, SWIFT: BARCKENX',
+      'NCBA BANK KENYA PLC – THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE: 07, SWIFT: CBAFKENX'
+    ];
     const lineHeight = 4;
-    const paddingV = 4;
-    const textWidth = contentWidth;
-    const lines = doc.splitTextToSize(bankDetails, textWidth);
-    return lines.length * lineHeight + paddingV + 15; // include bottom margin
+    const paddingV = 2;
+    const lines = bankLines.flatMap(line => doc.splitTextToSize(line, contentWidth));
+    return lines.length * lineHeight + paddingV + 15;
   };
 
   const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
