@@ -1301,7 +1301,8 @@ export const generatePDFDownload = async (data: DocumentData) => {
     pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
   } else {
     let renderedHeight = 0;
-    const imgDataPages: string[] = [];
+    const imgDataPages: { dataUrl: string; pxHeight: number; isBlank: boolean }[] = [];
+
     while (renderedHeight < canvas.height) {
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
@@ -1313,14 +1314,43 @@ export const generatePDFDownload = async (data: DocumentData) => {
         0, renderedHeight, canvas.width, pageCanvas.height,
         0, 0, pageCanvas.width, pageCanvas.height
       );
-      imgDataPages.push(pageCanvas.toDataURL('image/png'));
+
+      // Heuristic: detect fully blank (white) page to avoid adding trailing empty page
+      let isBlank = true;
+      try {
+        const step = Math.max(10, Math.floor(Math.min(pageCanvas.width, pageCanvas.height) / 50));
+        const imgData = ctx.getImageData(0, 0, pageCanvas.width, pageCanvas.height).data;
+        outer: for (let y = 0; y < pageCanvas.height; y += step) {
+          for (let x = 0; x < pageCanvas.width; x += step) {
+            const i = (y * pageCanvas.width + x) * 4;
+            const r = imgData[i];
+            const g = imgData[i + 1];
+            const b = imgData[i + 2];
+            const a = imgData[i + 3];
+            // consider near-white as white
+            if (!(r > 250 && g > 250 && b > 250 && a > 0)) {
+              isBlank = false;
+              break outer;
+            }
+          }
+        }
+      } catch {
+        isBlank = false;
+      }
+
+      imgDataPages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: pageCanvas.height, isBlank });
       renderedHeight += pageCanvas.height;
     }
 
-    imgDataPages.forEach((img, idx) => {
+    // If the last page is blank, drop it
+    if (imgDataPages.length > 1 && imgDataPages[imgDataPages.length - 1].isBlank) {
+      imgDataPages.pop();
+    }
+
+    imgDataPages.forEach((page, idx) => {
       if (idx > 0) pdf.addPage();
-      const h = (pageHeightPx * imgWidth) / canvas.width; // map cropped height to mm
-      pdf.addImage(img, 'PNG', 0, 0, imgWidth, h);
+      const h = (page.pxHeight * imgWidth) / canvas.width; // map cropped height to mm
+      pdf.addImage(page.dataUrl, 'PNG', 0, 0, imgWidth, h);
     });
   }
 
@@ -1383,7 +1413,7 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
     notes: invoice.notes,
     terms_and_conditions: documentType === 'INVOICE' ? `Terms
 1. PAYMENT.
-Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees. Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
+Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney���s fees. Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
 2. PAYMENT, PRICE, TRANSPORTATION
 Seller shall have the continuing right to approve Buyer’s credit. Seller may at any time demand advance payment, additional security or guarantee of prompt payment. If Buyer refuses to give the payment, security or guarantee demanded, Seller may terminate the Agreement, refuse to deliver any undelivered goods and Buyer shall immediately become liable to Seller for the unpaid price of all goods delivered & for damages. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees incurred by Seller in collecting said sums.
 3. SERVICE CHARGE AND INTEREST

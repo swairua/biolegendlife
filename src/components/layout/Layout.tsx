@@ -1,9 +1,10 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedLogin } from '@/components/auth/EnhancedLogin';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,8 +19,29 @@ export function Layout({ children }: LayoutProps) {
   const publicRoutes = ['/auth-test', '/manual-setup', '/database-fix-page', '/auto-fix', '/audit', '/auto-payment-sync', '/payment-sync'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
 
-  // Show login after initial auth completes to avoid redirect bounce
-  if (!loading && !isAuthenticated && !isPublicRoute) {
+  // Detect existing Supabase auth token to allow a grace period on refresh/HMR
+  const hasSupabaseToken = useMemo(() => {
+    try {
+      const projectRef = supabase.supabaseUrl.split('//')[1]?.split('.')[0];
+      const key = projectRef ? `sb-${projectRef}-auth-token` : null;
+      if (key && localStorage.getItem(key)) return true;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i) || '';
+        if (k.startsWith('sb-') && k.endsWith('-auth-token')) return true;
+      }
+    } catch {}
+    return false;
+  }, []);
+
+  const [grace, setGrace] = useState(true);
+  useEffect(() => {
+    const ms = hasSupabaseToken ? 3500 : 1500;
+    const t = setTimeout(() => setGrace(false), ms);
+    return () => clearTimeout(t);
+  }, [hasSupabaseToken]);
+
+  // Show login only after initial auth/grace completes to avoid logout flash on refresh
+  if (!loading && !isAuthenticated && !isPublicRoute && !grace) {
     return <EnhancedLogin />;
   }
 
@@ -35,8 +57,8 @@ export function Layout({ children }: LayoutProps) {
     );
   }
 
-  // Show loading spinner if loading and no authentication state yet
-  if (loading) {
+  // Show loading spinner if loading or within grace window
+  if (loading || (!isPublicRoute && !isAuthenticated && grace)) {
     const loadingDuration = Math.floor((Date.now() - loadingStartTime) / 1000);
 
     return (
