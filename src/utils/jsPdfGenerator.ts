@@ -296,7 +296,7 @@ export const generateJsPDF = (data: DocumentData) => {
   }
 
   // Terms and Conditions for Invoices
-  if (data.terms_and_conditions && data.type === 'invoice') {
+  if (data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma')) {
     // Check if we need a new page (reserve space for footer)
     const pageHeight = doc.internal.pageSize.getHeight();
     const availableHeight = pageHeight - yPosition - footerHeight - 20; // extra margin
@@ -442,7 +442,7 @@ export const downloadInvoiceJsPDF = async (invoice: any, documentType: 'INVOICE'
     paid_amount: invoice.paid_amount || 0,
     balance_due: invoice.balance_due || (invoice.total_amount - (invoice.paid_amount || 0)),
     notes: invoice.notes,
-    terms_and_conditions: documentType === 'INVOICE' ? `TERMS & CONDITIONS
+    terms_and_conditions: (documentType === 'INVOICE' || documentType === 'PROFORMA') ? `TERMS & CONDITIONS
 
 1. Payment
 
