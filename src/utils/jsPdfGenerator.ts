@@ -342,31 +342,35 @@ export const generateJsPDF = (data: DocumentData) => {
     const textWidth = contentWidth;
 
     const bankLines = [
-      'KCB BANK KENYA LTD – RIVER ROAD BRANCH, ACC: 1216348367, SWIFT: KCBLKENX, BANK CODE: 01, BRANCH CODE: 114',
-      'ABSA BANK KENYA PLC – THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE: 024, SWIFT: BARCKENX',
-      'NCBA BANK KENYA PLC – THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE: 07, SWIFT: CBAFKENX'
+      'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD:',
+      '-KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114',
+      '-ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX',
+      '-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX'
     ];
 
-    const wrapped = bankLines.flatMap(line => docToUse.splitTextToSize(line, textWidth));
-    const textHeight = wrapped.length * lineHeight;
+    const blocks = bankLines.map(line => docToUse.splitTextToSize(line, textWidth));
+    const wrappedWithSpacing = blocks.flatMap(lines => [...lines, '']);
+    const textHeight = wrappedWithSpacing.length * lineHeight;
     const yTop = pageHeight - textHeight - paddingV - 15;
 
     docToUse.setFontSize(9);
     docToUse.setTextColor(17, 24, 39);
-    docToUse.text(wrapped, margin, yTop + paddingV);
+    docToUse.text(wrappedWithSpacing, margin, yTop + paddingV);
   };
 
   // Calculate footer height for margin calculations
   const getFooterHeight = () => {
     const bankLines = [
-      'KCB BANK KENYA LTD – RIVER ROAD BRANCH, ACC: 1216348367, SWIFT: KCBLKENX, BANK CODE: 01, BRANCH CODE: 114',
-      'ABSA BANK KENYA PLC – THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE: 024, SWIFT: BARCKENX',
-      'NCBA BANK KENYA PLC – THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE: 07, SWIFT: CBAFKENX'
+      'MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD:',
+      '-KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114',
+      '-ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX',
+      '-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX'
     ];
     const lineHeight = 4;
     const paddingV = 2;
-    const lines = bankLines.flatMap(line => doc.splitTextToSize(line, contentWidth));
-    return lines.length * lineHeight + paddingV + 15;
+    const blocks = bankLines.map(line => doc.splitTextToSize(line, contentWidth));
+    const linesWithSpacing = blocks.flatMap(lines => [...lines, '']);
+    return linesWithSpacing.length * lineHeight + paddingV + 15;
   };
 
   const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;

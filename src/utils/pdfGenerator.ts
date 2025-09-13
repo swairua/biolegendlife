@@ -6,7 +6,7 @@ import html2canvas from 'html2canvas';
 // In a real app, you'd want to use a proper PDF library like jsPDF or react-pdf
 
 export interface DocumentData {
-  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo';
+  type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo' | 'credit_note';
   number: string;
   date: string;
   lpo_number?: string;
@@ -68,6 +68,7 @@ interface CompanyDetails {
   phone?: string;
   email?: string;
   tax_number?: string;
+  registration_number?: string;
   logo_url?: string;
 }
 
@@ -130,6 +131,7 @@ const buildDocumentHTML = (data: DocumentData) => {
   });
 
   const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
+                        data.type === 'credit_note' ? 'Credit Note' :
                         data.type === 'delivery' ? 'Delivery Note' :
                         data.type === 'statement' ? 'Customer Statement' :
                         data.type === 'receipt' ? 'Payment Receipt' :
@@ -226,8 +228,8 @@ const buildDocumentHTML = (data: DocumentData) => {
     .bank-details { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 10px; color: #111827; text-align: center; font-weight: 600; }
     .invoice-terms-section { margin: 30px 0 20px 0; page-break-inside: avoid; }
     .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
-    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: center; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
-.invoice-bank-details .bank-line { margin: 2px 0; }
+    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: left; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
+.invoice-bank-details .bank-line { margin: 6px 0; }
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
 </head>
@@ -431,7 +433,10 @@ const buildDocumentHTML = (data: DocumentData) => {
 
     ${(data.type === 'invoice' || data.type === 'proforma') ? `
     <div class="invoice-bank-details">
-      <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
+      <div class="bank-line"><strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD:</strong></div>
+      <div class="bank-line">-KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114</div>
+      <div class="bank-line">-ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX</div>
+      <div class="bank-line">-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX</div>
     </div>` : ''}
 
     ${data.type === 'quotation' ? `
@@ -475,12 +480,13 @@ export const generatePDF = (data: DocumentData) => {
   }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
-                       data.type === 'delivery' ? 'Delivery Note' :
-                       data.type === 'statement' ? 'Customer Statement' :
-                       data.type === 'receipt' ? 'Payment Receipt' :
-                       data.type === 'remittance' ? 'Remittance Advice' :
-                       data.type === 'lpo' ? 'Purchase Order' :
-                       data.type.charAt(0).toUpperCase() + data.type.slice(1);
+                        data.type === 'credit_note' ? 'Credit Note' :
+                        data.type === 'delivery' ? 'Delivery Note' :
+                        data.type === 'statement' ? 'Customer Statement' :
+                        data.type === 'receipt' ? 'Payment Receipt' :
+                        data.type === 'remittance' ? 'Remittance Advice' :
+                        data.type === 'lpo' ? 'Purchase Order' :
+                        data.type.charAt(0).toUpperCase() + data.type.slice(1);
   
   const htmlContent = `
     <!DOCTYPE html>
@@ -1227,9 +1233,10 @@ export const generatePDF = (data: DocumentData) => {
         <!-- Bank Details (for invoices and proformas) -->
         ${(data.type === 'invoice' || data.type === 'proforma') ? `
     <div class="invoice-bank-details">
-      <div class="bank-line"><strong>KCB BANK KENYA LTD – RIVER ROAD BRANCH, ACC: 1216348367, SWIFT: KCBLKENX, BANK CODE: 01, BRANCH CODE: 114</strong></div>
-      <div class="bank-line"><strong>ABSA BANK KENYA PLC – THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE: 024, SWIFT: BARCKENX</strong></div>
-      <div class="bank-line"><strong>NCBA BANK KENYA PLC – THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE: 07, SWIFT: CBAFKENX</strong></div>
+      <div class="bank-line"><strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD:</strong></div>
+      <div class="bank-line">-KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114</div>
+      <div class="bank-line">-ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX</div>
+      <div class="bank-line">-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX</div>
     </div>
     ` : ''}
 
@@ -1344,6 +1351,9 @@ export const generatePDFDownload = async (data: DocumentData) => {
       const breakY = findBreak(renderedY, innerPageHeightPx);
       const sliceHeight = Math.min(innerPageHeightPx, canvas.height - renderedY, breakY - renderedY);
 
+      // If the remaining slice is too small, stop to avoid blank trailing page
+      if (sliceHeight <= 2) break;
+
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
       pageCanvas.height = sliceHeight;
@@ -1351,7 +1361,23 @@ export const generatePDFDownload = async (data: DocumentData) => {
       if (!ctx) break;
       ctx.drawImage(canvas, 0, renderedY, canvas.width, sliceHeight, 0, 0, pageCanvas.width, pageCanvas.height);
 
-      pages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: sliceHeight });
+      // Detect near-empty (almost white) slices and skip them
+      const stepX = Math.max(10, Math.floor(pageCanvas.width / 100));
+      const stepY = Math.max(10, Math.floor(pageCanvas.height / 100));
+      let white = 0; let count = 0;
+      for (let y = 0; y < pageCanvas.height; y += stepY) {
+        for (let x = 0; x < pageCanvas.width; x += stepX) {
+          const d = ctx.getImageData(x, y, 1, 1).data;
+          if (d[0] > 245 && d[1] > 245 && d[2] > 245) white++;
+          count++;
+        }
+      }
+      const whiteRatio = white / Math.max(1, count);
+      const isBlank = whiteRatio > 0.99;
+
+      if (!isBlank) {
+        pages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: sliceHeight });
+      }
       renderedY += sliceHeight;
     }
 
@@ -1364,6 +1390,7 @@ export const generatePDFDownload = async (data: DocumentData) => {
   }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma_Invoice' :
+                        data.type === 'credit_note' ? 'Credit_Note' :
                         data.type === 'delivery' ? 'Delivery_Note' :
                         data.type === 'statement' ? 'Customer_Statement' :
                         data.type === 'receipt' ? 'Payment_Receipt' :
@@ -1432,6 +1459,51 @@ Seller shall not be liable for any damages resulting from: any delay or failure 
 5. INDEMINITY
 Buyer shall indemnify and hold Seller harmless from and against any and all claims, demands, lawsuits, damages, liabilities, costs and expenses (including attorney’s fees), incurred by reason of any injury to or death of any person, or damage to any property, resulting from or arising out of any act, error, omission, negligence, or misconduct by Buyer in connection with the goods sold hereunder.
 6. ANY OTHER TERMS AND CONDITIONS....` : invoice.terms_and_conditions,
+  };
+
+  return generatePDFDownload(documentData);
+};
+
+// Function for credit note PDF generation (uses same format as quotation)
+export const downloadCreditNotePDF = async (creditNote: any, company?: CompanyDetails) => {
+  const documentData: DocumentData = {
+    type: 'credit_note',
+    number: creditNote.credit_note_number,
+    date: creditNote.credit_note_date,
+    company: company, // Pass company details
+    customer: {
+      name: creditNote.customers?.name || 'Unknown Customer',
+      email: creditNote.customers?.email,
+      phone: creditNote.customers?.phone,
+      address: creditNote.customers?.address,
+      city: creditNote.customers?.city,
+      country: creditNote.customers?.country,
+    },
+    items: creditNote.credit_note_items?.map((item: any) => {
+      const quantity = Number(item.quantity || 0);
+      const unitPrice = Number(item.unit_price || 0);
+      const taxAmount = Number(item.tax_amount || 0);
+      const discountAmount = Number(item.discount_amount || 0);
+      const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
+
+      return {
+        description: item.description || item.product_name || item.products?.name || 'Unknown Item',
+        quantity: quantity,
+        unit_price: unitPrice,
+        discount_percentage: Number(item.discount_percentage || 0),
+        discount_amount: discountAmount,
+        tax_percentage: Number(item.tax_percentage || 0),
+        tax_amount: taxAmount,
+        tax_inclusive: item.tax_inclusive || false,
+        line_total: Number(item.line_total ?? computedLineTotal),
+        unit_of_measure: item.products?.unit_of_measure || item.unit_of_measure || 'pcs',
+      };
+    }) || [],
+    subtotal: creditNote.subtotal,
+    tax_amount: creditNote.tax_amount,
+    total_amount: creditNote.total_amount,
+    notes: creditNote.notes,
+    terms_and_conditions: creditNote.terms_and_conditions,
   };
 
   return generatePDFDownload(documentData);
@@ -1604,6 +1676,35 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
 
 // Function for generating payment receipt PDF
 export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyDetails) => {
+  const allocations = payment.payment_allocations || [];
+  const items = allocations.length > 0
+    ? allocations.map((alloc: any, idx: number) => ({
+        description: `Payment to Invoice ${alloc.invoice_number || alloc.invoice_id || 'N/A'}`,
+        quantity: 1,
+        unit_price: Number(alloc.allocated_amount || alloc.amount_allocated || alloc.amount || 0),
+        tax_percentage: 0,
+        tax_amount: 0,
+        tax_inclusive: false,
+        line_total: Number(alloc.allocated_amount || alloc.amount_allocated || alloc.amount || 0),
+      }))
+    : [{
+        description: `Payment received${payment.reference_number ? ` (Ref: ${payment.reference_number})` : ''}`,
+        quantity: 1,
+        unit_price: typeof payment.amount === 'string'
+          ? parseFloat(payment.amount.replace('$', '').replace(',', ''))
+          : Number(payment.amount || 0),
+        tax_percentage: 0,
+        tax_amount: 0,
+        tax_inclusive: false,
+        line_total: typeof payment.amount === 'string'
+          ? parseFloat(payment.amount.replace('$', '').replace(',', ''))
+          : Number(payment.amount || 0),
+      }];
+
+  const totalAmount = typeof payment.amount === 'string'
+    ? parseFloat(payment.amount.replace('$', '').replace(',', ''))
+    : Number(payment.amount || 0);
+
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
     number: payment.number || payment.payment_number || `REC-${Date.now()}`,
@@ -1614,9 +1715,10 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
       email: payment.customers?.email,
       phone: payment.customers?.phone,
     },
-    total_amount: typeof payment.amount === 'string' ?
-      parseFloat(payment.amount.replace('$', '').replace(',', '')) :
-      payment.amount,
+    items,
+    subtotal: items.reduce((sum: number, it: any) => sum + Number(it.line_total || 0), 0),
+    tax_amount: 0,
+    total_amount: totalAmount,
     notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}\nInvoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms that payment has been received and processed.',
   };

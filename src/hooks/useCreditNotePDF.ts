@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { generateCreditNotePDF, type CreditNotePDFData, type CompanyData } from '@/utils/creditNotePdfGenerator';
+import { downloadCreditNotePDF, type CompanyDetails } from '@/utils/pdfGenerator';
 import { useCompanies } from '@/hooks/useDatabase';
 
 export function useCreditNotePDFDownload() {
@@ -8,21 +8,21 @@ export function useCreditNotePDFDownload() {
   const currentCompany = companies?.[0];
 
   return useMutation({
-    mutationFn: async (creditNote: CreditNotePDFData) => {
+    mutationFn: async (creditNote: any) => {
       // Prepare company data
-      const companyData: CompanyData = {
+      const companyData: CompanyDetails = {
         name: currentCompany?.name || 'Your Company',
         email: currentCompany?.email || '',
         phone: currentCompany?.phone || '',
         address: currentCompany?.address || '',
         tax_number: currentCompany?.tax_number || '',
-        registration_number: currentCompany?.registration_number || '',
+        registration_number: (currentCompany as any)?.registration_number || '',
         logo_url: currentCompany?.logo_url || '',
       };
 
-      // Generate and download PDF
-      generateCreditNotePDF(creditNote, companyData);
-      
+      // Generate and download PDF using shared generator
+      await downloadCreditNotePDF(creditNote, companyData);
+
       return { success: true };
     },
     onSuccess: () => {
