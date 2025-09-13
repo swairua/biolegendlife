@@ -226,7 +226,8 @@ const buildDocumentHTML = (data: DocumentData) => {
     .bank-details { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 10px; color: #111827; text-align: center; font-weight: 600; }
     .invoice-terms-section { margin: 30px 0 20px 0; page-break-inside: avoid; }
     .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
-    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 15px; background: #f0f0f0; border-radius: 8px; border: 1px solid #ddd; font-size: 10px; color: #111827; text-align: center; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
+    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: center; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
+.invoice-bank-details .bank-line { margin: 2px 0; }
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
 </head>
@@ -1225,10 +1226,12 @@ export const generatePDF = (data: DocumentData) => {
 
         <!-- Bank Details (for invoices and proformas) -->
         ${(data.type === 'invoice' || data.type === 'proforma') ? `
-        <div class="invoice-bank-details">
-          <strong>MAKE ALL PAYMENTS THROUGH BIOLEGEND SCIENTIFIC LTD, KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114 ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE; 000, BRANCH CODE; 07, SWIFT CODE; CBAFKENX</strong>
-        </div>
-        ` : ''}
+    <div class="invoice-bank-details">
+      <div class="bank-line"><strong>KCB BANK KENYA LTD – RIVER ROAD BRANCH, ACC: 1216348367, SWIFT: KCBLKENX, BANK CODE: 01, BRANCH CODE: 114</strong></div>
+      <div class="bank-line"><strong>ABSA BANK KENYA PLC – THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE: 024, SWIFT: BARCKENX</strong></div>
+      <div class="bank-line"><strong>NCBA BANK KENYA PLC – THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE: 07, SWIFT: CBAFKENX</strong></div>
+    </div>
+    ` : ''}
 
         <!-- Quotation Footer (centered at bottom) -->
         ${data.type === 'quotation' ? `
@@ -1296,61 +1299,67 @@ export const generatePDFDownload = async (data: DocumentData) => {
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   const pageHeightPx = (canvas.width * pageHeight) / imgWidth; // pixel height per PDF page at the chosen scale
 
-  if (imgHeight <= pageHeight) {
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-  } else {
-    let renderedHeight = 0;
-    const imgDataPages: { dataUrl: string; pxHeight: number; isBlank: boolean }[] = [];
+  // Add safe top/bottom margins and try to avoid splitting through text
+  const topMarginMm = 8; // visible white margin at top of each PDF page
+  const bottomMarginMm = 8; // visible white margin at bottom of each PDF page
+  const pxPerMm = canvas.width / imgWidth;
+  const topMarginPx = Math.round(topMarginMm * pxPerMm);
+  const bottomMarginPx = Math.round(bottomMarginMm * pxPerMm);
+  const innerPageHeightPx = Math.floor(pageHeightPx - topMarginPx - bottomMarginPx);
 
-    while (renderedHeight < canvas.height) {
+  if (imgHeight <= (pageHeight - topMarginMm - bottomMarginMm)) {
+    const imgData = canvas.toDataURL('image/png');
+    const h = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 0, topMarginMm, imgWidth, h);
+  } else {
+    let renderedY = 0;
+    const pages: { dataUrl: string; pxHeight: number }[] = [];
+    const ctxAll = canvas.getContext('2d');
+
+    const isWhiteRow = (y: number) => {
+      if (!ctxAll) return false;
+      const stepX = Math.max(10, Math.floor(canvas.width / 100));
+      let white = 0; let count = 0;
+      for (let x = 0; x < canvas.width; x += stepX) {
+        const d = ctxAll.getImageData(x, y, 1, 1).data;
+        if (d[0] > 245 && d[1] > 245 && d[2] > 245) white++;
+        count++;
+      }
+      return white / Math.max(1, count) > 0.9;
+    };
+
+    const findBreak = (start: number, height: number) => {
+      const target = start + height;
+      const SEARCH = 24; // px around target to find a whitespace seam
+      for (let dy = 0; dy <= SEARCH; dy++) {
+        const up = target - dy;
+        if (up > start + 10 && isWhiteRow(up)) return up;
+        const down = target + dy;
+        if (down < canvas.height - 1 && isWhiteRow(down)) return down;
+      }
+      return Math.min(target, canvas.height);
+    };
+
+    while (renderedY < canvas.height) {
+      const breakY = findBreak(renderedY, innerPageHeightPx);
+      const sliceHeight = Math.min(innerPageHeightPx, canvas.height - renderedY, breakY - renderedY);
+
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
-      pageCanvas.height = Math.min(pageHeightPx, canvas.height - renderedHeight);
+      pageCanvas.height = sliceHeight;
       const ctx = pageCanvas.getContext('2d');
       if (!ctx) break;
-      ctx.drawImage(
-        canvas,
-        0, renderedHeight, canvas.width, pageCanvas.height,
-        0, 0, pageCanvas.width, pageCanvas.height
-      );
+      ctx.drawImage(canvas, 0, renderedY, canvas.width, sliceHeight, 0, 0, pageCanvas.width, pageCanvas.height);
 
-      // Heuristic: detect fully blank (white) page to avoid adding trailing empty page
-      let isBlank = true;
-      try {
-        const step = Math.max(10, Math.floor(Math.min(pageCanvas.width, pageCanvas.height) / 50));
-        const imgData = ctx.getImageData(0, 0, pageCanvas.width, pageCanvas.height).data;
-        outer: for (let y = 0; y < pageCanvas.height; y += step) {
-          for (let x = 0; x < pageCanvas.width; x += step) {
-            const i = (y * pageCanvas.width + x) * 4;
-            const r = imgData[i];
-            const g = imgData[i + 1];
-            const b = imgData[i + 2];
-            const a = imgData[i + 3];
-            // consider near-white as white
-            if (!(r > 250 && g > 250 && b > 250 && a > 0)) {
-              isBlank = false;
-              break outer;
-            }
-          }
-        }
-      } catch {
-        isBlank = false;
-      }
-
-      imgDataPages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: pageCanvas.height, isBlank });
-      renderedHeight += pageCanvas.height;
+      pages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: sliceHeight });
+      renderedY += sliceHeight;
     }
 
-    // If the last page is blank, drop it
-    if (imgDataPages.length > 1 && imgDataPages[imgDataPages.length - 1].isBlank) {
-      imgDataPages.pop();
-    }
-
-    imgDataPages.forEach((page, idx) => {
+    // Render pages with visible margins
+    pages.forEach((page, idx) => {
       if (idx > 0) pdf.addPage();
       const h = (page.pxHeight * imgWidth) / canvas.width; // map cropped height to mm
-      pdf.addImage(page.dataUrl, 'PNG', 0, 0, imgWidth, h);
+      pdf.addImage(page.dataUrl, 'PNG', 0, topMarginMm, imgWidth, h);
     });
   }
 
