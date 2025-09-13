@@ -1351,6 +1351,9 @@ export const generatePDFDownload = async (data: DocumentData) => {
       const breakY = findBreak(renderedY, innerPageHeightPx);
       const sliceHeight = Math.min(innerPageHeightPx, canvas.height - renderedY, breakY - renderedY);
 
+      // If the remaining slice is too small, stop to avoid blank trailing page
+      if (sliceHeight <= 2) break;
+
       const pageCanvas = document.createElement('canvas');
       pageCanvas.width = canvas.width;
       pageCanvas.height = sliceHeight;
@@ -1358,7 +1361,23 @@ export const generatePDFDownload = async (data: DocumentData) => {
       if (!ctx) break;
       ctx.drawImage(canvas, 0, renderedY, canvas.width, sliceHeight, 0, 0, pageCanvas.width, pageCanvas.height);
 
-      pages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: sliceHeight });
+      // Detect near-empty (almost white) slices and skip them
+      const stepX = Math.max(10, Math.floor(pageCanvas.width / 100));
+      const stepY = Math.max(10, Math.floor(pageCanvas.height / 100));
+      let white = 0; let count = 0;
+      for (let y = 0; y < pageCanvas.height; y += stepY) {
+        for (let x = 0; x < pageCanvas.width; x += stepX) {
+          const d = ctx.getImageData(x, y, 1, 1).data;
+          if (d[0] > 245 && d[1] > 245 && d[2] > 245) white++;
+          count++;
+        }
+      }
+      const whiteRatio = white / Math.max(1, count);
+      const isBlank = whiteRatio > 0.99;
+
+      if (!isBlank) {
+        pages.push({ dataUrl: pageCanvas.toDataURL('image/png'), pxHeight: sliceHeight });
+      }
       renderedY += sliceHeight;
     }
 
