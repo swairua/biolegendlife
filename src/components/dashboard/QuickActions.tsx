@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Plus, 
-  FileText, 
-  Receipt, 
-  Users, 
+import {
+  Plus,
+  FileText,
+  Receipt,
+  Users,
   Package,
-  DollarSign 
+  DollarSign
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface QuickAction {
   title: string;
@@ -69,14 +70,14 @@ export function QuickActions() {
             className="flex items-center justify-start space-x-3 h-auto p-4 text-left"
             asChild
           >
-            <a href={action.href}>
+            <Link to={action.href}>
               <action.icon className="h-5 w-5" />
               <div className="flex-1">
                 <div className="font-medium">{action.title}</div>
                 <div className="text-xs opacity-90">{action.description}</div>
               </div>
               <Plus className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         ))}
       </CardContent>
