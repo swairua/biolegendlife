@@ -1371,6 +1371,7 @@ export const generatePDFDownload = async (data: DocumentData) => {
   }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma_Invoice' :
+                        data.type === 'credit_note' ? 'Credit_Note' :
                         data.type === 'delivery' ? 'Delivery_Note' :
                         data.type === 'statement' ? 'Customer_Statement' :
                         data.type === 'receipt' ? 'Payment_Receipt' :
