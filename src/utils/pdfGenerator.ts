@@ -1449,7 +1449,7 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
     notes: invoice.notes,
     terms_and_conditions: (documentType === 'INVOICE' || documentType === 'PROFORMA') ? `Terms
 1. PAYMENT.
-Payment terms are cash on delivery, unless credit terms are established at the Seller’s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney���s fees. Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
+Payment terms are cash on delivery, unless credit terms are established at the Seller��s sole discretion. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney���s fees. Net 30 days on all credit invoices or “Month Following invoice”. In addition, Buyer shall pay all sales, use, customs, excise or other taxes presently or hereafter payable in regards to this transaction, and Buyer shall reimburse Seller for any such taxes or charges paid by BIOLEGEND SCIENTIFIC LTD (hereafter "Seller."). Including all withholding taxes which should be remitted immediately upon payments.
 2. PAYMENT, PRICE, TRANSPORTATION
 Seller shall have the continuing right to approve Buyer’s credit. Seller may at any time demand advance payment, additional security or guarantee of prompt payment. If Buyer refuses to give the payment, security or guarantee demanded, Seller may terminate the Agreement, refuse to deliver any undelivered goods and Buyer shall immediately become liable to Seller for the unpaid price of all goods delivered & for damages. Buyer agrees to pay Seller cost of collection of overdue invoices, including reasonable attorney’s fees incurred by Seller in collecting said sums.
 3. SERVICE CHARGE AND INTEREST
@@ -1796,7 +1796,11 @@ export const downloadDeliveryNotePDF = async (deliveryNote: any, company?: Compa
       city: deliveryNote.customers?.city,
       country: deliveryNote.customers?.country,
     },
-    items: (deliveryNote.delivery_note_items || deliveryNote.delivery_items)?.map((item: any, index: number) => ({
+    items: ((deliveryNote.delivery_note_items && deliveryNote.delivery_note_items.length > 0)
+      ? deliveryNote.delivery_note_items
+      : (deliveryNote.delivery_items && deliveryNote.delivery_items.length > 0)
+        ? deliveryNote.delivery_items
+        : [])?.map((item: any, index: number) => ({
       description: `${item.products?.name || item.product_name || item.description || 'Unknown Item'}${invoiceNumber !== 'N/A' ? ` (From Invoice: ${invoiceNumber})` : ''}`,
       quantity: item.quantity_delivered || item.quantity || 0,
       unit_price: 0, // Not relevant for delivery notes
