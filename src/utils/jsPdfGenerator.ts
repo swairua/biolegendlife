@@ -348,13 +348,14 @@ export const generateJsPDF = (data: DocumentData) => {
       '-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX'
     ];
 
-    const wrapped = bankLines.flatMap(line => docToUse.splitTextToSize(line, textWidth));
-    const textHeight = wrapped.length * lineHeight;
+    const blocks = bankLines.map(line => docToUse.splitTextToSize(line, textWidth));
+    const wrappedWithSpacing = blocks.flatMap(lines => [...lines, '']);
+    const textHeight = wrappedWithSpacing.length * lineHeight;
     const yTop = pageHeight - textHeight - paddingV - 15;
 
     docToUse.setFontSize(9);
     docToUse.setTextColor(17, 24, 39);
-    docToUse.text(wrapped, margin, yTop + paddingV);
+    docToUse.text(wrappedWithSpacing, margin, yTop + paddingV);
   };
 
   // Calculate footer height for margin calculations
@@ -367,8 +368,9 @@ export const generateJsPDF = (data: DocumentData) => {
     ];
     const lineHeight = 4;
     const paddingV = 2;
-    const lines = bankLines.flatMap(line => doc.splitTextToSize(line, contentWidth));
-    return lines.length * lineHeight + paddingV + 15;
+    const blocks = bankLines.map(line => doc.splitTextToSize(line, contentWidth));
+    const linesWithSpacing = blocks.flatMap(lines => [...lines, '']);
+    return linesWithSpacing.length * lineHeight + paddingV + 15;
   };
 
   const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
