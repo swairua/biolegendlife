@@ -131,6 +131,7 @@ const buildDocumentHTML = (data: DocumentData) => {
   });
 
   const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
+                        data.type === 'credit_note' ? 'Credit Note' :
                         data.type === 'delivery' ? 'Delivery Note' :
                         data.type === 'statement' ? 'Customer Statement' :
                         data.type === 'receipt' ? 'Payment Receipt' :
@@ -479,12 +480,13 @@ export const generatePDF = (data: DocumentData) => {
   }
 
   const documentTitle = data.type === 'proforma' ? 'Proforma Invoice' :
-                       data.type === 'delivery' ? 'Delivery Note' :
-                       data.type === 'statement' ? 'Customer Statement' :
-                       data.type === 'receipt' ? 'Payment Receipt' :
-                       data.type === 'remittance' ? 'Remittance Advice' :
-                       data.type === 'lpo' ? 'Purchase Order' :
-                       data.type.charAt(0).toUpperCase() + data.type.slice(1);
+                        data.type === 'credit_note' ? 'Credit Note' :
+                        data.type === 'delivery' ? 'Delivery Note' :
+                        data.type === 'statement' ? 'Customer Statement' :
+                        data.type === 'receipt' ? 'Payment Receipt' :
+                        data.type === 'remittance' ? 'Remittance Advice' :
+                        data.type === 'lpo' ? 'Purchase Order' :
+                        data.type.charAt(0).toUpperCase() + data.type.slice(1);
   
   const htmlContent = `
     <!DOCTYPE html>
