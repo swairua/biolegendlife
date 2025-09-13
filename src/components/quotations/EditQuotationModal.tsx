@@ -30,6 +30,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useCustomers, useProducts, useTaxSettings, useCompanies } from '@/hooks/useDatabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface QuotationItem {
@@ -106,6 +107,36 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
     product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
     product.product_code.toLowerCase().includes(searchProduct.toLowerCase())
   ) || [];
+
+  const addItem = (product: any) => {
+    const existingItem = items.find(item => item.product_id === product.id);
+
+    if (existingItem) {
+      updateItemQuantity(existingItem.id, existingItem.quantity + 1);
+      return;
+    }
+
+    const draft: QuotationItem = {
+      id: `temp-${Date.now()}`,
+      product_id: product.id,
+      product_name: product.name,
+      description: product.description || product.name,
+      quantity: 1,
+      unit_price: Number(product.selling_price || 0),
+      discount_percentage: 0,
+      tax_percentage: 0,
+      tax_amount: 0,
+      tax_inclusive: false,
+      line_total: 0,
+    };
+
+    const { lineTotal, taxAmount } = calculateLineTotal(draft, 1, draft.unit_price, 0, 0, false);
+    draft.line_total = lineTotal;
+    draft.tax_amount = taxAmount;
+
+    setItems(prev => [...prev, draft]);
+    setSearchProduct('');
+  };
 
   const calculateLineTotal = (item: QuotationItem, quantity?: number, unitPrice?: number, discountPercentage?: number, taxPercentage?: number, taxInclusive?: boolean) => {
     const qty = quantity ?? item.quantity;
@@ -223,9 +254,58 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
 
     setIsSubmitting(true);
     try {
-      // TODO: Implement actual update API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      if (!quotation?.id) {
+        throw new Error('Missing quotation ID');
+      }
+
+      const updateData = {
+        customer_id: selectedCustomerId,
+        quotation_date: quotationDate,
+        valid_until: validUntil || null,
+        subtotal,
+        tax_amount: taxAmount,
+        total_amount: totalAmount,
+        notes,
+        terms_and_conditions: termsAndConditions,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error: qError } = await supabase
+        .from('quotations')
+        .update(updateData)
+        .eq('id', quotation.id);
+
+      if (qError) throw qError;
+
+      const { error: delError } = await supabase
+        .from('quotation_items')
+        .delete()
+        .eq('quotation_id', quotation.id);
+
+      if (delError) throw delError;
+
+      if (items.length > 0) {
+        const insertItems = items.map((item, index) => ({
+          quotation_id: quotation.id,
+          product_id: item.product_id || null,
+          description: item.description || item.product_name,
+          quantity: Number(item.quantity || 0),
+          unit_price: Number(item.unit_price || 0),
+          discount_percentage: Number(item.discount_percentage || 0),
+          tax_percentage: Number(item.tax_percentage || 0),
+          tax_amount: Number(item.tax_amount || 0),
+          tax_inclusive: !!item.tax_inclusive,
+          line_total: Number(item.line_total || 0),
+          sort_order: index + 1,
+        }));
+
+        const { error: insError } = await supabase
+          .from('quotation_items')
+          .insert(insertItems);
+
+        if (insError) throw insError;
+      }
+
       toast.success(`Quotation ${quotation.quotation_number} updated successfully!`);
       onSuccess();
       onOpenChange(false);
@@ -346,7 +426,7 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
             </Card>
           </div>
 
-          {/* Right Column - Summary */}
+          {/* Right Column - Summary and Product Add */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
@@ -374,6 +454,59 @@ export function EditQuotationModal({ open, onOpenChange, onSuccess, quotation }:
                       <div className="font-bold text-primary">{formatCurrency(totalAmount)}</div>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Add Products</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Product Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search products by name or code..."
+                      value={searchProduct}
+                      onChange={(e) => setSearchProduct(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+
+                  {/* Product List */}
+                  {searchProduct && (
+                    <div className="max-h-64 overflow-y-auto border rounded-lg">
+                      {loadingProducts ? (
+                        <div className="p-4 text-center text-muted-foreground">Loading products...</div>
+                      ) : filteredProducts.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">No products found</div>
+                      ) : (
+                        filteredProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="p-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0 transition-smooth"
+                            onClick={() => addItem(product)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="font-medium">{product.name}</div>
+                                <div className="text-sm text-muted-foreground">{product.product_code}</div>
+                                {product.description && (
+                                  <div className="text-xs text-muted-foreground mt-1">{product.description}</div>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">{formatCurrency(product.selling_price)}</div>
+                                <div className="text-xs text-muted-foreground">Stock: {product.stock_quantity}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
