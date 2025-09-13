@@ -226,8 +226,8 @@ const buildDocumentHTML = (data: DocumentData) => {
     .bank-details { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 10px; color: #111827; text-align: center; font-weight: 600; }
     .invoice-terms-section { margin: 30px 0 20px 0; page-break-inside: avoid; }
     .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
-    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: center; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
-.invoice-bank-details .bank-line { margin: 2px 0; }
+    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: left; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
+.invoice-bank-details .bank-line { margin: 6px 0; }
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
 </head>
