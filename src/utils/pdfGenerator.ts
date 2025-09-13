@@ -68,6 +68,7 @@ interface CompanyDetails {
   phone?: string;
   email?: string;
   tax_number?: string;
+  registration_number?: string;
   logo_url?: string;
 }
 
