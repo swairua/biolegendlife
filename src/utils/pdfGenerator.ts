@@ -1676,6 +1676,35 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
 
 // Function for generating payment receipt PDF
 export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyDetails) => {
+  const allocations = payment.payment_allocations || [];
+  const items = allocations.length > 0
+    ? allocations.map((alloc: any, idx: number) => ({
+        description: `Payment to Invoice ${alloc.invoice_number || alloc.invoice_id || 'N/A'}`,
+        quantity: 1,
+        unit_price: Number(alloc.allocated_amount || alloc.amount_allocated || alloc.amount || 0),
+        tax_percentage: 0,
+        tax_amount: 0,
+        tax_inclusive: false,
+        line_total: Number(alloc.allocated_amount || alloc.amount_allocated || alloc.amount || 0),
+      }))
+    : [{
+        description: `Payment received${payment.reference_number ? ` (Ref: ${payment.reference_number})` : ''}`,
+        quantity: 1,
+        unit_price: typeof payment.amount === 'string'
+          ? parseFloat(payment.amount.replace('$', '').replace(',', ''))
+          : Number(payment.amount || 0),
+        tax_percentage: 0,
+        tax_amount: 0,
+        tax_inclusive: false,
+        line_total: typeof payment.amount === 'string'
+          ? parseFloat(payment.amount.replace('$', '').replace(',', ''))
+          : Number(payment.amount || 0),
+      }];
+
+  const totalAmount = typeof payment.amount === 'string'
+    ? parseFloat(payment.amount.replace('$', '').replace(',', ''))
+    : Number(payment.amount || 0);
+
   const documentData: DocumentData = {
     type: 'receipt', // Use receipt type for payment receipts
     number: payment.number || payment.payment_number || `REC-${Date.now()}`,
@@ -1686,9 +1715,10 @@ export const generatePaymentReceiptPDF = async (payment: any, company?: CompanyD
       email: payment.customers?.email,
       phone: payment.customers?.phone,
     },
-    total_amount: typeof payment.amount === 'string' ?
-      parseFloat(payment.amount.replace('$', '').replace(',', '')) :
-      payment.amount,
+    items,
+    subtotal: items.reduce((sum: number, it: any) => sum + Number(it.line_total || 0), 0),
+    tax_amount: 0,
+    total_amount: totalAmount,
     notes: `Payment received via ${payment.payment_method?.replace('_', ' ') || payment.method?.replace('_', ' ') || 'Unknown method'}\n\nReference: ${payment.reference_number || 'N/A'}\nInvoice: ${payment.payment_allocations?.[0]?.invoice_number || 'N/A'}`,
     terms_and_conditions: 'Thank you for your payment. This receipt confirms that payment has been received and processed.',
   };
