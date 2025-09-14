@@ -8,9 +8,13 @@ import { AuthStatusIndicator } from '@/components/auth/AuthStatusIndicator';
 import { enableResizeObserverErrorSuppression } from '@/utils/resizeObserverErrorHandler';
 import App from './App.tsx'
 import './index.css'
+import { initGlobalErrorHandler } from '@/utils/globalErrorHandler';
 
 // Suppress ResizeObserver errors before any components render
 enableResizeObserverErrorSuppression();
+
+// Initialize global error handling (prevents "[object Object]" messages)
+initGlobalErrorHandler();
 
 // Removed auto-migration imports for production safety
 
