@@ -343,26 +343,39 @@ export const generateJsPDF = (data: DocumentData) => {
     // Prepare terms text (fallback to empty string if none)
     const termsText = data.terms_and_conditions || '';
 
-    // Find a font size that fits the available area
-    let fittedFont = 10;
+    // Accurate fit calculation: convert pt -> mm
+    const PT_TO_MM = 0.352777778;
     let wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
+    let fittedFont = 10;
+    let fittedLHF = 1.0;
 
-    const fits = (font: number) => {
-      const lineH = Math.max(3.0, font * 0.34);
+    const fits = (font: number, lineHeightFactor: number) => {
       doc.setFontSize(font);
+      doc.setLineHeightFactor(lineHeightFactor);
       wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
-      const termsHeight = wrappedLines.length * lineH;
-      return termsHeight <= availableAreaHeight;
+      const perLineMm = font * lineHeightFactor * PT_TO_MM;
+      const totalMm = wrappedLines.length * perLineMm;
+      return totalMm <= availableAreaHeight;
     };
 
-    for (let f = 10; f >= 5; f--) {
-      if (fits(f)) {
-        fittedFont = f;
-        break;
+    // Try reducing font size, then slightly tighten line spacing if needed
+    let found = false;
+    for (let f = 10; f >= 4; f--) {
+      if (fits(f, 1.0)) { fittedFont = f; fittedLHF = 1.0; found = true; break; }
+    }
+    if (!found) {
+      for (let f = 10; f >= 4; f--) {
+        if (fits(f, 0.9)) { fittedFont = f; fittedLHF = 0.9; found = true; break; }
+      }
+    }
+    if (!found) {
+      for (let f = 10; f >= 4; f--) {
+        if (fits(f, 0.85)) { fittedFont = f; fittedLHF = 0.85; found = true; break; }
       }
     }
 
     // Render title
+    doc.setLineHeightFactor(1.2);
     doc.setFontSize(12);
     doc.setTextColor(75, 33, 182);
     doc.text('TERMS & CONDITIONS', margin, topY);
@@ -370,7 +383,7 @@ export const generateJsPDF = (data: DocumentData) => {
     // Render terms block
     doc.setFontSize(fittedFont);
     doc.setTextColor(50, 50, 50);
-    doc.setLineHeightFactor(1.0);
+    doc.setLineHeightFactor(fittedLHF);
     doc.text(wrappedLines, margin, topY + titleGap);
 
     // Render bank footer at the very bottom of this page only
