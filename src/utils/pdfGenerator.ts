@@ -439,10 +439,7 @@ const buildDocumentHTML = (data: DocumentData) => {
       <div class="bank-line">-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX</div>
     </div>` : ''}
 
-    ${data.type === 'quotation' ? `
-    <div class="quotation-footer">
-      We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!
-    </div>` : ''}
+    ${''}
   </div>
 </body>
 </html>`;
