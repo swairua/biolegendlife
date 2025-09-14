@@ -282,57 +282,6 @@ export const generateJsPDF = (data: DocumentData) => {
 
   // Main content done. Footer will be added with Terms on a dedicated last page for invoice/proforma.
 
-  // TERMS & Bank Footer on a dedicated final page for invoice/proforma
-  if (data.type === 'invoice' || data.type === 'proforma') {
-    const pageHeight = doc.internal.pageSize.getHeight();
-    // Always create a final page for Terms + Footer
-    doc.addPage();
-
-    const topY = 20;
-    const titleGap = 10;
-
-    // Compute dynamic footer height
-    const dynamicFooterHeight = getFooterHeight();
-    const areaBottomPadding = 10; // extra safety margin above footer
-    const availableAreaHeight = pageHeight - topY - titleGap - dynamicFooterHeight - areaBottomPadding;
-
-    // Prepare terms text (fallback to empty string if none)
-    const termsText = data.terms_and_conditions || '';
-
-    // Find a font size/line height combo that fits the available area
-    let fittedFont = 10;
-    let fittedLineHeight = Math.max(3.2, fittedFont * 0.35);
-    let wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
-
-    const fits = (font: number) => {
-      const lineH = Math.max(3.0, font * 0.34);
-      doc.setFontSize(font);
-      wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
-      const termsHeight = wrappedLines.length * lineH;
-      return termsHeight <= availableAreaHeight;
-    };
-
-    for (let f = 10; f >= 6; f--) {
-      if (fits(f)) {
-        fittedFont = f;
-        fittedLineHeight = Math.max(3.0, f * 0.34);
-        break;
-      }
-    }
-
-    // Render title
-    doc.setFontSize(12);
-    doc.setTextColor(75, 33, 182);
-    doc.text('TERMS & CONDITIONS', margin, topY);
-
-    // Render terms block
-    doc.setFontSize(fittedFont);
-    doc.setTextColor(50, 50, 50);
-    doc.text(wrappedLines, margin, topY + titleGap);
-
-    // Render bank footer at the very bottom of this page only
-    renderBankFooter(doc);
-  }
 
   // Footer renderer (Bank Details) for invoices and proformas at the very bottom, full width
   const renderBankFooter = (docInstance?: jsPDF) => {
@@ -377,6 +326,57 @@ export const generateJsPDF = (data: DocumentData) => {
   const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
 
   // For invoices and proformas, footer will be rendered only on the final Terms page.
+
+  // TERMS & Bank Footer on a dedicated final page for invoice/proforma
+  if (data.type === 'invoice' || data.type === 'proforma') {
+    const pageHeight = doc.internal.pageSize.getHeight();
+    // Always create a final page for Terms + Footer
+    doc.addPage();
+
+    const topY = 20;
+    const titleGap = 10;
+
+    // Compute dynamic footer height
+    const dynamicFooterHeight = getFooterHeight();
+    const areaBottomPadding = 10; // extra safety margin above footer
+    const availableAreaHeight = pageHeight - topY - titleGap - dynamicFooterHeight - areaBottomPadding;
+
+    // Prepare terms text (fallback to empty string if none)
+    const termsText = data.terms_and_conditions || '';
+
+    // Find a font size that fits the available area
+    let fittedFont = 10;
+    let wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
+
+    const fits = (font: number) => {
+      const lineH = Math.max(3.0, font * 0.34);
+      doc.setFontSize(font);
+      wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
+      const termsHeight = wrappedLines.length * lineH;
+      return termsHeight <= availableAreaHeight;
+    };
+
+    for (let f = 10; f >= 6; f--) {
+      if (fits(f)) {
+        fittedFont = f;
+        break;
+      }
+    }
+
+    // Render title
+    doc.setFontSize(12);
+    doc.setTextColor(75, 33, 182);
+    doc.text('TERMS & CONDITIONS', margin, topY);
+
+    // Render terms block
+    doc.setFontSize(fittedFont);
+    doc.setTextColor(50, 50, 50);
+    doc.setLineHeightFactor(1.0);
+    doc.text(wrappedLines, margin, topY + titleGap);
+
+    // Render bank footer at the very bottom of this page only
+    renderBankFooter(doc);
+  }
 
   // Quotation Footer (kept for quotations only)
   if (data.type === 'quotation') {
