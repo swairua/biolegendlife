@@ -50,14 +50,7 @@ export function EnhancedLogin() {
     const { error } = await signIn(formData.email, formData.password);
 
     if (error) {
-      const errorInfo = handleAuthError(error);
-
-
-      if (errorInfo.type === 'invalid_credentials') {
-        setTimeout(() => {
-          toast.info('Tip: Use the "Create Admin User" button above if this is your first time setting up the system.');
-        }, 2000);
-      }
+      handleAuthError(error);
     } else {
       toast.success('Welcome to Biolegend Scientific!');
       navigate('/');
