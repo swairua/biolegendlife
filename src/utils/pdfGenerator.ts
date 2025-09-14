@@ -1301,6 +1301,25 @@ export const generatePDFDownload = async (data: DocumentData) => {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
+  // Footer reservation (mm) for types that require a persistent bottom footer
+  const footerReserveMm = data.type === 'quotation' ? 18 : 0; // space to keep free at bottom
+
+  // Helper to draw footer on each page
+  const drawFooter = (pageIndex: number) => {
+    if (data.type !== 'quotation') return;
+    const marginMm = 20;
+    const maxWidth = pageWidth - marginMm * 2;
+    const text = 'We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!';
+    pdf.setFont('helvetica', 'italic');
+    pdf.setFontSize(12);
+    pdf.setTextColor(17, 24, 39);
+    const lines = pdf.splitTextToSize(text, maxWidth) as string[];
+    const lineHeight = 5;
+    const yBottom = pageHeight - 10; // 10mm from bottom baseline
+    const yTop = yBottom - (lines.length - 1) * lineHeight;
+    pdf.text(lines as any, marginMm, yTop, { align: 'left' });
+  };
+
   // Convert canvas to pages
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -1308,7 +1327,8 @@ export const generatePDFDownload = async (data: DocumentData) => {
 
   // Add safe top/bottom margins and try to avoid splitting through text
   const topMarginMm = 8; // visible white margin at top of each PDF page
-  const bottomMarginMm = 8; // visible white margin at bottom of each PDF page
+  const bottomMarginMmBase = 8; // visible white margin at bottom of each PDF page
+  const bottomMarginMm = bottomMarginMmBase + footerReserveMm; // reserve footer space
   const pxPerMm = canvas.width / imgWidth;
   const topMarginPx = Math.round(topMarginMm * pxPerMm);
   const bottomMarginPx = Math.round(bottomMarginMm * pxPerMm);
@@ -1318,6 +1338,12 @@ export const generatePDFDownload = async (data: DocumentData) => {
     const imgData = canvas.toDataURL('image/png');
     const h = (canvas.height * imgWidth) / canvas.width;
     pdf.addImage(imgData, 'PNG', 0, topMarginMm, imgWidth, h);
+    // Clear footer area and draw footer
+    if (footerReserveMm > 0) {
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, pageHeight - footerReserveMm - bottomMarginMmBase, pageWidth, footerReserveMm + bottomMarginMmBase, 'F');
+      drawFooter(1);
+    }
   } else {
     let renderedY = 0;
     const pages: { dataUrl: string; pxHeight: number }[] = [];
@@ -1381,11 +1407,16 @@ export const generatePDFDownload = async (data: DocumentData) => {
       renderedY += sliceHeight;
     }
 
-    // Render pages with visible margins
+    // Render pages with visible margins and reserved footer area
     pages.forEach((page, idx) => {
       if (idx > 0) pdf.addPage();
       const h = (page.pxHeight * imgWidth) / canvas.width; // map cropped height to mm
       pdf.addImage(page.dataUrl, 'PNG', 0, topMarginMm, imgWidth, h);
+      if (footerReserveMm > 0) {
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, pageHeight - footerReserveMm - bottomMarginMmBase, pageWidth, footerReserveMm + bottomMarginMmBase, 'F');
+        drawFooter(idx + 1);
+      }
     });
   }
 
