@@ -323,7 +323,6 @@ export const generateJsPDF = (data: DocumentData) => {
     return linesWithSpacing.length * lineHeight + paddingV + 15;
   };
 
-  const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
 
   // For invoices and proformas, footer will be rendered only on the final Terms page.
 
@@ -356,7 +355,7 @@ export const generateJsPDF = (data: DocumentData) => {
       return termsHeight <= availableAreaHeight;
     };
 
-    for (let f = 10; f >= 6; f--) {
+    for (let f = 10; f >= 5; f--) {
       if (fits(f)) {
         fittedFont = f;
         break;
