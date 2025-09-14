@@ -389,7 +389,7 @@ export const generateJsPDF = (data: DocumentData) => {
   // Quotation Footer (kept for quotations only)
   if (data.type === 'quotation') {
     const footerY = doc.internal.pageSize.getHeight() - 15;
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     doc.setTextColor(75, 33, 182);
     const text = 'We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!';
     const qLines = doc.splitTextToSize(text, contentWidth);
