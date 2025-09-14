@@ -1237,12 +1237,6 @@ export const generatePDF = (data: DocumentData) => {
     </div>
     ` : ''}
 
-        <!-- Quotation Footer (centered at bottom) -->
-        ${data.type === 'quotation' ? `
-        <div class="quotation-footer">
-          We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!
-        </div>
-        ` : ''}
 
       </div>
     </body>
