@@ -1302,10 +1302,10 @@ export const generatePDFDownload = async (data: DocumentData) => {
     const maxWidth = pageWidth - marginMm * 2;
     const text = 'We trust that you will look at this quote satisfactorily........, looking forward to the order. Thank you for Your business!';
     pdf.setFont('helvetica', 'italic');
-    pdf.setFontSize(12);
+    pdf.setFontSize(10);
     pdf.setTextColor(17, 24, 39);
     const lines = pdf.splitTextToSize(text, maxWidth) as string[];
-    const lineHeight = 5;
+    const lineHeight = 4;
     const yBottom = pageHeight - 10; // 10mm from bottom baseline
     const yTop = yBottom - (lines.length - 1) * lineHeight;
     pdf.text(lines as any, marginMm, yTop, { align: 'left' });
