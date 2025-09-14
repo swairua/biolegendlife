@@ -21,8 +21,8 @@ function showOnce(message: string, description?: string) {
 
 function formatAuthMessage(raw: string) {
   const msg = raw.replace('[object Object]', '').trim();
-  if (!msg || msg.length < 3) return 'Authentication error';
-  return msg.includes('Authentication') || msg.includes('authentication') ? msg : `Authentication error: ${msg}`;
+  if (!msg || msg.length < 3) return 'Sign-in issue';
+  return /auth|authentication|signin|login/i.test(msg) ? msg : `Sign-in issue: ${msg}`;
 }
 
 export function initGlobalErrorHandler() {
