@@ -224,7 +224,7 @@ export const generateJsPDF = (data: DocumentData) => {
       startY: yPosition,
       head: [['Description', 'Qty', 'Unit Price', 'Tax %', 'Total']],
       body: tableData,
-      margin: { left: margin, right: margin, bottom: footerHeight },
+      margin: { left: margin, right: margin, bottom: 12 },
       styles: {
         fontSize: 9,
         cellPadding: 3,
@@ -241,10 +241,7 @@ export const generateJsPDF = (data: DocumentData) => {
         2: { halign: 'right', cellWidth: 30 },
         3: { halign: 'center', cellWidth: 20 },
         4: { halign: 'right', cellWidth: 30 },
-      },
-      didDrawPage: (data.type === 'invoice' || data.type === 'proforma') ? (pageData) => {
-        renderBankFooter(doc);
-      } : undefined,
+      }
     });
 
     yPosition = (doc as any).lastAutoTable.finalY + 10;
@@ -283,54 +280,58 @@ export const generateJsPDF = (data: DocumentData) => {
   doc.text(formatCurrency(data.total_amount), pageWidth - margin, yPosition, { align: 'right' });
   yPosition += 15;
 
-  // Check if we need to move content to next page to make room for footer
+  // Main content done. Footer will be added with Terms on a dedicated last page for invoice/proforma.
+
+  // TERMS & Bank Footer on a dedicated final page for invoice/proforma
   if (data.type === 'invoice' || data.type === 'proforma') {
     const pageHeight = doc.internal.pageSize.getHeight();
-    const availableSpace = pageHeight - yPosition;
+    // Always create a final page for Terms + Footer
+    doc.addPage();
 
-    // If there's not enough space for footer, move to next page
-    if (availableSpace < footerHeight + 20) {
-      doc.addPage();
-      renderBankFooter(doc);
+    const topY = 20;
+    const titleGap = 10;
+
+    // Compute dynamic footer height
+    const dynamicFooterHeight = getFooterHeight();
+    const areaBottomPadding = 10; // extra safety margin above footer
+    const availableAreaHeight = pageHeight - topY - titleGap - dynamicFooterHeight - areaBottomPadding;
+
+    // Prepare terms text (fallback to empty string if none)
+    const termsText = data.terms_and_conditions || '';
+
+    // Find a font size/line height combo that fits the available area
+    let fittedFont = 10;
+    let fittedLineHeight = Math.max(3.2, fittedFont * 0.35);
+    let wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
+
+    const fits = (font: number) => {
+      const lineH = Math.max(3.0, font * 0.34);
+      doc.setFontSize(font);
+      wrappedLines = doc.splitTextToSize(termsText, contentWidth) as string[];
+      const termsHeight = wrappedLines.length * lineH;
+      return termsHeight <= availableAreaHeight;
+    };
+
+    for (let f = 10; f >= 6; f--) {
+      if (fits(f)) {
+        fittedFont = f;
+        fittedLineHeight = Math.max(3.0, f * 0.34);
+        break;
+      }
     }
-  }
 
-  // Terms and Conditions for Invoices
-  if (data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma')) {
-    // Check if we need a new page (reserve space for footer)
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const availableHeight = pageHeight - yPosition - footerHeight - 20; // extra margin
-
-    if (availableHeight < 50) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
+    // Render title
     doc.setFontSize(12);
     doc.setTextColor(75, 33, 182);
-    doc.text('TERMS & CONDITIONS', margin, yPosition);
-    yPosition += 10;
+    doc.text('TERMS & CONDITIONS', margin, topY);
 
-    doc.setFontSize(9);
+    // Render terms block
+    doc.setFontSize(fittedFont);
     doc.setTextColor(50, 50, 50);
+    doc.text(wrappedLines, margin, topY + titleGap);
 
-    // Split terms into sections and ensure they don't break badly
-    const termsLines = doc.splitTextToSize(data.terms_and_conditions, contentWidth);
-    const lineHeight = 4;
-    const maxLinesPerPage = Math.floor((pageHeight - yPosition - footerHeight - 20) / lineHeight);
-
-    for (let i = 0; i < termsLines.length; i += maxLinesPerPage) {
-      if (i > 0) {
-        doc.addPage();
-        yPosition = 20;
-      }
-
-      const pageLines = termsLines.slice(i, i + maxLinesPerPage);
-      doc.text(pageLines, margin, yPosition);
-      yPosition += pageLines.length * lineHeight;
-    }
-
-    yPosition += 10;
+    // Render bank footer at the very bottom of this page only
+    renderBankFooter(doc);
   }
 
   // Footer renderer (Bank Details) for invoices and proformas at the very bottom, full width
@@ -375,16 +376,7 @@ export const generateJsPDF = (data: DocumentData) => {
 
   const footerHeight = (data.type === 'invoice' || data.type === 'proforma') ? getFooterHeight() : 0;
 
-  // Apply footer to pages without table content (if any)
-  if (data.type === 'invoice' || data.type === 'proforma') {
-    const pages = doc.getNumberOfPages();
-    for (let p = 1; p <= pages; p++) {
-      doc.setPage(p);
-      // Only render footer if it wasn't already rendered by didDrawPage
-      // This ensures footer appears on all pages, including title pages
-      renderBankFooter(doc);
-    }
-  }
+  // For invoices and proformas, footer will be rendered only on the final Terms page.
 
   // Quotation Footer (kept for quotations only)
   if (data.type === 'quotation') {
