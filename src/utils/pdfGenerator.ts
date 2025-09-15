@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { sanitizeAndEscape } from './textSanitizer';
 
 // PDF Generation utility using HTML to print/PDF conversion
 // Since we don't have jsPDF installed, I'll create a simple HTML-to-print function
@@ -347,7 +348,7 @@ const buildDocumentHTML = (data: DocumentData) => {
             <tr>
               ${data.type === 'statement' ? `
                 <td>${formatDate((item as any).transaction_date)}</td>
-                <td class="description-cell">${item.description}</td>
+                <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                 <td>${(item as any).reference}</td>
                 <td class="amount-cell">${(item as any).debit > 0 ? formatCurrency((item as any).debit) : ''}</td>
                 <td class="amount-cell">${(item as any).credit > 0 ? formatCurrency((item as any).credit) : ''}</td>
@@ -361,7 +362,7 @@ const buildDocumentHTML = (data: DocumentData) => {
                 <td class="amount-cell" style="font-weight: bold;">${formatCurrency(item.line_total)}</td>
               ` : `
                 <td>${index + 1}</td>
-                <td class="description-cell">${item.description}</td>
+                <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                 ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
                   <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#10B981' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
@@ -421,7 +422,7 @@ const buildDocumentHTML = (data: DocumentData) => {
     <div class="invoice-terms-section" style="page-break-before: always;">
       <div class="invoice-terms">
         <div class="section-subtitle">Terms & Conditions</div>
-        <div class="terms-content">${data.terms_and_conditions}</div>
+        <div class="terms-content">${sanitizeAndEscape(data.terms_and_conditions || '')}</div>
       </div>
     </div>` : ''}
 
@@ -1106,7 +1107,7 @@ export const generatePDF = (data: DocumentData) => {
                 <tr>
                   ${data.type === 'statement' ? `
                   <td>${formatDate((item as any).transaction_date)}</td>
-                  <td class="description-cell">${item.description}</td>
+                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   <td>${(item as any).reference}</td>
                   <td class="amount-cell">${(item as any).debit > 0 ? formatCurrency((item as any).debit) : ''}</td>
                   <td class="amount-cell">${(item as any).credit > 0 ? formatCurrency((item as any).credit) : ''}</td>
@@ -1120,7 +1121,7 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="amount-cell" style="font-weight: bold;">${formatCurrency(item.line_total)}</td>
                   ` : `
                   <td>${index + 1}</td>
-                  <td class="description-cell">${item.description}</td>
+                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
                   <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#10B981' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
@@ -1208,7 +1209,7 @@ export const generatePDF = (data: DocumentData) => {
         <div class="invoice-terms-section" style="page-break-before: always;">
           <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
-            <div class="terms-content">${data.terms_and_conditions}</div>
+        <div class="terms-content">${sanitizeAndEscape(data.terms_and_conditions || '')}</div>
           </div>
         </div>
         ` : ''}
