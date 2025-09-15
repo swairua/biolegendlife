@@ -415,21 +415,7 @@ const buildDocumentHTML = (data: DocumentData) => {
       </div>
     </div>` : ''}
 
-    ${data.notes && data.type !== 'quotation' ? `
-    <div class="notes-section">
-      <div class="notes">
-        <div class="section-subtitle">Notes</div>
-        <div class="notes-content">${data.notes}</div>
-      </div>
-    </div>` : ''}
-
-    ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
-    <div class="invoice-terms-section">
-      <div class="invoice-terms">
-        <div class="section-subtitle">Terms & Conditions</div>
-        <div class="terms-content">${data.terms_and_conditions}</div>
-      </div>
-    </div>` : ''}
+    ${''}
 
     ${(data.type === 'invoice' || data.type === 'proforma') ? `
     <div class="invoice-bank-details">
@@ -437,6 +423,14 @@ const buildDocumentHTML = (data: DocumentData) => {
       <div class="bank-line">-KCB RIVER ROAD BRANCH NUMBER: 1216348367 - SWIFT CODE; KCBLKENX - BANK CODE; 01 - BRANCH CODE; 114</div>
       <div class="bank-line">-ABSA BANK KENYA PLC: THIKA ROAD MALL BRANCH, ACC: 2051129930, BRANCH CODE; 024, SWIFT CODE; BARCKENX</div>
       <div class="bank-line">-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX</div>
+    </div>` : ''}
+
+    ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
+    <div class="invoice-terms-section" style="page-break-before: always;">
+      <div class="invoice-terms">
+        <div class="section-subtitle">Terms & Conditions</div>
+        <div class="terms-content">${data.terms_and_conditions}</div>
+      </div>
     </div>` : ''}
 
     ${''}
