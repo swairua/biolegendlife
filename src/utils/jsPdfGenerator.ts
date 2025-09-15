@@ -203,6 +203,14 @@ export const generateJsPDF = (data: DocumentData) => {
     detailsY += 5;
   }
 
+  if (data.lpo_number) {
+    doc.setTextColor(100, 100, 100);
+    doc.text('LPO No.:', detailsX, detailsY);
+    doc.setTextColor(0, 0, 0);
+    doc.text(sanitizeText(data.lpo_number), detailsX + 20, detailsY);
+    detailsY += 5;
+  }
+
   doc.setTextColor(100, 100, 100);
   doc.text('Amount:', detailsX, detailsY);
   doc.setTextColor(75, 33, 182);
