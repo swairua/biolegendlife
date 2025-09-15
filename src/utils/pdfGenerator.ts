@@ -122,6 +122,7 @@ const analyzeColumns = (items: DocumentData['items']) => {
 const buildDocumentHTML = (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
   const visibleColumns = analyzeColumns(data.items);
+  const hasStatementLPO = data.type === 'statement' && Array.isArray(data.items) && data.items.some((i: any) => i && (i as any).lpo_number);
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', {
     style: 'currency', currency: 'KES', minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -272,6 +273,7 @@ const buildDocumentHTML = (data: DocumentData) => {
                 <tr><td class="label">${data.type === 'lpo' ? 'Order Date' : 'Date'}:</td><td class="value">${formatDate(data.date)}</td></tr>
                 ${data.due_date ? `<tr><td class="label">${data.type === 'lpo' ? 'Expected Delivery' : 'Due Date'}:</td><td class="value">${formatDate(data.due_date)}</td></tr>` : ''}
                 ${data.valid_until ? `<tr><td class="label">Valid Until:</td><td class="value">${formatDate(data.valid_until)}</td></tr>` : ''}
+                ${data.lpo_number ? `<tr><td class="label">LPO No.:</td><td class="value">${sanitizeAndEscape(data.lpo_number)}</td></tr>` : ''}
                 <tr><td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td><td class="value" style="font-weight: bold; color: #111827;">${formatCurrency(data.total_amount)}</td></tr>
               </table>
             </div>
@@ -448,6 +450,7 @@ export const generatePDF = (data: DocumentData) => {
 
   // Analyze which columns have values
   const visibleColumns = analyzeColumns(data.items);
+  const hasStatementLPO = data.type === 'statement' && Array.isArray(data.items) && data.items.some((i: any) => i && (i as any).lpo_number);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -983,6 +986,12 @@ export const generatePDF = (data: DocumentData) => {
                       <td class="value">${formatDate(data.valid_until)}</td>
                     </tr>
                     ` : ''}
+                    ${data.lpo_number ? `
+                    <tr>
+                      <td class="label">LPO No.:</td>
+                      <td class="value">${sanitizeAndEscape(data.lpo_number)}</td>
+                    </tr>
+                    ` : ''}
                     <tr>
                       <td class="label">${data.type === 'receipt' ? 'Amount Paid' : data.type === 'remittance' ? 'Total Payment' : data.type === 'lpo' ? 'Order Total' : 'Amount'}:</td>
                       <td class="value" style="font-weight: bold; color: #111827;">${formatCurrency(data.total_amount)}</td>
@@ -1078,6 +1087,7 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 12%;">Date</th>
                 <th style="width: 25%;">Description</th>
                 <th style="width: 15%;">Reference</th>
+                ${hasStatementLPO ? '<th style="width: 12%;">LPO No.</th>' : ''}
                 <th style="width: 12%;">Debit</th>
                 <th style="width: 12%;">Credit</th>
                 <th style="width: 12%;">Balance</th>
@@ -1109,6 +1119,7 @@ export const generatePDF = (data: DocumentData) => {
                   <td>${formatDate((item as any).transaction_date)}</td>
                   <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   <td>${(item as any).reference}</td>
+                  ${hasStatementLPO ? `<td>${sanitizeAndEscape((item as any).lpo_number || '')}</td>` : ''}
                   <td class="amount-cell">${(item as any).debit > 0 ? formatCurrency((item as any).debit) : ''}</td>
                   <td class="amount-cell">${(item as any).credit > 0 ? formatCurrency((item as any).credit) : ''}</td>
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
@@ -1635,7 +1646,8 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
       description: `Invoice ${inv.invoice_number}`,
       debit: inv.total_amount || 0,
       credit: 0,
-      due_date: inv.due_date
+      due_date: inv.due_date,
+      lpo_number: inv.lpo_number
     })),
     // Add all payments as credits
     ...payments.map(pay => ({
@@ -1672,7 +1684,8 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
       debit: Number(transaction.debit || 0),
       credit: Number(transaction.credit || 0),
       due_date: transaction.due_date,
-      days_overdue: transaction.due_date ? Math.max(0, Math.floor((today.getTime() - new Date(transaction.due_date).getTime()) / (1000 * 60 * 60 * 24))) : 0
+      days_overdue: transaction.due_date ? Math.max(0, Math.floor((today.getTime() - new Date(transaction.due_date).getTime()) / (1000 * 60 * 60 * 24))) : 0,
+      lpo_number: (transaction as any).lpo_number
     };
   });
 
