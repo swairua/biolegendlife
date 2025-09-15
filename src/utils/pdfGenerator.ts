@@ -1201,25 +1201,7 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section (only for non-quotation documents) -->
-        ${data.notes && data.type !== 'quotation' ? `
-        <div class="notes-section">
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
-          </div>
-        </div>
-        ` : ''}
-
-        <!-- Terms Section (for invoices only) -->
-        ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
-        <div class="invoice-terms-section">
-          <div class="invoice-terms">
-            <div class="section-subtitle">Terms & Conditions</div>
-            <div class="terms-content">${data.terms_and_conditions}</div>
-          </div>
-        </div>
-        ` : ''}
+        ${''}
 
         <!-- Bank Details (for invoices and proformas) -->
         ${(data.type === 'invoice' || data.type === 'proforma') ? `
@@ -1230,6 +1212,16 @@ export const generatePDF = (data: DocumentData) => {
       <div class="bank-line">-NCBA BANK KENYA PLC: THIKA ROAD MALL (TRM) BRANCH, ACC: 1007470556, BANK CODE: 000, BRANCH CODE; 07, SWIFT CODE: CBAFKENX</div>
     </div>
     ` : ''}
+
+        <!-- Terms Section (for invoices and proformas) -->
+        ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
+        <div class="invoice-terms-section" style="page-break-before: always;">
+          <div class="invoice-terms">
+            <div class="section-subtitle">Terms & Conditions</div>
+            <div class="terms-content">${data.terms_and_conditions}</div>
+          </div>
+        </div>
+        ` : ''}
 
 
       </div>
