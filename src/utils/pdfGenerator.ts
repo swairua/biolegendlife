@@ -1272,6 +1272,11 @@ export const generatePDFDownload = async (data: DocumentData) => {
     throw new Error('Failed to render PDF content');
   }
 
+  // Measure Terms section position to force page break before it (for invoice/proforma)
+  const termsEl = iframe.contentDocument?.querySelector('.invoice-terms-section') as HTMLElement | null;
+  const pageRect = (pageEl as HTMLElement).getBoundingClientRect();
+  const termsTopCssPx = termsEl ? termsEl.getBoundingClientRect().top - pageRect.top : null;
+
   const canvas = await html2canvas(pageEl, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
