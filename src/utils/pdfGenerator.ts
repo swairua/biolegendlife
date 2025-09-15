@@ -1355,8 +1355,23 @@ export const generatePDFDownload = async (data: DocumentData) => {
       return Math.min(target, canvas.height);
     };
 
+    // Compute scale from CSS px to canvas px
+    const scalePx = canvas.width / (pageEl as HTMLElement).clientWidth;
+    const termsTopCanvasPx = termsTopCssPx != null ? Math.round(termsTopCssPx * scalePx) : null;
+
     while (renderedY < canvas.height) {
-      const breakY = findBreak(renderedY, innerPageHeightPx);
+      let breakY = findBreak(renderedY, innerPageHeightPx);
+
+      // Force a break exactly before Terms section so it starts on a fresh page
+      if (
+        (data.type === 'invoice' || data.type === 'proforma') &&
+        termsTopCanvasPx != null &&
+        termsTopCanvasPx > renderedY + 10 &&
+        termsTopCanvasPx < breakY - 10
+      ) {
+        breakY = findBreak(renderedY, termsTopCanvasPx - renderedY);
+      }
+
       const sliceHeight = Math.min(innerPageHeightPx, canvas.height - renderedY, breakY - renderedY);
 
       // If the remaining slice is too small, stop to avoid blank trailing page
