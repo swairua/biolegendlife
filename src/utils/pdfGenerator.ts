@@ -228,7 +228,7 @@ const buildDocumentHTML = (data: DocumentData) => {
     .bank-details { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 10px; color: #111827; text-align: center; font-weight: 600; }
     .invoice-terms-section { margin: 30px 0 20px 0; page-break-inside: avoid; }
     .invoice-terms { width: 100%; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 20px; }
-    .invoice-bank-details { margin-top: auto; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: left; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
+    .invoice-bank-details { margin-top: 12px; margin-bottom: 0; padding: 0; background: transparent; border-radius: 0; border: none; font-size: 10px; color: #111827; text-align: left; font-weight: 600; line-height: 1.4; page-break-inside: avoid; }
 .invoice-bank-details .bank-line { margin: 6px 0; }
     .quotation-footer { position: absolute; left: 20mm; right: 20mm; bottom: 10mm; font-size: 12px; color: #111827; text-align: center; font-weight: 600; font-style: italic; }
   </style>
@@ -415,16 +415,10 @@ const buildDocumentHTML = (data: DocumentData) => {
       </div>
     </div>` : ''}
 
-    ${data.notes && data.type !== 'quotation' ? `
-    <div class="notes-section">
-      <div class="notes">
-        <div class="section-subtitle">Notes</div>
-        <div class="notes-content">${data.notes}</div>
-      </div>
-    </div>` : ''}
+    ${''}
 
     ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
-    <div class="invoice-terms-section">
+    <div class="invoice-terms-section" style="page-break-before: always;">
       <div class="invoice-terms">
         <div class="section-subtitle">Terms & Conditions</div>
         <div class="terms-content">${data.terms_and_conditions}</div>
@@ -924,7 +918,7 @@ export const generatePDF = (data: DocumentData) => {
             padding: 20px;
           }
         }
-        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .invoice-terms-section {\n          margin: 30px 0 20px 0;\n          page-break-inside: avoid;\n        }\n        \n        .invoice-terms {\n          width: 100%;\n          padding: 20px;\n          background: #f8f9fa;\n          border-radius: 8px;\n          border: 1px solid #e9ecef;\n          margin-bottom: 20px;\n        }\n        \n        .invoice-bank-details {\n          margin-top: auto;
+        \n        .payment-banner {\n          background: transparent;\n          padding: 0;\n          margin: 0 0 10px 0;\n          border-left: none;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          border-radius: 0;\n          font-weight: 600;\n        }\n        \n        .bank-details {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n        }\n        \n        .invoice-terms-section {\n          margin: 30px 0 20px 0;\n          page-break-inside: avoid;\n        }\n        \n        .invoice-terms {\n          width: 100%;\n          padding: 20px;\n          background: #f8f9fa;\n          border-radius: 8px;\n          border: 1px solid #e9ecef;\n          margin-bottom: 20px;\n        }\n        \n        .invoice-bank-details {\n          margin-top: 12px;
           margin-bottom: 0;\n          padding: 15px;\n          background: #f0f0f0;\n          border-radius: 8px;\n          border: 1px solid #ddd;\n          font-size: 10px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          line-height: 1.4;\n          page-break-inside: avoid;\n        }\n        \n        .quotation-footer {\n          position: absolute;\n          left: 20mm;\n          right: 20mm;\n          bottom: 10mm;\n          font-size: 12px;\n          color: #111827;\n          text-align: center;\n          font-weight: 600;\n          font-style: italic;\n        }\n      </style>
     </head>
     <body>
@@ -1207,19 +1201,11 @@ export const generatePDF = (data: DocumentData) => {
         </div>
         ` : ''}
 
-        <!-- Notes Section (only for non-quotation documents) -->
-        ${data.notes && data.type !== 'quotation' ? `
-        <div class="notes-section">
-          <div class="notes">
-            <div class="section-subtitle">Notes</div>
-            <div class="notes-content">${data.notes}</div>
-          </div>
-        </div>
-        ` : ''}
+        ${''}
 
-        <!-- Terms Section (for invoices only) -->
+        <!-- Terms Section (for invoices and proformas) -->
         ${data.terms_and_conditions && (data.type === 'invoice' || data.type === 'proforma') ? `
-        <div class="invoice-terms-section">
+        <div class="invoice-terms-section" style="page-break-before: always;">
           <div class="invoice-terms">
             <div class="section-subtitle">Terms & Conditions</div>
             <div class="terms-content">${data.terms_and_conditions}</div>
@@ -1285,6 +1271,11 @@ export const generatePDFDownload = async (data: DocumentData) => {
     document.body.removeChild(iframe);
     throw new Error('Failed to render PDF content');
   }
+
+  // Measure Terms section position to force page break before it (for invoice/proforma)
+  const termsEl = iframe.contentDocument?.querySelector('.invoice-terms-section') as HTMLElement | null;
+  const pageRect = (pageEl as HTMLElement).getBoundingClientRect();
+  const termsTopCssPx = termsEl ? termsEl.getBoundingClientRect().top - pageRect.top : null;
 
   const canvas = await html2canvas(pageEl, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
 
@@ -1364,8 +1355,23 @@ export const generatePDFDownload = async (data: DocumentData) => {
       return Math.min(target, canvas.height);
     };
 
+    // Compute scale from CSS px to canvas px
+    const scalePx = canvas.width / (pageEl as HTMLElement).clientWidth;
+    const termsTopCanvasPx = termsTopCssPx != null ? Math.round(termsTopCssPx * scalePx) : null;
+
     while (renderedY < canvas.height) {
-      const breakY = findBreak(renderedY, innerPageHeightPx);
+      let breakY = findBreak(renderedY, innerPageHeightPx);
+
+      // Force a break exactly before Terms section so it starts on a fresh page
+      if (
+        (data.type === 'invoice' || data.type === 'proforma') &&
+        termsTopCanvasPx != null &&
+        termsTopCanvasPx > renderedY + 10 &&
+        termsTopCanvasPx < breakY - 10
+      ) {
+        breakY = findBreak(renderedY, termsTopCanvasPx - renderedY);
+      }
+
       const sliceHeight = Math.min(innerPageHeightPx, canvas.height - renderedY, breakY - renderedY);
 
       // If the remaining slice is too small, stop to avoid blank trailing page
