@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { sanitizeText } from './textSanitizer';
 
 interface DocumentData {
   type: 'quotation' | 'invoice' | 'remittance' | 'proforma' | 'delivery' | 'statement' | 'receipt' | 'lpo';
@@ -202,6 +203,14 @@ export const generateJsPDF = (data: DocumentData) => {
     detailsY += 5;
   }
 
+  if (data.lpo_number) {
+    doc.setTextColor(100, 100, 100);
+    doc.text('LPO No.:', detailsX, detailsY);
+    doc.setTextColor(0, 0, 0);
+    doc.text(sanitizeText(data.lpo_number), detailsX + 20, detailsY);
+    detailsY += 5;
+  }
+
   doc.setTextColor(100, 100, 100);
   doc.text('Amount:', detailsX, detailsY);
   doc.setTextColor(75, 33, 182);
@@ -213,7 +222,7 @@ export const generateJsPDF = (data: DocumentData) => {
   // Items Table
   if (data.items && data.items.length > 0) {
     const tableData = data.items.map(item => [
-      item.description,
+      sanitizeText(item.description),
       item.quantity.toString(),
       formatCurrency(item.unit_price),
       item.tax_percentage ? `${item.tax_percentage}%` : '0%',
@@ -341,7 +350,7 @@ export const generateJsPDF = (data: DocumentData) => {
     const availableAreaHeight = pageHeight - topY - titleGap - dynamicFooterHeight - areaBottomPadding;
 
     // Prepare terms text (fallback to empty string if none)
-    const termsText = data.terms_and_conditions || '';
+    const termsText = sanitizeText(data.terms_and_conditions || '');
 
     // Accurate fit calculation: convert pt -> mm
     const PT_TO_MM = 0.352777778;

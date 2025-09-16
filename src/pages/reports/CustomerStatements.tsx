@@ -26,7 +26,7 @@ import {
   FileText,
   Search
 } from 'lucide-react';
-import { useCustomers, usePayments, useCompanies } from '@/hooks/useDatabase';
+import { useCustomers, usePayments, useCompanies, useDeliveryNotes } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { toast } from 'sonner';
 import { generateCustomerStatementPDF } from '@/utils/pdfGenerator';
@@ -61,6 +61,7 @@ export default function CustomerStatements() {
   const { data: payments } = usePayments();
   const { data: companies } = useCompanies();
   const currentCompany = companies?.[0];
+  const { data: deliveryNotes } = useDeliveryNotes(currentCompany?.id);
 
   // Calculate customer statements
   const calculateCustomerStatements = (): CustomerStatement[] => {
@@ -211,7 +212,7 @@ export default function CustomerStatements() {
 
           await generateCustomerStatementPDF(customer, customerInvoices, customerPayments, {
             statement_date: statementDate
-          }, companyDetails);
+          }, companyDetails, (deliveryNotes || []).filter(d => d.customer_id === customer.id));
         }
       }
 
@@ -259,7 +260,7 @@ export default function CustomerStatements() {
 
           await generateCustomerStatementPDF(customer, customerInvoices, customerPayments, {
             statement_date: statementDate
-          }, companyDetails);
+          }, companyDetails, (deliveryNotes || []).filter(d => d.customer_id === customer.id));
         }
       }
 

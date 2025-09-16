@@ -26,11 +26,11 @@ import {
 } from 'lucide-react';
 import { generateCustomerStatementPDF } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
-import { useCustomers, usePayments, useCompanies } from '@/hooks/useDatabase';
+import { useCustomers, usePayments, useCompanies, useDeliveryNotes } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 
 // Helper function to compute customer statements from real data
-const computeCustomerStatements = (customers: any[], invoices: any[], payments: any[]) => {
+const computeCustomerStatements = (customers: any[], invoices: any[], payments: any[], deliveryNotes: any[] = []) => {
   if (!customers || !invoices || !payments) return [];
 
   return customers.map(customer => {
@@ -62,15 +62,23 @@ const computeCustomerStatements = (customers: any[], invoices: any[], payments: 
 
     // Build transactions array
     const allTransactions = [
-      ...customerInvoices.map(inv => ({
-        date: inv.invoice_date,
-        type: 'Invoice',
-        reference: inv.invoice_number,
-        description: `Invoice - ${inv.invoice_number}`,
-        debit: Number(inv.total_amount) || 0,
-        credit: 0,
-        balance: 0 // Will be calculated
-      })),
+      ...customerInvoices.map(inv => {
+        const dn = deliveryNotes.find((d: any) => d.invoice_id === inv.id);
+        const deliveryNoteNumber = dn?.delivery_number || dn?.delivery_note_number || '';
+        return {
+          date: inv.invoice_date,
+          type: 'Invoice',
+          reference: inv.invoice_number,
+          description: `Invoice - ${inv.invoice_number}`,
+          debit: Number(inv.total_amount) || 0,
+          credit: 0,
+          balance: 0,
+          invoice_number: inv.invoice_number,
+          lpo_number: inv.lpo_number || '',
+          delivery_note_number: deliveryNoteNumber,
+          amount: Number(inv.total_amount) || 0
+        };
+      }),
       ...customerPayments.map(pay => ({
         date: pay.payment_date,
         type: 'Payment',
@@ -78,7 +86,11 @@ const computeCustomerStatements = (customers: any[], invoices: any[], payments: 
         description: `Payment - ${pay.payment_method || 'Cash'}`,
         debit: 0,
         credit: Number(pay.amount) || 0,
-        balance: 0 // Will be calculated
+        balance: 0,
+        invoice_number: '',
+        lpo_number: '',
+        delivery_note_number: '',
+        amount: -(Number(pay.amount) || 0)
       }))
     ];
 
@@ -124,9 +136,15 @@ const StatementOfAccounts = () => {
   const { data: customers } = useCustomers(currentCompany?.id);
   const { data: invoices } = useInvoices(currentCompany?.id);
   const { data: payments } = usePayments(currentCompany?.id);
+  const { data: deliveryNotes } = useDeliveryNotes(currentCompany?.id);
 
   // Compute statements from real data
-  const computedStatements = computeCustomerStatements(customers || [], invoices || [], payments || []);
+  const computedStatements = computeCustomerStatements(
+    customers || [],
+    invoices || [],
+    payments || [],
+    deliveryNotes || []
+  );
 
   const handleDownloadStatement = async (statement: any) => {
     try {
@@ -156,7 +174,7 @@ const StatementOfAccounts = () => {
       // Generate PDF with real data
       await generateCustomerStatementPDF(customer, customerInvoices, customerPayments, {
         statement_date: new Date().toISOString().split('T')[0]
-      }, companyDetails);
+      }, companyDetails, (deliveryNotes || []).filter(d => d.customer_id === customer.id));
 
       toast.success(`Statement PDF generated for ${statement.customerName}`);
     } catch (error) {
@@ -423,12 +441,10 @@ const StatementOfAccounts = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Date</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Reference</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="text-right">Debit</TableHead>
-                            <TableHead className="text-right">Credit</TableHead>
-                            <TableHead className="text-right">Balance</TableHead>
+                            <TableHead>LPO</TableHead>
+                            <TableHead>Delivery Note</TableHead>
+                            <TableHead>Invoice No.</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -440,21 +456,11 @@ const StatementOfAccounts = () => {
                                   <span>{new Date(transaction.date).toLocaleDateString()}</span>
                                 </div>
                               </TableCell>
-                              <TableCell>
-                                <Badge variant={transaction.type === 'Payment' ? 'default' : 'secondary'}>
-                                  {transaction.type}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-medium">{transaction.reference}</TableCell>
-                              <TableCell>{transaction.description}</TableCell>
-                              <TableCell className="text-right text-destructive">
-                                {transaction.debit > 0 ? formatCurrency(transaction.debit) : ''}
-                              </TableCell>
-                              <TableCell className="text-right text-success">
-                                {transaction.credit > 0 ? formatCurrency(transaction.credit) : ''}
-                              </TableCell>
+                              <TableCell className="font-medium">{transaction.lpo_number || ''}</TableCell>
+                              <TableCell className="font-medium">{transaction.delivery_note_number || ''}</TableCell>
+                              <TableCell className="font-medium">{transaction.invoice_number || ''}</TableCell>
                               <TableCell className="text-right font-medium">
-                                {formatCurrency(transaction.balance)}
+                                {formatCurrency(transaction.amount ?? (transaction.debit > 0 ? transaction.debit : -transaction.credit))}
                               </TableCell>
                             </TableRow>
                           ))}
