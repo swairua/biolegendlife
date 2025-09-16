@@ -17,6 +17,8 @@ interface DocumentData {
   };
   company?: CompanyDetails;
   items?: Array<{
+    product_code?: string;
+    product_name?: string;
     description: string;
     quantity: number;
     unit_price: number;
@@ -221,7 +223,10 @@ export const generateJsPDF = (data: DocumentData) => {
 
   // Items Table
   if (data.items && data.items.length > 0) {
-    const tableData = data.items.map(item => [
+    const tableData = data.items.map((item, idx) => [
+      String(idx + 1),
+      sanitizeText(item.product_code || ''),
+      sanitizeText(item.product_name || item.description),
       sanitizeText(item.description),
       item.quantity.toString(),
       formatCurrency(item.unit_price),
@@ -231,7 +236,7 @@ export const generateJsPDF = (data: DocumentData) => {
 
     autoTable(doc, {
       startY: yPosition,
-      head: [['Description', 'Qty', 'Unit Price', 'Tax %', 'Total']],
+      head: [['#', 'Item No.', 'Item Name', 'Description', 'Qty', 'Unit Price', 'Tax %', 'Total']],
       body: tableData,
       margin: { left: margin, right: margin, bottom: 12 },
       styles: {
@@ -245,11 +250,14 @@ export const generateJsPDF = (data: DocumentData) => {
         fontStyle: 'bold',
       },
       columnStyles: {
-        0: { cellWidth: 'auto' },
-        1: { halign: 'center', cellWidth: 20 },
-        2: { halign: 'right', cellWidth: 30 },
-        3: { halign: 'center', cellWidth: 20 },
-        4: { halign: 'right', cellWidth: 30 },
+        0: { halign: 'center', cellWidth: 10 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 55 },
+        4: { halign: 'center', cellWidth: 16 },
+        5: { halign: 'right', cellWidth: 26 },
+        6: { halign: 'center', cellWidth: 16 },
+        7: { halign: 'right', cellWidth: 28 },
       }
     });
 
@@ -441,6 +449,8 @@ export const downloadInvoiceJsPDF = async (invoice: any, documentType: 'INVOICE'
       const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
       return {
+        product_code: item.products?.product_code || item.product_code || '',
+        product_name: item.product_name || item.products?.name || item.description || 'Unknown Item',
         description: item.description || item.product_name || item.products?.name || 'Unknown Item',
         quantity: quantity,
         unit_price: unitPrice,
@@ -551,6 +561,8 @@ export const downloadQuotationJsPDF = async (quotation: any, company?: CompanyDe
       const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
       return {
+        product_code: item.products?.product_code || item.product_code || '',
+        product_name: item.product_name || item.products?.name || item.description || 'Unknown Item',
         description: item.description || item.product_name || item.products?.name || 'Unknown Item',
         quantity: quantity,
         unit_price: unitPrice,
