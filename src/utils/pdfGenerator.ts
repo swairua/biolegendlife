@@ -1151,13 +1151,11 @@ export const generatePDF = (data: DocumentData) => {
                     }
                   </td>
                   ` : `
-                  <td>${item.quantity}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_code || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_name || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
+                  <td class="center">${item.quantity} ${item.unit_of_measure || 'pcs'}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
-                  ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.discountBeforeVat ? `<td class="amount-cell">${formatCurrency(item.discount_before_vat || 0)}</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
-                  ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
