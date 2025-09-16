@@ -255,7 +255,7 @@ export function ViewQuotationModal({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12 text-center">Item</TableHead>
+                      <TableHead className="w-12 text-center">Item #</TableHead>
                       <TableHead>Item Description</TableHead>
                       <TableHead className="text-center">Qty</TableHead>
                       <TableHead className="text-center">Unit Pack</TableHead>
