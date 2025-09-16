@@ -441,12 +441,10 @@ const StatementOfAccounts = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Date</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Reference</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="text-right">Debit</TableHead>
-                            <TableHead className="text-right">Credit</TableHead>
-                            <TableHead className="text-right">Balance</TableHead>
+                            <TableHead>LPO</TableHead>
+                            <TableHead>Delivery Note</TableHead>
+                            <TableHead>Invoice No.</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -458,21 +456,11 @@ const StatementOfAccounts = () => {
                                   <span>{new Date(transaction.date).toLocaleDateString()}</span>
                                 </div>
                               </TableCell>
-                              <TableCell>
-                                <Badge variant={transaction.type === 'Payment' ? 'default' : 'secondary'}>
-                                  {transaction.type}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-medium">{transaction.reference}</TableCell>
-                              <TableCell>{transaction.description}</TableCell>
-                              <TableCell className="text-right text-destructive">
-                                {transaction.debit > 0 ? formatCurrency(transaction.debit) : ''}
-                              </TableCell>
-                              <TableCell className="text-right text-success">
-                                {transaction.credit > 0 ? formatCurrency(transaction.credit) : ''}
-                              </TableCell>
+                              <TableCell className="font-medium">{transaction.lpo_number || ''}</TableCell>
+                              <TableCell className="font-medium">{transaction.delivery_note_number || ''}</TableCell>
+                              <TableCell className="font-medium">{transaction.invoice_number || ''}</TableCell>
                               <TableCell className="text-right font-medium">
-                                {formatCurrency(transaction.balance)}
+                                {formatCurrency(transaction.amount ?? (transaction.debit > 0 ? transaction.debit : -transaction.credit))}
                               </TableCell>
                             </TableRow>
                           ))}
