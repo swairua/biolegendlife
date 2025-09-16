@@ -260,7 +260,7 @@ export default function CustomerStatements() {
 
           await generateCustomerStatementPDF(customer, customerInvoices, customerPayments, {
             statement_date: statementDate
-          }, companyDetails);
+          }, companyDetails, (deliveryNotes || []).filter(d => d.customer_id === customer.id));
         }
       }
 
