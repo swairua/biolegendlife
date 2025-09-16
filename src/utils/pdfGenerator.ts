@@ -1138,7 +1138,6 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="amount-cell">${(item as any).credit_amount ? formatCurrency((item as any).credit_amount) : ''}</td>
                   <td class="amount-cell" style="font-weight: bold;">${formatCurrency(item.line_total)}</td>
                   ` : `
-                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
                   <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#10B981' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
