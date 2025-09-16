@@ -349,10 +349,11 @@ const buildDocumentHTML = (data: DocumentData) => {
             <tr>
               ${data.type === 'statement' ? `
                 <td>${formatDate((item as any).transaction_date)}</td>
-                <td>${sanitizeAndEscape((item as any).lpo_number || '')}</td>
-                <td>${sanitizeAndEscape((item as any).delivery_note_number || '')}</td>
-                <td>${sanitizeAndEscape((item as any).invoice_number || (item as any).reference || '')}</td>
-                <td class="amount-cell">${formatCurrency((item as any).amount !== undefined ? (item as any).amount : ((item as any).debit > 0 ? (item as any).debit : -((item as any).credit || 0)))}</td>
+                <td class="description-cell">${item.description}</td>
+                <td>${(item as any).reference}</td>
+                <td class="amount-cell">${(item as any).debit > 0 ? formatCurrency((item as any).debit) : ''}</td>
+                <td class="amount-cell">${(item as any).credit > 0 ? formatCurrency((item as any).credit) : ''}</td>
+                <td class="amount-cell">${formatCurrency(item.line_total)}</td>
               ` : data.type === 'remittance' ? `
                 <td>${formatDate((item as any).document_date)}</td>
                 <td>${(item as any).description ? (item as any).description.split(':')[0] : 'Payment'}</td>
@@ -1082,11 +1083,12 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 15%;">Unit</th>
                 <th style="width: 10%;">Status</th>
                 ` : data.type === 'statement' ? `
-                <th style="width: 16%;">Date</th>
-                <th style="width: 16%;">LPO No.</th>
-                <th style="width: 20%;">Delivery Note</th>
-                <th style="width: 20%;">Invoice No.</th>
-                <th style="width: 16%;">Amount</th>
+                <th style="width: 12%;">Date</th>
+                <th style="width: 25%;">Description</th>
+                <th style="width: 15%;">Reference</th>
+                <th style="width: 12%;">Debit</th>
+                <th style="width: 12%;">Credit</th>
+                <th style="width: 12%;">Balance</th>
                 ` : data.type === 'remittance' ? `
                 <th style="width: 15%;">Date</th>
                 <th style="width: 15%;">Document Type</th>
@@ -1113,10 +1115,11 @@ export const generatePDF = (data: DocumentData) => {
                 <tr>
                   ${data.type === 'statement' ? `
                   <td>${formatDate((item as any).transaction_date)}</td>
-                  <td>${sanitizeAndEscape((item as any).lpo_number || '')}</td>
-                  <td>${sanitizeAndEscape((item as any).delivery_note_number || '')}</td>
-                  <td>${sanitizeAndEscape((item as any).invoice_number || (item as any).reference || '')}</td>
-                  <td class="amount-cell">${formatCurrency((item as any).amount !== undefined ? (item as any).amount : ((item as any).debit > 0 ? (item as any).debit : -((item as any).credit || 0)))}</td>
+                  <td class="description-cell">${item.description}</td>
+                  <td>${(item as any).reference}</td>
+                  <td class="amount-cell">${(item as any).debit > 0 ? formatCurrency((item as any).debit) : ''}</td>
+                  <td class="amount-cell">${(item as any).credit > 0 ? formatCurrency((item as any).credit) : ''}</td>
+                  <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   ` : data.type === 'remittance' ? `
                   <td>${formatDate((item as any).document_date)}</td>
                   <td>${(item as any).description ? (item as any).description.split(':')[0] : 'Payment'}</td>
@@ -1633,23 +1636,15 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
   // Create all transactions (invoices and payments) with running balance
   const allTransactions = [
     // Add all invoices as debits
-    ...invoices.map(inv => {
-      const dn = (deliveryNotes || []).find((d: any) => d.invoice_id === inv.id);
-      const deliveryNoteNumber = dn?.delivery_number || dn?.delivery_note_number || '';
-      return {
-        date: inv.invoice_date,
-        type: 'invoice',
-        reference: inv.invoice_number,
-        description: `Invoice ${inv.invoice_number}`,
-        debit: inv.total_amount || 0,
-        credit: 0,
-        due_date: inv.due_date,
-        lpo_number: inv.lpo_number,
-        invoice_number: inv.invoice_number,
-        delivery_note_number: deliveryNoteNumber,
-        amount: Number(inv.total_amount || 0)
-      };
-    }),
+    ...invoices.map(inv => ({
+      date: inv.invoice_date,
+      type: 'invoice',
+      reference: inv.invoice_number,
+      description: `Invoice ${inv.invoice_number}`,
+      debit: inv.total_amount || 0,
+      credit: 0,
+      due_date: inv.due_date
+    })),
     // Add all payments as credits
     ...payments.map(pay => ({
       date: pay.payment_date,
