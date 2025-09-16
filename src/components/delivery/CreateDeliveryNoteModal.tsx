@@ -86,11 +86,35 @@ export const CreateDeliveryNoteModal = ({
   const createDeliveryNote = useCreateDeliveryNote();
 
   useEffect(() => {
-    if (open) {
-      // Generate delivery note number
-      setDeliveryNoteNumber(`DN-${Date.now()}`);
-    }
-  }, [open]);
+    const generateNextNumber = async () => {
+      if (!open || !companyId) return;
+      try {
+        // Fetch the most recent delivery note number for this company
+        const { data, error } = await supabase
+          .from('delivery_notes')
+          .select('delivery_number, delivery_note_number, created_at')
+          .eq('company_id', companyId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) {
+          console.warn('Failed to fetch latest delivery note number, falling back to base:', error);
+        }
+
+        const latest = data && data.length > 0 ? (data[0].delivery_number || data[0].delivery_note_number || '') : '';
+        const match = String(latest).match(/(\d+)/g);
+        const lastNumeric = match && match.length > 0 ? parseInt(match[match.length - 1], 10) : NaN;
+        const base = 500;
+        const next = Number.isFinite(lastNumeric) ? Math.max(base, lastNumeric + 1) : base;
+        setDeliveryNoteNumber(String(next));
+      } catch (e) {
+        console.error('Error generating delivery note number, using base 500:', e);
+        setDeliveryNoteNumber('500');
+      }
+    };
+
+    generateNextNumber();
+  }, [open, companyId]);
 
   // When invoice is selected, populate customer and items
   useEffect(() => {
