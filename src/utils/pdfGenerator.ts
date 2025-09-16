@@ -123,7 +123,14 @@ const analyzeColumns = (items: DocumentData['items']) => {
 // Build the full HTML (with inline CSS) for the current document design
 const buildDocumentHTML = (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
-  const visibleColumns = analyzeColumns(data.items);
+  const visibleColumns = (() => {
+    const cols: any = analyzeColumns(data.items);
+    if (data.type === 'quotation' || data.type === 'invoice') {
+      cols.taxPercentage = false;
+      cols.taxAmount = false;
+    }
+    return cols;
+  })();
   const hasStatementLPO = data.type === 'statement' && Array.isArray(data.items) && data.items.some((i: any) => i && (i as any).lpo_number);
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', {
@@ -452,7 +459,14 @@ export const generatePDF = (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
 
   // Analyze which columns have values
-  const visibleColumns = analyzeColumns(data.items);
+  const visibleColumns = (() => {
+    const cols: any = analyzeColumns(data.items);
+    if (data.type === 'quotation' || data.type === 'invoice') {
+      cols.taxPercentage = false;
+      cols.taxAmount = false;
+    }
+    return cols;
+  })();
   const hasStatementLPO = data.type === 'statement' && Array.isArray(data.items) && data.items.some((i: any) => i && (i as any).lpo_number);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
