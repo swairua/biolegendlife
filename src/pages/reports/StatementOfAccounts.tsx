@@ -174,7 +174,7 @@ const StatementOfAccounts = () => {
       // Generate PDF with real data
       await generateCustomerStatementPDF(customer, customerInvoices, customerPayments, {
         statement_date: new Date().toISOString().split('T')[0]
-      }, companyDetails);
+      }, companyDetails, (deliveryNotes || []).filter(d => d.customer_id === customer.id));
 
       toast.success(`Statement PDF generated for ${statement.customerName}`);
     } catch (error) {
