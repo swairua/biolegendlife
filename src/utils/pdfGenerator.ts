@@ -128,6 +128,9 @@ const buildDocumentHTML = (data: DocumentData) => {
     if (data.type === 'quotation' || data.type === 'invoice') {
       cols.taxPercentage = false;
       cols.taxAmount = false;
+      cols.discountPercentage = false;
+      cols.discountBeforeVat = false;
+      cols.discountAmount = false;
     }
     return cols;
   })();
@@ -464,6 +467,9 @@ export const generatePDF = (data: DocumentData) => {
     if (data.type === 'quotation' || data.type === 'invoice') {
       cols.taxPercentage = false;
       cols.taxAmount = false;
+      cols.discountPercentage = false;
+      cols.discountBeforeVat = false;
+      cols.discountAmount = false;
     }
     return cols;
   })();
