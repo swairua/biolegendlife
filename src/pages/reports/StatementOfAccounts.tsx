@@ -62,15 +62,23 @@ const computeCustomerStatements = (customers: any[], invoices: any[], payments: 
 
     // Build transactions array
     const allTransactions = [
-      ...customerInvoices.map(inv => ({
-        date: inv.invoice_date,
-        type: 'Invoice',
-        reference: inv.invoice_number,
-        description: `Invoice - ${inv.invoice_number}`,
-        debit: Number(inv.total_amount) || 0,
-        credit: 0,
-        balance: 0 // Will be calculated
-      })),
+      ...customerInvoices.map(inv => {
+        const dn = deliveryNotes.find((d: any) => d.invoice_id === inv.id);
+        const deliveryNoteNumber = dn?.delivery_number || dn?.delivery_note_number || '';
+        return {
+          date: inv.invoice_date,
+          type: 'Invoice',
+          reference: inv.invoice_number,
+          description: `Invoice - ${inv.invoice_number}`,
+          debit: Number(inv.total_amount) || 0,
+          credit: 0,
+          balance: 0,
+          invoice_number: inv.invoice_number,
+          lpo_number: inv.lpo_number || '',
+          delivery_note_number: deliveryNoteNumber,
+          amount: Number(inv.total_amount) || 0
+        };
+      }),
       ...customerPayments.map(pay => ({
         date: pay.payment_date,
         type: 'Payment',
@@ -78,7 +86,11 @@ const computeCustomerStatements = (customers: any[], invoices: any[], payments: 
         description: `Payment - ${pay.payment_method || 'Cash'}`,
         debit: 0,
         credit: Number(pay.amount) || 0,
-        balance: 0 // Will be calculated
+        balance: 0,
+        invoice_number: '',
+        lpo_number: '',
+        delivery_note_number: '',
+        amount: -(Number(pay.amount) || 0)
       }))
     ];
 
