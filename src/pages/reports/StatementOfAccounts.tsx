@@ -30,7 +30,7 @@ import { useCustomers, usePayments, useCompanies, useDeliveryNotes } from '@/hoo
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 
 // Helper function to compute customer statements from real data
-const computeCustomerStatements = (customers: any[], invoices: any[], payments: any[]) => {
+const computeCustomerStatements = (customers: any[], invoices: any[], payments: any[], deliveryNotes: any[] = []) => {
   if (!customers || !invoices || !payments) return [];
 
   return customers.map(customer => {
