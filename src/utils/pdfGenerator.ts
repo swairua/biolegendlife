@@ -1475,6 +1475,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
       return {
+        product_code: item.products?.product_code || item.product_code || '',
+        product_name: item.product_name || item.products?.name || '',
         description: item.description || item.product_name || item.products?.name || 'Unknown Item',
         quantity: quantity,
         unit_price: unitPrice,
