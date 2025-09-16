@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Download, Send, X, AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { usePayments, useCompanies } from '@/hooks/useDatabase';
+import { usePayments, useCompanies, useDeliveryNotes } from '@/hooks/useDatabase';
 import { useInvoicesFixed as useInvoices } from '@/hooks/useInvoicesFixed';
 import { generateCustomerStatementPDF } from '@/utils/pdfGenerator';
 import { toast } from 'sonner';
@@ -36,6 +36,7 @@ export default function CustomerStatementPreviewModal({
   const { data: companies } = useCompanies();
   const { data: invoices } = useInvoices();
   const { data: payments } = usePayments();
+  const { data: deliveryNotes } = useDeliveryNotes(companies?.[0]?.id);
 
   // Get customer's invoices and payments
   const customerInvoices = invoices?.filter(inv => inv.customer_id === customer.customer_id) || [];
@@ -107,7 +108,7 @@ export default function CustomerStatementPreviewModal({
 
       await generateCustomerStatementPDF(customerData, customerInvoices, customerPayments, {
         statement_date: statementDate
-      }, companyDetails);
+      }, companyDetails, (deliveryNotes || []).filter(d => d.customer_id === customer.customer_id));
       
       toast.success('Statement PDF generated successfully!');
     } catch (error) {
