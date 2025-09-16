@@ -343,18 +343,12 @@ const buildDocumentHTML = (data: DocumentData) => {
               <th style="width: 16%;">Credit Amount</th>
               <th style="width: 18%;">Payment Amount</th>
             ` : `
-              <th style="width: 4%;">#</th>
-              <th style="width: 12%;">Item No.</th>
-              <th style="width: 18%;">Item Name</th>
-              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '22%' : '30%'};">Description</th>
-              <th style="width: 8%;">Qty</th>
-              <th style="width: 14%;">Unit Price</th>
-              ${visibleColumns.discountPercentage ? '<th style="width: 8%;">Disc %</th>' : ''}
-              ${visibleColumns.discountBeforeVat ? '<th style="width: 10%;">Disc Before VAT</th>' : ''}
-              ${visibleColumns.discountAmount ? '<th style="width: 10%;">Disc Amount</th>' : ''}
-              ${visibleColumns.taxPercentage ? '<th style="width: 8%;">Tax %</th>' : ''}
-              ${visibleColumns.taxAmount ? '<th style="width: 10%;">Tax Amount</th>' : ''}
-              <th style="width: 14%;">Total</th>
+              <th style="width: 16%;">Item Number</th>
+              <th style="width: 20%;">Item Name</th>
+              <th style="width: 34%;">Description</th>
+              <th style="width: 10%;">Units</th>
+              <th style="width: 10%;">Unit Price</th>
+              <th style="width: 10%;">Line Total</th>
             `}
           </tr>
         </thead>
@@ -1121,18 +1115,12 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 16%;">Credit Amount</th>
                 <th style="width: 18%;">Payment Amount</th>
                 ` : `
-                <th style="width: 4%;">#</th>
-              <th style="width: 12%;">Item No.</th>
-              <th style="width: 18%;">Item Name</th>
-              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '22%' : '30%'};">Description</th>
-              <th style="width: 8%;">Qty</th>
-              <th style="width: 14%;">Unit Price</th>
-              ${visibleColumns.discountPercentage ? '<th style="width: 8%;">Disc %</th>' : ''}
-              ${visibleColumns.discountBeforeVat ? '<th style="width: 10%;">Disc Before VAT</th>' : ''}
-              ${visibleColumns.discountAmount ? '<th style="width: 10%;">Disc Amount</th>' : ''}
-              ${visibleColumns.taxPercentage ? '<th style="width: 8%;">Tax %</th>' : ''}
-              ${visibleColumns.taxAmount ? '<th style="width: 10%;">Tax Amount</th>' : ''}
-              <th style="width: 14%;">Total</th>
+                <th style="width: 16%;">Item Number</th>
+              <th style="width: 20%;">Item Name</th>
+              <th style="width: 34%;">Description</th>
+              <th style="width: 10%;">Units</th>
+              <th style="width: 10%;">Unit Price</th>
+              <th style="width: 10%;">Line Total</th>
                 `}
               </tr>
             </thead>
