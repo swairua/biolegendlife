@@ -255,6 +255,7 @@ export function ViewQuotationModal({
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12 text-center">Item #</TableHead>
                       <TableHead>Item Description</TableHead>
                       <TableHead className="text-center">Qty</TableHead>
                       <TableHead className="text-center">Unit Pack</TableHead>
@@ -266,6 +267,7 @@ export function ViewQuotationModal({
                   <TableBody>
                     {quotation.quotation_items.map((item: any, index: number) => (
                       <TableRow key={index}>
+                        <TableCell className="w-12 text-center">{index + 1}</TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{item.description}</div>

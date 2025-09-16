@@ -378,7 +378,7 @@ const buildDocumentHTML = (data: DocumentData) => {
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '<span style="color: #111827; font-weight: bold;">✓ Complete</span>' : '<span style="color: #111827; font-weight: bold;">⚠ Partial</span>'}
                   </td>
                 ` : `
-                  <td class="description-cell">${sanitizeAndEscape((item as any).product_code || '')}</td>
+                  <td class="center">${index + 1}</td>
                   <td class="description-cell">${sanitizeAndEscape((item as any).product_name || '')}</td>
                   <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   <td class="center">${item.quantity} ${item.unit_of_measure || 'pcs'}</td>
@@ -1149,7 +1149,7 @@ export const generatePDF = (data: DocumentData) => {
                     }
                   </td>
                   ` : `
-                  <td class="description-cell">${sanitizeAndEscape((item as any).product_code || '')}</td>
+                  <td class="center">${index + 1}</td>
                   <td class="description-cell">${sanitizeAndEscape((item as any).product_name || '')}</td>
                   <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   <td class="center">${item.quantity} ${item.unit_of_measure || 'pcs'}</td>

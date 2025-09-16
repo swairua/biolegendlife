@@ -223,8 +223,8 @@ export const generateJsPDF = (data: DocumentData) => {
 
   // Items Table
   if (data.items && data.items.length > 0) {
-    const tableData = data.items.map((item) => [
-      sanitizeText(item.product_code || ''),
+    const tableData = data.items.map((item, index) => [
+      String(index + 1),
       sanitizeText(item.product_name || item.description),
       sanitizeText(item.description),
       `${item.quantity} ${item.unit_of_measure || 'pcs'}`,

@@ -559,6 +559,7 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12 text-center">Item #</TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
@@ -569,8 +570,9 @@ export function CreateQuotationModal({ open, onOpenChange, onSuccess }: CreateQu
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {items.map((item) => (
+                  {items.map((item, index) => (
                     <TableRow key={item.id}>
+                      <TableCell className="w-12 text-center">{index + 1}</TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">{item.product_name}</div>
