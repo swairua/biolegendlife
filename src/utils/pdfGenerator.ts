@@ -1688,6 +1688,9 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
       reference: transaction.reference,
       debit: Number(transaction.debit || 0),
       credit: Number(transaction.credit || 0),
+      amount: Number((transaction as any).amount !== undefined ? (transaction as any).amount : (transaction.debit || 0) - (transaction.credit || 0)),
+      invoice_number: (transaction as any).invoice_number || '',
+      delivery_note_number: (transaction as any).delivery_note_number || '',
       due_date: transaction.due_date,
       days_overdue: transaction.due_date ? Math.max(0, Math.floor((today.getTime() - new Date(transaction.due_date).getTime()) / (1000 * 60 * 60 * 24))) : 0,
       lpo_number: (transaction as any).lpo_number
