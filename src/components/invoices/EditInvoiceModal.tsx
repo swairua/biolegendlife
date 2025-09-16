@@ -508,7 +508,7 @@ export function EditInvoiceModal({ open, onOpenChange, onSuccess, invoice }: Edi
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12 text-center">Item</TableHead>
+                    <TableHead className="w-12 text-center">Item #</TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
