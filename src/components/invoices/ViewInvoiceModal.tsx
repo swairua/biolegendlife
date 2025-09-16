@@ -241,6 +241,7 @@ export function ViewInvoiceModal({
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12 text-center">Item</TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Unit Price</TableHead>
@@ -252,6 +253,7 @@ export function ViewInvoiceModal({
                 <TableBody>
                   {invoice.invoice_items.map((item: any, index: number) => (
                     <TableRow key={item.id || index}>
+                      <TableCell className="w-12 text-center">{index + 1}</TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">
