@@ -21,6 +21,8 @@ export interface DocumentData {
   };
   company?: CompanyDetails; // Optional company details override
   items?: Array<{
+    product_code?: string;
+    product_name?: string;
     description: string;
     quantity: number;
     unit_price: number;
@@ -331,16 +333,18 @@ const buildDocumentHTML = (data: DocumentData) => {
               <th style="width: 16%;">Credit Amount</th>
               <th style="width: 18%;">Payment Amount</th>
             ` : `
-              <th style="width: 5%;">#</th>
-              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
-              <th style="width: 10%;">Qty</th>
-              <th style="width: 15%;">Unit Price</th>
-              ${visibleColumns.discountPercentage ? '<th style="width: 10%;">Disc %</th>' : ''}
-              ${visibleColumns.discountBeforeVat ? '<th style="width: 12%;">Disc Before VAT</th>' : ''}
-              ${visibleColumns.discountAmount ? '<th style="width: 12%;">Disc Amount</th>' : ''}
-              ${visibleColumns.taxPercentage ? '<th style="width: 10%;">Tax %</th>' : ''}
-              ${visibleColumns.taxAmount ? '<th style="width: 12%;">Tax Amount</th>' : ''}
-              <th style="width: 15%;">Total</th>
+              <th style="width: 4%;">#</th>
+              <th style="width: 12%;">Item No.</th>
+              <th style="width: 18%;">Item Name</th>
+              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '22%' : '30%'};">Description</th>
+              <th style="width: 8%;">Qty</th>
+              <th style="width: 14%;">Unit Price</th>
+              ${visibleColumns.discountPercentage ? '<th style="width: 8%;">Disc %</th>' : ''}
+              ${visibleColumns.discountBeforeVat ? '<th style="width: 10%;">Disc Before VAT</th>' : ''}
+              ${visibleColumns.discountAmount ? '<th style="width: 10%;">Disc Amount</th>' : ''}
+              ${visibleColumns.taxPercentage ? '<th style="width: 8%;">Tax %</th>' : ''}
+              ${visibleColumns.taxAmount ? '<th style="width: 10%;">Tax Amount</th>' : ''}
+              <th style="width: 14%;">Total</th>
             `}
           </tr>
         </thead>
@@ -1097,16 +1101,18 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 16%;">Credit Amount</th>
                 <th style="width: 18%;">Payment Amount</th>
                 ` : `
-                <th style="width: 5%;">#</th>
-                <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '30%' : '40%'};">Description</th>
-                <th style="width: 10%;">Qty</th>
-                <th style="width: 15%;">Unit Price</th>
-                ${visibleColumns.discountPercentage ? '<th style="width: 10%;">Disc %</th>' : ''}
-                ${visibleColumns.discountBeforeVat ? '<th style="width: 12%;">Disc Before VAT</th>' : ''}
-                ${visibleColumns.discountAmount ? '<th style="width: 12%;">Disc Amount</th>' : ''}
-                ${visibleColumns.taxPercentage ? '<th style="width: 10%;">Tax %</th>' : ''}
-                ${visibleColumns.taxAmount ? '<th style="width: 12%;">Tax Amount</th>' : ''}
-                <th style="width: 15%;">Total</th>
+                <th style="width: 4%;">#</th>
+              <th style="width: 12%;">Item No.</th>
+              <th style="width: 18%;">Item Name</th>
+              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '22%' : '30%'};">Description</th>
+              <th style="width: 8%;">Qty</th>
+              <th style="width: 14%;">Unit Price</th>
+              ${visibleColumns.discountPercentage ? '<th style="width: 8%;">Disc %</th>' : ''}
+              ${visibleColumns.discountBeforeVat ? '<th style="width: 10%;">Disc Before VAT</th>' : ''}
+              ${visibleColumns.discountAmount ? '<th style="width: 10%;">Disc Amount</th>' : ''}
+              ${visibleColumns.taxPercentage ? '<th style="width: 8%;">Tax %</th>' : ''}
+              ${visibleColumns.taxAmount ? '<th style="width: 10%;">Tax Amount</th>' : ''}
+              <th style="width: 14%;">Total</th>
                 `}
               </tr>
             </thead>
