@@ -123,7 +123,17 @@ const analyzeColumns = (items: DocumentData['items']) => {
 // Build the full HTML (with inline CSS) for the current document design
 const buildDocumentHTML = (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
-  const visibleColumns = analyzeColumns(data.items);
+  const visibleColumns = (() => {
+    const cols: any = analyzeColumns(data.items);
+    if (data.type === 'quotation' || data.type === 'invoice') {
+      cols.taxPercentage = false;
+      cols.taxAmount = false;
+      cols.discountPercentage = false;
+      cols.discountBeforeVat = false;
+      cols.discountAmount = false;
+    }
+    return cols;
+  })();
   const hasStatementLPO = data.type === 'statement' && Array.isArray(data.items) && data.items.some((i: any) => i && (i as any).lpo_number);
 
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-KE', {
@@ -333,18 +343,12 @@ const buildDocumentHTML = (data: DocumentData) => {
               <th style="width: 16%;">Credit Amount</th>
               <th style="width: 18%;">Payment Amount</th>
             ` : `
-              <th style="width: 4%;">#</th>
-              <th style="width: 12%;">Item No.</th>
-              <th style="width: 18%;">Item Name</th>
-              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '22%' : '30%'};">Description</th>
-              <th style="width: 8%;">Qty</th>
-              <th style="width: 14%;">Unit Price</th>
-              ${visibleColumns.discountPercentage ? '<th style="width: 8%;">Disc %</th>' : ''}
-              ${visibleColumns.discountBeforeVat ? '<th style="width: 10%;">Disc Before VAT</th>' : ''}
-              ${visibleColumns.discountAmount ? '<th style="width: 10%;">Disc Amount</th>' : ''}
-              ${visibleColumns.taxPercentage ? '<th style="width: 8%;">Tax %</th>' : ''}
-              ${visibleColumns.taxAmount ? '<th style="width: 10%;">Tax Amount</th>' : ''}
-              <th style="width: 14%;">Total</th>
+              <th style="width: 16%;">Item Number</th>
+              <th style="width: 20%;">Item Name</th>
+              <th style="width: 34%;">Description</th>
+              <th style="width: 10%;">Units</th>
+              <th style="width: 10%;">Unit Price</th>
+              <th style="width: 10%;">Line Total</th>
             `}
           </tr>
         </thead>
@@ -366,8 +370,6 @@ const buildDocumentHTML = (data: DocumentData) => {
                 <td class="amount-cell">${(item as any).credit_amount ? formatCurrency((item as any).credit_amount) : ''}</td>
                 <td class="amount-cell" style="font-weight: bold;">${formatCurrency(item.line_total)}</td>
               ` : `
-                <td>${index + 1}</td>
-                <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                 ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
                   <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#10B981' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
@@ -376,13 +378,11 @@ const buildDocumentHTML = (data: DocumentData) => {
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '<span style="color: #111827; font-weight: bold;">✓ Complete</span>' : '<span style="color: #111827; font-weight: bold;">⚠ Partial</span>'}
                   </td>
                 ` : `
-                  <td>${item.quantity}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_code || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_name || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
+                  <td class="center">${item.quantity} ${item.unit_of_measure || 'pcs'}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
-                  ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.discountBeforeVat ? `<td class="amount-cell">${formatCurrency(item.discount_before_vat || 0)}</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
-                  ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                 `}
               `}
@@ -452,7 +452,17 @@ export const generatePDF = (data: DocumentData) => {
   const company = data.company || DEFAULT_COMPANY;
 
   // Analyze which columns have values
-  const visibleColumns = analyzeColumns(data.items);
+  const visibleColumns = (() => {
+    const cols: any = analyzeColumns(data.items);
+    if (data.type === 'quotation' || data.type === 'invoice') {
+      cols.taxPercentage = false;
+      cols.taxAmount = false;
+      cols.discountPercentage = false;
+      cols.discountBeforeVat = false;
+      cols.discountAmount = false;
+    }
+    return cols;
+  })();
   const hasStatementLPO = data.type === 'statement' && Array.isArray(data.items) && data.items.some((i: any) => i && (i as any).lpo_number);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -1101,18 +1111,12 @@ export const generatePDF = (data: DocumentData) => {
                 <th style="width: 16%;">Credit Amount</th>
                 <th style="width: 18%;">Payment Amount</th>
                 ` : `
-                <th style="width: 4%;">#</th>
-              <th style="width: 12%;">Item No.</th>
-              <th style="width: 18%;">Item Name</th>
-              <th style="width: ${visibleColumns.discountPercentage || visibleColumns.discountBeforeVat || visibleColumns.discountAmount || visibleColumns.taxPercentage || visibleColumns.taxAmount ? '22%' : '30%'};">Description</th>
-              <th style="width: 8%;">Qty</th>
-              <th style="width: 14%;">Unit Price</th>
-              ${visibleColumns.discountPercentage ? '<th style="width: 8%;">Disc %</th>' : ''}
-              ${visibleColumns.discountBeforeVat ? '<th style="width: 10%;">Disc Before VAT</th>' : ''}
-              ${visibleColumns.discountAmount ? '<th style="width: 10%;">Disc Amount</th>' : ''}
-              ${visibleColumns.taxPercentage ? '<th style="width: 8%;">Tax %</th>' : ''}
-              ${visibleColumns.taxAmount ? '<th style="width: 10%;">Tax Amount</th>' : ''}
-              <th style="width: 14%;">Total</th>
+                <th style="width: 16%;">Item Number</th>
+              <th style="width: 20%;">Item Name</th>
+              <th style="width: 34%;">Description</th>
+              <th style="width: 10%;">Units</th>
+              <th style="width: 10%;">Unit Price</th>
+              <th style="width: 10%;">Line Total</th>
                 `}
               </tr>
             </thead>
@@ -1134,8 +1138,6 @@ export const generatePDF = (data: DocumentData) => {
                   <td class="amount-cell">${(item as any).credit_amount ? formatCurrency((item as any).credit_amount) : ''}</td>
                   <td class="amount-cell" style="font-weight: bold;">${formatCurrency(item.line_total)}</td>
                   ` : `
-                  <td>${index + 1}</td>
-                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                   ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
                   <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#10B981' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
@@ -1147,13 +1149,11 @@ export const generatePDF = (data: DocumentData) => {
                     }
                   </td>
                   ` : `
-                  <td>${item.quantity}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_code || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_name || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
+                  <td class="center">${item.quantity} ${item.unit_of_measure || 'pcs'}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
-                  ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.discountBeforeVat ? `<td class="amount-cell">${formatCurrency(item.discount_before_vat || 0)}</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
-                  ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                   `}
                   `}
@@ -1471,6 +1471,8 @@ export const downloadInvoicePDF = async (invoice: any, documentType: 'INVOICE' |
       const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
       return {
+        product_code: item.products?.product_code || item.product_code || '',
+        product_name: item.product_name || item.products?.name || '',
         description: item.description || item.product_name || item.products?.name || 'Unknown Item',
         quantity: quantity,
         unit_price: unitPrice,
@@ -1530,6 +1532,8 @@ export const downloadCreditNotePDF = async (creditNote: any, company?: CompanyDe
       const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
       return {
+        product_code: item.products?.product_code || item.product_code || '',
+        product_name: item.product_name || item.products?.name || '',
         description: item.description || item.product_name || item.products?.name || 'Unknown Item',
         quantity: quantity,
         unit_price: unitPrice,
@@ -1576,6 +1580,8 @@ export const downloadQuotationPDF = async (quotation: any, company?: CompanyDeta
       const computedLineTotal = quantity * unitPrice - discountAmount + taxAmount;
 
       return {
+        product_code: item.products?.product_code || item.product_code || '',
+        product_name: item.product_name || item.products?.name || '',
         description: item.description || item.product_name || item.products?.name || 'Unknown Item',
         quantity: quantity,
         unit_price: unitPrice,
