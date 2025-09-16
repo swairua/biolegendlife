@@ -1633,16 +1633,23 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
   // Create all transactions (invoices and payments) with running balance
   const allTransactions = [
     // Add all invoices as debits
-    ...invoices.map(inv => ({
-      date: inv.invoice_date,
-      type: 'invoice',
-      reference: inv.invoice_number,
-      description: `Invoice ${inv.invoice_number}`,
-      debit: inv.total_amount || 0,
-      credit: 0,
-      due_date: inv.due_date,
-      lpo_number: inv.lpo_number
-    })),
+    ...invoices.map(inv => {
+      const dn = (deliveryNotes || []).find((d: any) => d.invoice_id === inv.id);
+      const deliveryNoteNumber = dn?.delivery_number || dn?.delivery_note_number || '';
+      return {
+        date: inv.invoice_date,
+        type: 'invoice',
+        reference: inv.invoice_number,
+        description: `Invoice ${inv.invoice_number}`,
+        debit: inv.total_amount || 0,
+        credit: 0,
+        due_date: inv.due_date,
+        lpo_number: inv.lpo_number,
+        invoice_number: inv.invoice_number,
+        delivery_note_number: deliveryNoteNumber,
+        amount: Number(inv.total_amount || 0)
+      };
+    }),
     // Add all payments as credits
     ...payments.map(pay => ({
       date: pay.payment_date,
@@ -1651,7 +1658,11 @@ export const generateCustomerStatementPDF = async (customer: any, invoices: any[
       description: `Payment - ${pay.method || 'Cash'}`,
       debit: 0,
       credit: pay.amount || 0,
-      due_date: null
+      due_date: null,
+      lpo_number: '',
+      invoice_number: '',
+      delivery_note_number: '',
+      amount: -Number(pay.amount || 0)
     }))
   ];
 
