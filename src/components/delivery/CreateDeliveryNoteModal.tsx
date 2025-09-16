@@ -33,6 +33,7 @@ import { useCreateDeliveryNote } from '@/hooks/useQuotationItems';
 import { mapDeliveryNoteForDatabase } from '@/utils/deliveryNoteMapper';
 import { validateDeliveryNoteData } from '@/utils/deliveryNoteValidation';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DeliveryItem {
   id: string;
