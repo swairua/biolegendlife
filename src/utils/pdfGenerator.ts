@@ -370,8 +370,6 @@ const buildDocumentHTML = (data: DocumentData) => {
                 <td class="amount-cell">${(item as any).credit_amount ? formatCurrency((item as any).credit_amount) : ''}</td>
                 <td class="amount-cell" style="font-weight: bold;">${formatCurrency(item.line_total)}</td>
               ` : `
-                <td>${index + 1}</td>
-                <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
                 ${data.type === 'delivery' ? `
                   <td>${(item as any).quantity_ordered || item.quantity}</td>
                   <td style="font-weight: bold; color: ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '#10B981' : '#F59E0B'};">${(item as any).quantity_delivered || item.quantity}</td>
@@ -380,13 +378,11 @@ const buildDocumentHTML = (data: DocumentData) => {
                     ${(item as any).quantity_delivered >= (item as any).quantity_ordered ? '<span style="color: #111827; font-weight: bold;">✓ Complete</span>' : '<span style="color: #111827; font-weight: bold;">⚠ Partial</span>'}
                   </td>
                 ` : `
-                  <td>${item.quantity}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_code || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape((item as any).product_name || '')}</td>
+                  <td class="description-cell">${sanitizeAndEscape(item.description)}</td>
+                  <td class="center">${item.quantity} ${item.unit_of_measure || 'pcs'}</td>
                   <td class="amount-cell">${formatCurrency(item.unit_price)}</td>
-                  ${visibleColumns.discountPercentage ? `<td>${item.discount_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.discountBeforeVat ? `<td class="amount-cell">${formatCurrency(item.discount_before_vat || 0)}</td>` : ''}
-                  ${visibleColumns.discountAmount ? `<td class="amount-cell">${formatCurrency(item.discount_amount || 0)}</td>` : ''}
-                  ${visibleColumns.taxPercentage ? `<td>${item.tax_percentage || 0}%</td>` : ''}
-                  ${visibleColumns.taxAmount ? `<td class="amount-cell">${formatCurrency(item.tax_amount || 0)}</td>` : ''}
                   <td class="amount-cell">${formatCurrency(item.line_total)}</td>
                 `}
               `}
