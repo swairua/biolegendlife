@@ -136,9 +136,15 @@ const StatementOfAccounts = () => {
   const { data: customers } = useCustomers(currentCompany?.id);
   const { data: invoices } = useInvoices(currentCompany?.id);
   const { data: payments } = usePayments(currentCompany?.id);
+  const { data: deliveryNotes } = useDeliveryNotes(currentCompany?.id);
 
   // Compute statements from real data
-  const computedStatements = computeCustomerStatements(customers || [], invoices || [], payments || []);
+  const computedStatements = computeCustomerStatements(
+    customers || [],
+    invoices || [],
+    payments || [],
+    deliveryNotes || []
+  );
 
   const handleDownloadStatement = async (statement: any) => {
     try {
